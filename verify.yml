@@ -1,0 +1,20 @@
+---
+
+- name: Verify TextFSM template
+  hosts: localhost
+  gather_facts: False
+
+  vars_prompt:
+    - name: template_name
+      prompt: "Enter the name of the template to verify"
+      default: "cisco_show_vlan"
+      private: no
+
+  roles:
+    - test_env_setup
+    - { role: debug, debug_variable: parsed_sample }
+    - ntc
+    - { role: debug, debug_variable: vlans.response }
+    - test_verify
+
+ 
