@@ -48,8 +48,8 @@ EXAMPLES = '''
 
 # verify that parsed result is the same as expected
 - compare_dict:
-    result: "{{ result.response }}"
-    sample: "{{ parsed_sample }}"
+    result: "{{ item.item.response }}"
+    sample: "{{ item.ansible_facts.parsed_sample }}"
 
 '''
 

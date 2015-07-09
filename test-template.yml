@@ -21,23 +21,16 @@
   - name: extract command string from command_variable
     set_fact: command="{{ command_variable | split("_") | join(" ") }}"
 
-  - name: read vendor environment settings
-    include_vars: "{{ TEST_DIR }}/{{ vendor }}.yml"
-
   - name: run TextFSM locally on test input
     ntc_show_command:
       connection: offline
       file: "{{ item }}"
       vendor: "{{ vendor }}"
-      device_type: "{{ device_type }}"
       command: "{{ command }}"
-      host: "{{ inventory_hostname }}"
-      username: "{{ username }}"
-      password: "{{ password }}"
     with_fileglob:
       - "{{ TEST_DIR }}/{{ vendor }}/{{ template_name}}*.raw"
     register: ntc_result
-  
+  - debug: var="{{ntc_result.results}}"  
   - name: read parsed sample files
     include_vars: "{{ item.item | split('.') | first }}.parsed"
     with_items: "{{ ntc_result.results }}" 
