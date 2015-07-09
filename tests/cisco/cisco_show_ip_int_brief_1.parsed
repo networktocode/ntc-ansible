@@ -1,0 +1,48 @@
+---
+parsed_sample:
+
+- intf: Ethernet0/0
+  ipaddr: 192.168.20.89
+  proto: up
+  status: up
+
+- intf: Ethernet0/1
+  ipaddr: 192.168.159.130
+  proto: up
+  status: up
+
+- intf: Ethernet0/2
+  ipaddr: unassigned
+  proto: down 
+  status: administratively down
+
+- intf: Ethernet0/3
+  ipaddr: unassigned
+  proto: down
+  status: administratively down
+
+- intf: Serial1/0
+  ipaddr: unassigned
+  proto: down
+  status: up
+
+- intf: Serial1/1
+  ipaddr: unassigned
+  proto: down
+  status: administratively down
+
+- intf: Serial1/2
+  ipaddr: unassigned
+  proto: down
+  status: administratively down
+
+- intf: Serial1/3
+  ipaddr: unassigned
+  proto: down
+  status: administratively down
+
+- intf: Tunnel1
+  ipaddr: 169.254.1.1
+  proto: down
+  status: up
+

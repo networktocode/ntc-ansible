@@ -1,9 +1,5 @@
 ---
-
 vendor: hp
-connection: offline
 device_type: hp_comware
-username: cisco
-password: cisco
 
 

@@ -1,5 +1,0 @@
----
-- name: verify that parsed result equals expected sample
-  compare_dict: 
-    result: "{{ vlans.response }}"
-    sample: "{{ parsed_sample }}"

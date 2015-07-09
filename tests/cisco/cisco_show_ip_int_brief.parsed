@@ -30,4 +30,3 @@ parsed_sample:
   ipaddr: 10.0.1.2
   proto: up
   status: up
-

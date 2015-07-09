@@ -5,4 +5,3 @@ Ethernet0/1                1.1.1.1         YES NVRAM  up                    up
 Ethernet0/2                unassigned      YES NVRAM  administratively down down
 Ethernet0/3                unassigned      YES NVRAM  administratively down down
 Loopback0                  10.0.1.2        YES NVRAM  up                    up
-
