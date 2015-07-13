@@ -1,0 +1,4 @@
+---
+
+- name: show variable {{ debug_variable }} 
+  debug: var={{debug_variable}}

@@ -1,0 +1,10 @@
+---
+
+- name: read test definition variable
+  include_vars: "{{ TEST_DIR }}{{ template_name }}.yml"
+
+- name: read parsed output sample
+  include_vars: "{{ TEST_DIR }}{{ parsed }}"
+
+- name: update raw variable path
+  set_fact: raw="{{ TEST_DIR }}{{ raw }}"

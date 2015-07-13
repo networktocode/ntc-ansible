@@ -1,0 +1,3 @@
+---
+TEST_DIR: "./tests/"
+TEMPLATE_DIR: "./ntc_templates"

@@ -1,0 +1,13 @@
+---
+
+vendor: cisco
+command: 'show vlan'
+connection: offline
+device_type: cisco_ios
+username: cisco
+password: cisco
+
+raw: cisco_show_vlan.raw
+template: cisco_show_vlan.template
+parsed: failed_cisco_show_vlan.parsed
+

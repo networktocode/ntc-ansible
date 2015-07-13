@@ -1,0 +1,13 @@
+---
+
+vendor: cisco
+command: 'show ip int brief'
+connection: offline
+device_type: cisco_ios
+username: cisco
+password: cisco
+
+raw: cisco_show_ip_int_brief.raw
+template: cisco_show_ip_int_brief.template
+parsed: cisco_show_ip_int_brief.parsed
+
