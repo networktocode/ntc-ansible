@@ -1,0 +1,9 @@
+---
+
+vendor: cisco
+connection: offline
+device_type: cisco_ios
+username: cisco
+password: cisco
+
+

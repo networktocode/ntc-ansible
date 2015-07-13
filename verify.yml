@@ -11,11 +11,10 @@
       private: no
 
   roles:
-    - read_test_input
+    - test_env_setup
     - { role: debug, debug_variable: parsed_sample }
     - ntc
     - { role: debug, debug_variable: vlans.response }
-    - debug
-    - verify
+    - test_verify
 
  
