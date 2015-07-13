@@ -1,0 +1,34 @@
+#!/usr/bin/python
+#coding: utf-8 -*-
+
+def compare(list_one, list_two):
+    msg = ''
+    for el in list_one:
+        if el not in list_two:
+            msg = str(el) + " is not found in sample input"
+            return 1,msg
+    return 0,msg 
+
+def main():
+
+    module = AnsibleModule(
+        argument_spec=dict(
+            result=dict(required=True),
+            sample=dict(required=True),
+        ),
+        supports_check_mode=False
+    )
+    
+    result_dict = module.params['result']
+    sample_dict = module.params['sample']
+
+    rc,msg = compare(result_dict, sample_dict)
+   
+    if rc != 0:
+        module.fail_json(msg=msg)
+    else:
+        module.exit_json(changed=False)
+
+from ansible.module_utils.basic import *
+main()
+
