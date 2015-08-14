@@ -58,7 +58,7 @@ options:
             - path where TextFSM templates are stored. Default path is ntc
               with ntc in the same working dir as the playbook being run
         required: false
-        default: ntc
+        default: ntc_templates
         choices: []
         aliases: []
     index_file:
@@ -166,7 +166,7 @@ def main():
             vendor=dict(required=True),
             file=dict(required=False),
             index_file=dict(default='index'),
-            template_dir=dict(default='ntc'),
+            template_dir=dict(default='ntc_templates'),
             command=dict(required=False),
             host=dict(required=True),
             username=dict(required=True, type='str'),
