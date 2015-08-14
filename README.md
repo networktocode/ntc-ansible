@@ -22,7 +22,7 @@ Gets config data from devices that don't have an API
   * Examples
 
 #### Synopsis
- This module offers structured data for CLI enabled devices by using the TextFSM library and netmiko for SSH connectivity
+ This module offers structured data for CLI enabled devices by using the TextFSM library for templating and netmiko for SSH connectivity
 
 #### Options
 
@@ -37,7 +37,7 @@ Gets config data from devices that don't have an API
 | command  |   no  |  | <ul></ul> |  Command to execute on target device  |
 | file  |   no  |  | <ul></ul> |  If using connection=offline, this is the file (with path) of a file that contains raw text output, i.e. 'show command' and then the contents of the file will be rendered with the the TextFSM template  |
 | password  |   yes  |  | <ul></ul> |  Password used to login to the target device  |
-| index_file  |   no  |  ntc  | <ul></ul> |  name of index file.  file location must be relative to the template_dir  |
+| index_file  |   no  |  index  | <ul></ul> |  name of index file.  file location must be relative to the template_dir  |
 
 
  
