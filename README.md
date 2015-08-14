@@ -4,7 +4,7 @@
 ---
 ### Requirements
 * netmiko
-* TestFSM
+* TextFSM
 * terminal
 
 ---
