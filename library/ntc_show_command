@@ -6,7 +6,8 @@ module: ntc_show_command
 short_description: Gets config data from devices that don't have an API
 description:
     - This module offers structured data for CLI enabled devices by
-      using the TextFSM library and netmiko for SSH connectivity
+      using the TextFSM library for templating and netmiko for SSH
+      connectivity
 author: Jason Edelman (@jedelman8)
 requirements:
     - netmiko
@@ -48,7 +49,7 @@ options:
             - name of index file.  file location must be relative to
               the template_dir
         required: false
-        default: ntc
+        default: index
         choices: []
         aliases: []
     file:
@@ -71,21 +72,21 @@ options:
     host:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
-        required: false
+        required: true
         default: null
         choices: []
         aliases: []
     username:
         description:
             - Username used to login to the target device
-        required: false
+        required: true
         default: null
         choices: []
         aliases: []
     password:
         description:
             - Password used to login to the target device
-        required: false
+        required: true
         default: null
         choices: []
         aliases: []
