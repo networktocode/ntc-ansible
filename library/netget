@@ -1,0 +1,192 @@
+#!/usr/bin/env python
+
+DOCUMENTATION = '''
+---
+module: netget
+short_description: Gets config data from devices that don't have an API
+description:
+    - This module currently uses paramiko to connect to devices,
+      execute a command, and return structured (JSON) or raw text data
+author: Jason Edelman (@jedelman8)
+requirements:
+    - textfsm
+    - paramiko
+
+options:
+    connection:
+        description:
+            - connection mechanism to use to connect to target device
+        required: false
+        default: ssh
+        choices: ['ssh']
+        aliases: []
+    template:
+        description:
+            - full path and name of the TextFSM template file
+        required: true
+        default: null
+        choices: []
+        aliases: []
+    file:
+        description:
+            - If template param isn't used, file can be used to specify
+              a location of a file that contains raw text output, i.e.
+              'show command' and then the contents of the file will
+              be rendered with the the TextFSM template
+        required: false
+        default: null
+        choices: []
+        aliases: []
+    command:
+        description:
+            - Command to execute on target device
+        required: false
+        default: null
+        choices: []
+        aliases: []
+    host:
+        description:
+            - IP Address or hostname (resolvable by Ansible control host)
+        required: false
+        default: null
+        choices: []
+        aliases: []
+    username:
+        description:
+            - Username used to login to the target device
+        required: false
+        default: null
+        choices: []
+        aliases: []
+    password:
+        description:
+            - Password used to login to the target device
+        required: false
+        default: null
+        choices: []
+        aliases: []
+
+'''
+EXAMPLES = '''
+
+'''
+import os.path
+import sys
+import socket
+import paramiko
+import time
+import textfsm
+
+
+def disable_paging(remote_conn):
+    """Disable paging on a Cisco device using terminal length 0
+
+    """
+    remote_conn.send("terminal length 0\n")
+    time.sleep(.5)
+
+    # Clear the buffer on the screen
+    output = remote_conn.recv(1000)
+
+    return output
+
+
+def send_command(remote_conn, command):
+    """Send command to device
+    """
+    remote_conn.send('\n')
+    remote_conn.send(command + '\n')
+    time.sleep(.5)
+
+    rawtext = remote_conn.recv(5000)
+
+    return rawtext
+
+
+def get_structured_io(template, rawtxt):
+    """Returns structured data given raw text using
+    TextFSM templates
+    """
+    fsm = textfsm.TextFSM(open(template))
+
+    # an object is what is being extracted
+    # based on the template, it may be one object or multiple
+    # as is the case with neighbors, interfaces, etc.
+    objects = fsm.ParseText(rawtxt)
+
+    structured_data = []
+    for obj in objects:
+        index = 0
+        temp = {}
+        for template_value in obj:
+            temp[fsm.header[index].lower()] = template_value
+            index += 1
+        structured_data.append(temp)
+
+    return structured_data
+
+
+def main():
+
+    module = AnsibleModule(
+        argument_spec=dict(
+            connection=dict(required=True, choices=['ssh', 'offline']),
+            template=dict(required=True),
+            file=dict(),
+            command=dict(required=True),
+            host=dict(),
+            username=dict(type='str'),
+            password=dict(type='str'),
+        ),
+        supports_check_mode=False
+    )
+
+    connection = module.params['connection']
+    template = module.params['template']
+    raw_file = module.params['file']
+    command = module.params['command']
+    username = module.params['username']
+    password = module.params['password']
+
+    host = socket.gethostbyname(module.params['host'])
+
+    if command and raw_file:
+        raw_file = None
+
+    if not os.path.isfile(template):
+        module.fail_json(msg='could not read template')
+
+    if raw_file and not os.path.isfile(raw_file):
+        module.fail_json(msg='could not read raw text file')
+
+    if command:
+        if not all([username, password, host]):
+            module.fail_json(msg='when using a command: username, password,'
+                             + ' and host are all required parameters')
+
+    if connection == 'ssh':
+        remote_conn_pre = paramiko.SSHClient()
+        remote_conn_pre.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        remote_conn_pre.connect(host, username=username, password=password)
+        remote_conn = remote_conn_pre.invoke_shell()
+
+        # Strip the initial router prompt
+        output = remote_conn.recv(2000)
+
+        disable_paging(remote_conn)
+
+        rawtxt = send_command(remote_conn, command)
+
+    elif connection == 'offline':
+        with open(raw_file, 'r') as data:
+            rawtxt = data.read()
+
+    structured_data = get_structured_io(template, rawtxt)
+
+    results = {}
+    results['sio'] = structured_data
+
+    module.exit_json(**results)
+
+from ansible.module_utils.basic import *
+main()

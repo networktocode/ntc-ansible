@@ -1,0 +1,229 @@
+#!/usr/bin/env python
+
+DOCUMENTATION = '''
+---
+module: ntc_show_command
+short_description: Gets config data from devices that don't have an API
+description:
+    - This module offers structured data for CLI enabled devices by
+      using the TextFSM library and netmiko for SSH connectivity
+author: Jason Edelman (@jedelman8)
+requirements:
+    - netmiko
+    - textfsm
+    - terminal
+options:
+    connection:
+        description:
+            - connect to device using netmiko or read from offline file
+              for testing
+        required: false
+        default: ssh
+        choices: ['ssh', 'offline']
+        aliases: []
+    device_type:
+        description:
+            - netmiko device type
+        required: true
+        default: ssh
+        choices: []
+        aliases: []
+    vendor:
+        description:
+            - Vendor FROM the index file
+        required: true
+        default: ssh
+        choices: []
+        aliases: []
+    template_dir:
+        description:
+            - path where TextFSM templates are stored. Default path is ntc
+              with ntc in the same working dir as the playbook being run
+        required: false
+        default: ntc
+        choices: []
+        aliases: []
+    index_file:
+        description:
+            - name of index file.  file location must be relative to
+              the template_dir
+        required: false
+        default: ntc
+        choices: []
+        aliases: []
+    file:
+        description:
+            - If using connection=offline, this is the file (with path)
+              of a file that contains raw text output, i.e.
+              'show command' and then the contents of the file will
+              be rendered with the the TextFSM template
+        required: false
+        default: null
+        choices: []
+        aliases: []
+    command:
+        description:
+            - Command to execute on target device
+        required: false
+        default: null
+        choices: []
+        aliases: []
+    host:
+        description:
+            - IP Address or hostname (resolvable by Ansible control host)
+        required: false
+        default: null
+        choices: []
+        aliases: []
+    username:
+        description:
+            - Username used to login to the target device
+        required: false
+        default: null
+        choices: []
+        aliases: []
+    password:
+        description:
+            - Password used to login to the target device
+        required: false
+        default: null
+        choices: []
+        aliases: []
+
+'''
+EXAMPLES = '''
+
+# get vlan data
+- ntc_show_command:
+    connection=ssh
+    vendor=cisco
+    device_type=cisco_nxos
+    command='show vlan'
+    host={{ inventory_hostname }}
+    username={{ username }}
+    password={{ password }}
+
+'''
+
+import os.path
+import socket
+from netmiko import ConnectHandler
+import clitable
+from clitable import CliTableError
+
+
+def clitable_to_dict(cli_table):
+    """Converts TextFSM cli_table object to list of dictionaries
+    """
+
+    # number of rows within the table excluding the headers
+    object_rows = cli_table.size
+
+    rows = []
+
+    # build list of row objects - each row is list-like
+    for each in range(0, object_rows):
+        cli_table.row_index = each + 1
+        rows.append(cli_table.row)
+
+    objs = []
+    for row in rows:
+        temp = {}
+        index = 0
+        for each in row:
+            temp[cli_table.header[index].lower()] = each
+            index += 1
+        objs.append(temp)
+
+    return objs
+
+
+def main():
+
+    module = AnsibleModule(
+        argument_spec=dict(
+            connection=dict(choices=['ssh', 'offline'],
+                            default='ssh'),
+            device_type=dict(required=True),
+            vendor=dict(required=True),
+            file=dict(required=False),
+            index_file=dict(default='index'),
+            template_dir=dict(default='ntc'),
+            command=dict(required=False),
+            host=dict(required=True),
+            username=dict(required=True, type='str'),
+            password=dict(required=True, type='str'),
+        ),
+        supports_check_mode=False
+    )
+
+    connection = module.params['connection']
+    device_type = module.params['device_type']
+    vendor = module.params['vendor']
+    raw_file = module.params['file']
+    index_file = module.params['index_file']
+    template_dir = module.params['template_dir']
+    command = module.params['command']
+    username = module.params['username']
+    password = module.params['password']
+
+    host = socket.gethostbyname(module.params['host'])
+
+    if not command and not raw_file:
+        module.fail_json(msg="at least one of params: ['command', 'file']"
+                         + " must be supplied")
+
+    if connection == 'offline' and not raw_file:
+        module.fail_json(msg='specifiy file if using connection=offline')
+
+    if template_dir.endswith('/'):
+        template_dir.rstrip('/')
+
+    if not os.path.isfile(template_dir + '/' + index_file):
+        module.fail_json(msg='could not find or read index file')
+
+    if raw_file and not os.path.isfile(raw_file):
+        module.fail_json(msg='could not read raw text file')
+
+    if command:
+        if not all([username, password, host]):
+            module.fail_json(msg='when using a command: username, password,'
+                             + ' and host are all required parameters')
+
+    if connection == 'ssh':
+
+        device = ConnectHandler(
+                    device_type=device_type,
+                    ip=socket.gethostbyname(host),
+                    username=username,
+                    password=password
+                    )
+
+        rawtxt = device.send_command(command)
+
+    elif connection == 'offline':
+        with open(raw_file, 'r') as data:
+            rawtxt = data.read()
+
+    with open('from_dev', 'w') as data:
+        data.write(rawtxt)
+
+    cli_table = clitable.CliTable(index_file, template_dir)
+
+    attrs = {'Command': command, 'Vendor': vendor}
+
+    try:
+        cli_table.ParseCmd(rawtxt, attrs)
+    except CliTableError as e:
+        module.fail_json(msg='parsing error',
+                         error=str(e))
+
+    structured_data = clitable_to_dict(cli_table)
+
+    results = {}
+    results['response'] = structured_data
+
+    module.exit_json(**results)
+
+from ansible.module_utils.basic import *
+main()

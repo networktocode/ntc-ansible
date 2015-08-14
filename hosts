@@ -1,0 +1,13 @@
+[cisco:vars]
+username=cisco
+password=!cisco123!
+
+[hp_comware:vars]
+username=hp
+password=hp123
+
+[cisco]
+n9396-1
+
+[hp_comware]
+hp1

@@ -1,0 +1,7 @@
+---
+
+vendor: hp_comware
+device_type: hp_comware
+
+
+vlan_command: "display vlan brief"
