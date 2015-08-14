@@ -28,15 +28,15 @@ Gets config data from devices that don't have an API
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   no  |  | <ul></ul> |  Username used to login to the target device  |
+| username  |   yes  |  | <ul></ul> |  Username used to login to the target device  |
 | vendor  |   yes  |  ssh  | <ul></ul> |  Vendor FROM the index file  |
 | device_type  |   yes  |  ssh  | <ul></ul> |  netmiko device type  |
 | template_dir  |   no  |  ntc  | <ul></ul> |  path where TextFSM templates are stored. Default path is ntc with ntc in the same working dir as the playbook being run  |
-| host  |   no  |  | <ul></ul> |  IP Address or hostname (resolvable by Ansible control host)  |
+| host  |   yes  |  | <ul></ul> |  IP Address or hostname (resolvable by Ansible control host)  |
 | connection  |   no  |  ssh  | <ul> <li>ssh</li>  <li>offline</li> </ul> |  connect to device using netmiko or read from offline file for testing  |
 | command  |   no  |  | <ul></ul> |  Command to execute on target device  |
 | file  |   no  |  | <ul></ul> |  If using connection=offline, this is the file (with path) of a file that contains raw text output, i.e. 'show command' and then the contents of the file will be rendered with the the TextFSM template  |
-| password  |   no  |  | <ul></ul> |  Password used to login to the target device  |
+| password  |   yes  |  | <ul></ul> |  Password used to login to the target device  |
 | index_file  |   no  |  ntc  | <ul></ul> |  name of index file.  file location must be relative to the template_dir  |
 
 
@@ -65,4 +65,5 @@ Gets config data from devices that don't have an API
 
 ---
 Created by Network to Code, LLC
+For:
 2015
