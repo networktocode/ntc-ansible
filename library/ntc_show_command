@@ -42,7 +42,7 @@ options:
     device_type:
         description:
             - netmiko device type
-        required: true
+        required: false
         default: ssh
         choices: []
         aliases: []
@@ -82,28 +82,28 @@ options:
     command:
         description:
             - Command to execute on target device
-        required: false
+        required: true
         default: null
         choices: []
         aliases: []
     host:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
-        required: true
+        required: false
         default: null
         choices: []
         aliases: []
     username:
         description:
             - Username used to login to the target device
-        required: true
+        required: false
         default: null
         choices: []
         aliases: []
     password:
         description:
             - Password used to login to the target device
-        required: true
+        required: false
         default: null
         choices: []
         aliases: []
@@ -162,15 +162,18 @@ def main():
         argument_spec=dict(
             connection=dict(choices=['ssh', 'offline'],
                             default='ssh'),
-            device_type=dict(required=True),
+            device_type=dict(required=False),
             vendor=dict(required=True),
             file=dict(required=False),
             index_file=dict(default='index'),
             template_dir=dict(default='ntc_templates'),
-            command=dict(required=False),
-            host=dict(required=True),
-            username=dict(required=True, type='str'),
-            password=dict(required=True, type='str'),
+            command=dict(required=True),
+            host=dict(required=False),
+            username=dict(required=False, type='str'),
+            password=dict(required=False, type='str'),
+        ),
+        required_together=(
+            ['device_type', 'host', 'password', 'username'],
         ),
         supports_check_mode=False
     )
@@ -185,11 +188,11 @@ def main():
     username = module.params['username']
     password = module.params['password']
 
-    host = socket.gethostbyname(module.params['host'])
+    if module.params['host']:
+        host = socket.gethostbyname(module.params['host'])
 
-    if not command and not raw_file:
-        module.fail_json(msg="at least one of params: ['command', 'file']"
-                         + " must be supplied")
+    if connection == 'ssh' and not module.params['host']:
+        module.fail_json(msg='specify host if using connection=ssh')
 
     if connection == 'offline' and not raw_file:
         module.fail_json(msg='specifiy file if using connection=offline')
@@ -202,11 +205,6 @@ def main():
 
     if raw_file and not os.path.isfile(raw_file):
         module.fail_json(msg='could not read raw text file')
-
-    if command:
-        if not all([username, password, host]):
-            module.fail_json(msg='when using a command: username, password,'
-                             + ' and host are all required parameters')
 
     if connection == 'ssh':
 
