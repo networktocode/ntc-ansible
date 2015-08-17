@@ -6,7 +6,7 @@ password=!cisco123!
 username=hp
 password=hp123
 
-[cisco]
+[cisco_nxos]
 n9396-1
 
 [hp_comware]
