@@ -1,0 +1,11 @@
+Interface                  IP-Address      OK? Method Status                Protocol
+Ethernet0/0                192.168.20.89   YES NVRAM  up                    up
+Ethernet0/1                192.168.159.130 YES DHCP   up                    up
+Ethernet0/2                unassigned      YES NVRAM  administratively down down
+Ethernet0/3                unassigned      YES NVRAM  administratively down down
+Serial1/0                  unassigned      YES NVRAM  up                    down
+Serial1/1                  unassigned      YES NVRAM  administratively down down
+Serial1/2                  unassigned      YES NVRAM  administratively down down
+Serial1/3                  unassigned      YES NVRAM  administratively down down
+Tunnel1                    169.254.1.1     YES NVRAM  up                    down
+

@@ -16,6 +16,6 @@
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
-      register: vlans
+      register: result
 
-    - debug: var=vlans
+    - debug: var=result
