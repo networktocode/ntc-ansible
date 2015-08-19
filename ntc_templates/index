@@ -4,7 +4,7 @@
 # abc[[xyz]] is expanded to abc(x(y(z)?)?)?, regexp inside [[]] is not supported
 #
 Template, Hostname, Vendor_Type, Command
-cisco_show_vlan.template, .*, cisco, sh[[ow]] vl[[an]]
-cisco_show_ip_int_brief.template, .*, cisco, sh[[ow]] ip int[[erface]] br[[ief]]
+cisco_ios_show_vlan.template, .*, cisco_ios, sh[[ow]] vl[[an]]
+cisco_ios_show_ip_int_brief.template, .*, cisco_ios, sh[[ow]] ip int[[erface]] br[[ief]]
 hp_comware_display_vlan_brief.template, .*, hp_comware, di[[splay]] v[[lan]] b[[rief]]
 

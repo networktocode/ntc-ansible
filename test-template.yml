@@ -6,17 +6,19 @@
 
   vars_prompt:
     - name: template_name
-      prompt: "Enter the name of the template to verify"
-      default: "cisco_show_ip_int_brief"
+      prompt: "Enter the name of the template to verify:"
+      default: "cisco_ios_show_ip_int_brief"
+      private: no
+
+    - name: device_type
+      prompt: "Enter the device type:"
+      default: "cisco_ios"
       private: no
 
   tasks:
   
-  - name: extract vendor name from template name
-    set_fact: vendor="{{ template_name | split("_") | first }}"
-
   - name: extract command from template name
-    set_fact: command_variable="{{ template_name | split(vendor + "_") | last }}"
+    set_fact: command_variable="{{ template_name | split(device_type + "_") | last }}"
 
   - name: extract command string from command_variable
     set_fact: command="{{ command_variable | split("_") | join(" ") }}"
@@ -25,12 +27,12 @@
     ntc_show_command:
       connection: offline
       file: "{{ item }}"
-      vendor: "{{ vendor }}"
+      vendor: "{{ device_type }}"
       command: "{{ command }}"
     with_fileglob:
-      - "{{ TEST_DIR }}/{{ vendor }}/{{ template_name}}*.raw"
+      - "{{ TEST_DIR }}/{{ device_type }}/{{ template_name}}*.raw"
     register: ntc_result
-  - debug: var="{{ntc_result.results}}"  
+  
   - name: read parsed sample files
     include_vars: "{{ item.item | split('.') | first }}.parsed"
     with_items: "{{ ntc_result.results }}" 

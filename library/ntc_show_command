@@ -221,9 +221,6 @@ def main():
         with open(raw_file, 'r') as data:
             rawtxt = data.read()
 
-    with open('from_dev', 'w') as data:
-        data.write(rawtxt)
-
     cli_table = clitable.CliTable(index_file, template_dir)
 
     attrs = {'Command': command, 'Vendor': vendor}
