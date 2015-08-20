@@ -27,7 +27,7 @@ All files submitted for a show command should follow a strict naming convention:
 base_filename + [_test_suffix_number] + extension
 ```
 
-**base_filename:** *`devicetype_commandname`*
+**base_filename:** *`devicetype_commandname`*  
 **Template extension:** `.template`  
 **Raw test file extension:** `.raw`  
 **Parsed test file extension:** `.parsed`  
