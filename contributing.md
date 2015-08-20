@@ -42,7 +42,7 @@ base_filename + [_test_suffix_number] + extension
 
 ## Template file testing
 
-To test a template, run `test-template.yml` as a playbook follow the prompts.
+To test a template, run `test-template.yml` as a playbook and follow the prompts.
 
 Note: 
 
