@@ -1,52 +1,52 @@
 # CONTRIBUTING
 
-If you want to contribute you've got two options:
+There are two ways to contribute:
 
- 1. You want to create a template for a command that does not yet have a template
- 2. You want to update an already existing template to parse additional values
+ 1. Create a new template.
+ 2. Update an existing template.
 
-## File naming convention
+## Creating a new template
 
-All files submitted for a show command "X" of device type "Y" should follow a strict naming convention:
+  1. Create a TextFSM template for a given show command and store it in [ntc_templates](ntc_templates/)
+  2. Add that TextFSM template to the [index file](ntc_templates/index).
+  3. Create a test input file (containing the raw output of the show command) and give it the extension `.raw`.
+  4. Create a file containing the correct parsed results and give it the extentsion `.parsed`.
+  5. Store both the `.raw` and `.parsed` files in [tests/*devicetype*](tests/)
+  6. (Optional) If creating more than one test case, i.e. more than one `.raw` and `.parsed` files, repeat steps
+  3-5 but add a *test_suffix_number* to the files as described in *File naming conventions* below.
+
+## Updating an existing template
+
+  1. Update the existing TextFSM template in [ntc_templates](ntc_templates/)
+  2. Repeat steps 3-6 from *Creating a new template* above.
+
+## File naming conventions
+
+All files submitted for a show command should follow a strict naming convention:
 ```
-base_filename + [_test_suffix] + extension
+base_filename + [_test_suffix_number] + extension
 ```
 
-**base_filename:** `devicetypey_show_command_x`  
+**base_filename:** *`devicetype_commandname`*  
 **Template extension:** `.template`  
 **Raw test file extension:** `.raw`  
 **Parsed test file extension:** `.parsed`  
-**test_suffix:** `[1..]`
+**test_suffix_number:** *`<integer>`*
 
 >Example: Cisco's `show vlan` command  
 **template file:** cisco_ios_show_vlan.template  
 **raw test file:** cisco_ios_show_vlan.raw  
 **parsed test file:** cisco_ios_show_vlan.parsed  
-
-## Contributing a brand new temlpate
-
-In order to contribute you need to do three things:
-
-  1. Create a TextFSM template for a given show command and store it in [ntc_templates](ntc_templates/)
-  2. Add that TextFSM template to the [index](ntc_templates/index).  **Device** needs to be included within the index as well.
-  3. Create a test input file (containing the output of the show command) and its parsed equivalent. The former should have `.raw`
-     extension, the latter should have `.parsed` extension and store these files in [tests/devicetype](tests/)
-
-## Updating an existing template
-
-In order to update an existing temlpate you need to do two things:
-
-  1. Update the existing TextFSM template in [ntc_templates](ntc_templates/)
-  2. Create a new set of test files (`.raw` and `.parsed`), append test suffix to the base filename and store them in [tests/devicetype](tests/)
+**alternate raw test file:** cisco_ios_show_vlan_1.raw  
+**alternate parsed test file:** cisco_ios_show_vlan_1.parsed
 
 ## Template file testing
 
-If you need to test template at any time use `test-template.yml` playbook and provide a template base filename.
+To test a template, run `test-template.yml` as a playbook and follow the prompts.
 
 Note: 
 
-* device support is needed in Netmiko prior to using here.
-* device types follow Netmiko's convention.
+* device types follow netmiko's conventions.
+* device support in netmiko is required.
 
 Documentation on TextFSM:  http://code.google.com/p/textfsm/wiki/TextFSMHowto
-
