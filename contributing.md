@@ -27,11 +27,11 @@ All files submitted for a show command should follow a strict naming convention:
 base_filename + [_test_suffix_number] + extension
 ```
 
-**base_filename:** `*devicetype*_*commandname*`  
+**base_filename:** *`devicetype`*`_`*`commandname`*
 **Template extension:** `.template`  
 **Raw test file extension:** `.raw`  
 **Parsed test file extension:** `.parsed`  
-**test_suffix_number:** `[*<integer>*]`
+**test_suffix_number:** *`<integer>`*
 
 >Example: Cisco's `show vlan` command  
 **template file:** cisco_ios_show_vlan.template  
