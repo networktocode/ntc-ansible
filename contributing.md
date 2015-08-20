@@ -36,10 +36,9 @@ base_filename + [_test_suffix_number] + extension
 >Example: Cisco's `show vlan` command  
 **template file:** cisco_ios_show_vlan.template  
 **raw test file:** cisco_ios_show_vlan.raw  
-**parsed test file:** cisco_ios_show_vlan.parsed
-
+**parsed test file:** cisco_ios_show_vlan.parsed  
 **alternate raw test file:** cisco_ios_show_vlan_1.raw  
-**alternate parsed test file:** cisco_ios_show_vlan_1.parsed  
+**alternate parsed test file:** cisco_ios_show_vlan_1.parsed
 
 ## Template file testing
 
