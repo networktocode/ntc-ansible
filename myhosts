@@ -1,1 +1,0 @@
-192.168.159.130 username=cisco password=cisco vendor=cisco device_type=cisco_ios vlan_command='show ip int brief'
