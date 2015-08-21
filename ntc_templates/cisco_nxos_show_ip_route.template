@@ -1,0 +1,16 @@
+Value Filldown PREFIX (\d+\.\d+\.\d+\.\d+)
+Value Filldown MASK (\d+)
+Value NEXT_HOP (\d+\.\d+\.\d+\.\d+)
+Value INTERFACE ([^\[]\S+/?\S+[^\]])
+Value COST (\d\/\d)
+Value TYPE (\w+)
+
+Start
+  ^\s*${PREFIX}/${MASK}, \S+: \S+ -> NewPrefix
+
+NewPrefix
+  ^\s+\*+via ${NEXT_HOP}, ${INTERFACE}, \[$COST\], \S+, ${TYPE} -> Record
+  ^\s+\*+via ${NEXT_HOP}, \[$COST\], \S+, ${TYPE} -> Record
+  ^.*(?!via).* -> Start
+
+EOF

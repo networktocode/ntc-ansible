@@ -1,0 +1,51 @@
+---
+parsed_sample:
+
+- cost: 0/0
+  interface: Lo10
+  mask: "32"
+  next_hop: 1.1.1.1
+  prefix: 1.1.1.1
+  type: local
+
+- cost: 0/0
+  interface: Lo10
+  mask: "32"
+  next_hop: 1.1.1.1
+  prefix: 1.1.1.1
+  type: direct
+
+- cost: 1/0
+  interface: ""
+  mask: "32"
+  next_hop: 10.10.10.2
+  prefix: 2.2.2.2
+  type: static
+
+- cost: 1/0
+  interface: ""
+  mask: "32"
+  next_hop: 10.10.20.2
+  prefix: 2.2.2.2
+  type: static
+
+- cost: 0/0
+  interface: Lo33
+  mask: "32"
+  next_hop: 9.9.9.9
+  prefix: 9.9.9.9
+  type: local
+
+- cost: 0/0
+  interface: Eth1/1.1
+  mask: "32"
+  next_hop: 10.10.10.1
+  prefix: 10.10.10.1
+  type: local
+
+- cost: 0/0
+  interface: Eth1/1.2
+  mask: "32"
+  next_hop: 10.10.20.1
+  prefix: 10.10.20.1
+  type: local
