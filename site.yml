@@ -1,7 +1,7 @@
 ---
 
 - name: GET STRUCTURED DATA BACK FROM CLI DEVICES
-  hosts: all
+  hosts: cisco_nxos
   connection: local
   gather_facts: False
 
@@ -12,7 +12,7 @@
         connection: ssh
         vendor: "{{ vendor }}"
         device_type: "{{ device_type }}"
-        command: "{{ vlan_command }}"
+        command: "{{ ip_route_command }}"
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"

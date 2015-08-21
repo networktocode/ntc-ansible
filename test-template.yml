@@ -7,7 +7,7 @@
   vars_prompt:
     - name: template_name
       prompt: "Enter the name of the template to verify:"
-      default: "cisco_ios_show_ip_int_brief"
+      default: "cisco_ios_show_vlan_1"
       private: no
 
     - name: device_type
@@ -16,7 +16,7 @@
       private: no
 
   tasks:
-  
+
   - name: extract command from template name
     set_fact: command_variable="{{ template_name | split(device_type + "_") | last }}"
 

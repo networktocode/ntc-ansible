@@ -3,8 +3,9 @@
 # Last field supports variable length command completion.
 # abc[[xyz]] is expanded to abc(x(y(z)?)?)?, regexp inside [[]] is not supported
 #
-Template, Hostname, Vendor_Type, Command
+Template, Hostname, Vendor, Command
 cisco_ios_show_vlan.template, .*, cisco_ios, sh[[ow]] vl[[an]]
 cisco_ios_show_ip_int_brief.template, .*, cisco_ios, sh[[ow]] ip int[[erface]] br[[ief]]
 hp_comware_display_vlan_brief.template, .*, hp_comware, di[[splay]] v[[lan]] b[[rief]]
+cisco_nxos_show_ip_route.template, .*, cisco_nxos, sh[[ow]] ip ro[[ute]]
 

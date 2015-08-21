@@ -1,6 +1,0 @@
----
-
-vendor: cisco
-device_type: cisco_nxos
-
-vlan_command: "show vlan"
