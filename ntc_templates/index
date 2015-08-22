@@ -6,4 +6,4 @@
 Template, Hostname, Vendor_Type, Command
 cisco_show_vlan_template, .*, cisco, sh[[ow]] vl[[an]]
 hp_comware_display_vlan_brief_template, .*, hp_comware, di[[splay]] v[[lan]] b[[rief]]
-
+cisco_ios_show_ip_route_template, .*, cisco, sh[[ow]] ip ro[ute]]
