@@ -1,14 +1,12 @@
 Value Filldown VLAN_ID (\d+)
-Value Filldown STP_VERSION (\w+)
-Value INTERFACE (\w+\/\w+)
+Value INTERFACE (\S+)
 Value ROLE (\w+)
 Value STATUS (\w+)
 Value COST (\d+)
 Value PORT_PRIORITY (\w+)
 Value PORT_ID (\w+)
-Value TYPE (\w+)
+Value TYPE (.*)
 
 Start
-  ^VLAN(0?)${VLAN_ID}
-  ^\s+Spanning tree enabled protocol\s+${STP_VERSION}
-  ^${INTERFACE}\s+${ROLE}\s+${STATUS}\s+${COST}\s+${PORT_PRIORITY}.+${PORT_ID}\s+${TYPE} -> Record
+  ^VLAN(0*)?${VLAN_ID}
+  ^${INTERFACE}\s+${ROLE}\s+${STATUS}\s+${COST}\s+${PORT_PRIORITY}.${PORT_ID}\s+${TYPE} -> Record
