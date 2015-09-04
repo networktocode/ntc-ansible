@@ -16,7 +16,7 @@
       private: no
 
   tasks:
-  
+
   - name: extract command from template name
     set_fact: command_variable="{{ template_name | split(device_type + "_") | last }}"
 
@@ -32,11 +32,11 @@
     with_fileglob:
       - "{{ TEST_DIR }}/{{ device_type }}/{{ template_name}}*.raw"
     register: ntc_result
-  
+
   - name: read parsed sample files
     include_vars: "{{ item.item | split('.') | first }}.parsed"
-    with_items: "{{ ntc_result.results }}" 
-    register: ntc_result 
+    with_items: "{{ ntc_result.results }}"
+    register: ntc_result
 
   - name: verify that parsed result is the same as expected
     compare_dict:
