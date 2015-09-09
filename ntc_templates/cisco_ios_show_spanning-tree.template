@@ -1,5 +1,5 @@
 Value Filldown VLAN_ID (\d+)
-Value INTERFACE (\S+)
+Value Required INTERFACE (\S+)
 Value ROLE (\w+)
 Value STATUS (\w+)
 Value COST (\d+)
