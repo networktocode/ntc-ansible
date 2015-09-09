@@ -1,7 +1,7 @@
 ---
 parsed_sample:
 
-- cost: '128'
+- cost: '4'
   interface: Gi0/2
   port_id: '3'
   port_priority: '128'
@@ -10,7 +10,7 @@ parsed_sample:
   type: Shr
   vlan_id: '1'
 
-- cost: '128'
+- cost: '4'
   interface: Gi0/3
   port_id: '4'
   port_priority: '128'
@@ -19,7 +19,7 @@ parsed_sample:
   type: Shr
   vlan_id: '1'
 
-- cost: '128'
+- cost: '4'
   interface: Gi1/0
   port_id: '5'
   port_priority: '128'
@@ -28,7 +28,7 @@ parsed_sample:
   type: Shr
   vlan_id: '1'
 
-- cost: '128'
+- cost: '4'
   interface: Gi0/3
   port_id: '4'
   port_priority: '128'
@@ -37,7 +37,7 @@ parsed_sample:
   type: Shr
   vlan_id: '2'
 
-- cost: '128'
+- cost: '4'
   interface: Gi1/0
   port_id: '5'
   port_priority: '128'
@@ -46,7 +46,7 @@ parsed_sample:
   type: Shr
   vlan_id: '2'
 
-- cost: '128'
+- cost: '4'
   interface: Gi0/3
   port_id: '4'
   port_priority: '128'
@@ -55,7 +55,7 @@ parsed_sample:
   type: Shr
   vlan_id: '3'
 
-- cost: '128'
+- cost: '4'
   interface: Gi1/0
   port_id: '5'
   port_priority: '128'
