@@ -1,4 +1,4 @@
-[cisco:vars]
+[cisco_nxos:vars]
 username=cisco
 password=!cisco123!
 
@@ -6,8 +6,8 @@ password=!cisco123!
 username=hp
 password=hp123
 
-[cisco]
-n9396-1 
+[cisco_nxos]
+n9k1
 
 [hp_comware]
 hp1

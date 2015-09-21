@@ -10,8 +10,7 @@
     - name: GET VLANS IN REAL TIME
       ntc_show_command:
         connection: ssh
-        vendor: "{{ vendor }}"
-        device_type: "{{ device_type }}"
+        platform: "{{ platform }}"
         command: "{{ vlan_command }}"
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"

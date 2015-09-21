@@ -10,15 +10,15 @@
       default: "cisco_ios_show_ip_int_brief"
       private: no
 
-    - name: device_type
-      prompt: "Enter the device type:"
+    - name: platform
+      prompt: "Enter the platform"
       default: "cisco_ios"
       private: no
 
   tasks:
 
   - name: extract command from template name
-    set_fact: command_variable="{{ template_name | split(device_type + "_") | last }}"
+    set_fact: command_variable="{{ template_name | split(platform + "_") | last }}"
 
   - name: extract command string from command_variable
     set_fact: command="{{ command_variable | split("_") | join(" ") }}"
@@ -27,10 +27,10 @@
     ntc_show_command:
       connection: offline
       file: "{{ item }}"
-      vendor: "{{ device_type }}"
+      platform: "{{ platform }}"
       command: "{{ command }}"
     with_fileglob:
-      - "{{ TEST_DIR }}/{{ device_type }}/{{ template_name}}*.raw"
+      - "{{ TEST_DIR }}/{{ platform }}/{{ template_name}}*.raw"
     register: ntc_result
 
   - name: read parsed sample files

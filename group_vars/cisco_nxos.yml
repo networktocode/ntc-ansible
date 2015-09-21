@@ -1,0 +1,5 @@
+---
+
+platform: cisco_nxos
+
+vlan_command: show vlan

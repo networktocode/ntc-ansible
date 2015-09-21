@@ -15,8 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 DOCUMENTATION = '''
 ---
 module: ntc_show_command
@@ -39,16 +37,9 @@ options:
         default: ssh
         choices: ['ssh', 'offline']
         aliases: []
-    device_type:
+    platform:
         description:
-            - netmiko device type
-        required: false
-        default: ssh
-        choices: []
-        aliases: []
-    vendor:
-        description:
-            - Vendor FROM the index file
+            - Platform FROM the index file
         required: true
         default: ssh
         choices: []
@@ -114,8 +105,7 @@ EXAMPLES = '''
 # get vlan data
 - ntc_show_command:
     connection=ssh
-    vendor=cisco
-    device_type=cisco_nxos
+    platform=cisco_nxos
     command='show vlan'
     host={{ inventory_hostname }}
     username={{ username }}
@@ -162,8 +152,7 @@ def main():
         argument_spec=dict(
             connection=dict(choices=['ssh', 'offline'],
                             default='ssh'),
-            device_type=dict(required=False),
-            vendor=dict(required=True),
+            platform=dict(required=True),
             file=dict(required=False),
             index_file=dict(default='index'),
             template_dir=dict(default='ntc_templates'),
@@ -173,14 +162,14 @@ def main():
             password=dict(required=False, type='str'),
         ),
         required_together=(
-            ['device_type', 'host', 'password', 'username'],
+            ['host', 'password', 'username'],
         ),
         supports_check_mode=False
     )
 
     connection = module.params['connection']
-    device_type = module.params['device_type']
-    vendor = module.params['vendor']
+    platform = module.params['platform']
+    device_type = platform.split('-')[0]
     raw_file = module.params['file']
     index_file = module.params['index_file']
     template_dir = module.params['template_dir']
@@ -223,7 +212,7 @@ def main():
 
     cli_table = clitable.CliTable(index_file, template_dir)
 
-    attrs = {'Command': command, 'Vendor': vendor}
+    attrs = {'Command': command, 'platform': platform}
 
     try:
         cli_table.ParseCmd(rawtxt, attrs)
