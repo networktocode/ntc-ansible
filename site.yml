@@ -1,7 +1,7 @@
 ---
 
 - name: GET STRUCTURED DATA BACK FROM CLI DEVICES
-  hosts: cisco_nxos
+  hosts: all
   connection: local
   gather_facts: False
 
@@ -10,9 +10,8 @@
     - name: GET VLANS IN REAL TIME
       ntc_show_command:
         connection: ssh
-        vendor: "{{ vendor }}"
-        device_type: "{{ device_type }}"
-        command: "{{ ip_route_command }}"
+        platform: "{{ platform }}"
+        command: "{{ vlan_command }}"
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"

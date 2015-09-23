@@ -17,20 +17,41 @@
 ## ntc_show_command
 Gets config data from devices that don't have an API
 
-  * Synopsis
-  * Options
-  * Examples
+  * [Synopsis](#synopsis)
+  * [``platform`` Naming Convention](#platform-naming-convention)
+  * [Options](#options)
+  * [Examples](#examples)
 
 #### Synopsis
- This module offers structured data for CLI enabled devices by using the TextFSM library for templating and netmiko for SSH connectivity
+This module offers structured data for CLI enabled devices by using the TextFSM library for templating and netmiko for SSH connectivity.
+
+#### ``platform`` Naming Convention
+The ``platform`` parameter given to the modules should be of the form:``<netmiko_device_type>[-<hardware_type>]``.
+In plain English, that means it should start with a supported ``netmiko`` device type, followed by an optional hyphen
+and arbitrary hardware specific identifier.
+
+Valid ``platform`` names:
+```
+cisco_ios-c3k
+cisco_ios-c6k
+cisco_ios
+cisco_nxos
+hp_comware
+```
+
+Invalid ``platform`` names:
+```
+cisco-ios-c3k
+csco_ios
+hp-comware_5900
+```
 
 #### Options
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
 | username  |   no  |  | <ul></ul> |  Username used to login to the target device  |
-| vendor  |   yes  |  ssh  | <ul></ul> |  Vendor FROM the index file  |
-| device_type  |   no  |  ssh  | <ul></ul> |  netmiko device type  |
+| platform  |   yes  |  ssh  | <ul></ul> |  Platform FROM the index file  |
 | template_dir  |   no  |  ntc_templates  | <ul></ul> |  path where TextFSM templates are stored. Default path is ntc with ntc in the same working dir as the playbook being run  |
 | host  |   no  |  | <ul></ul> |  IP Address or hostname (resolvable by Ansible control host)  |
 | connection  |   no  |  ssh  | <ul> <li>ssh</li>  <li>offline</li> </ul> |  connect to device using netmiko or read from offline file for testing  |
@@ -39,8 +60,6 @@ Gets config data from devices that don't have an API
 | password  |   no  |  | <ul></ul> |  Password used to login to the target device  |
 | index_file  |   no  |  index  | <ul></ul> |  name of index file.  file location must be relative to the template_dir  |
 
-
- 
 #### Examples
 
 ```
@@ -48,17 +67,13 @@ Gets config data from devices that don't have an API
 # get vlan data
 - ntc_show_command:
     connection=ssh
-    vendor=cisco
-    device_type=cisco_nxos
+    platform=cisco_nxos
     command='show vlan'
     host={{ inventory_hostname }}
     username={{ username }}
     password={{ password }}
 
-
 ```
-
-
 
 ---
 
