@@ -7,12 +7,12 @@
   vars_prompt:
     - name: template_name
       prompt: "Enter the name of the template to verify:"
-      default: "cisco_ios_show_ip_int_brief"
+      default: "cisco_nxos_show_ip_route"
       private: no
 
     - name: platform
       prompt: "Enter the platform"
-      default: "cisco_ios"
+      default: "cisco_nxos"
       private: no
 
   tasks:
@@ -32,6 +32,8 @@
     with_fileglob:
       - "{{ TEST_DIR }}/{{ platform }}/{{ template_name}}*.raw"
     register: ntc_result
+
+  - debug: var=ntc_result
 
   - name: read parsed sample files
     include_vars: "{{ item.item | split('.') | first }}.parsed"
