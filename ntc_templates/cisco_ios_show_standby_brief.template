@@ -1,7 +1,7 @@
 Value IFACE (\S+)
 Value GROUP (\d+)
 Value PRIORITY (\d+)
-Value PREEMT (.)
+Value PREEMPT (.)
 Value STATE (\w+)
 Value ACTIVE (\w+)
 Value STANDBY (\S+)
