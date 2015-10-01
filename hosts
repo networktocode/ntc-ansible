@@ -6,6 +6,10 @@ password=!cisco123!
 username=cisco
 password=!cisco123!
 
+[cisoc_ios:vars]
+username=cisco
+password=!cisco123!
+
 [hp_comware:vars]
 username=hp
 password=hp123
@@ -15,3 +19,6 @@ n9k1
 
 [hp_comware]
 hp1
+
+[cisco_ios]
+router1
