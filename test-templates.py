@@ -67,6 +67,7 @@ if __name__ == "__main__":
                     host_list=HOSTS
                 )
                 results = runner.run()
+                print json.dumps(results, indent=4)
                 results['response'] = rsp['contacted']['localhost']['response']
                 # print rsp.get('response')
                 with_parsed.append(results)
