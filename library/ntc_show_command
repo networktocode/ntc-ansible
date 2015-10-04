@@ -116,8 +116,12 @@ import os.path
 import socket
 from netmiko import ConnectHandler
 
-import clitable
-from clitable import CliTableError
+try:
+    import clitable
+    from clitable import CliTableError
+except ImportError:
+    import sys
+    module.fail_json(msg=sys.path)
 
 
 def clitable_to_dict(cli_table):
