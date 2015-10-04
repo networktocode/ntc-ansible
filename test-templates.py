@@ -3,7 +3,7 @@
 import ansible.runner
 import json
 import sys
-
+import os
 
 def compare(list_one, list_two):
     msg = ''
