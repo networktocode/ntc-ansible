@@ -16,10 +16,12 @@ before_install:
   - pip install -r requirements.txt
   - cd ..
   - pip install --upgrade pip
+  - pip install gtextfsm
+  - where python
+  - locate gtextfsm
 
 install:
   - pip install ansible
-  - pip install pycsco
 
 script:
   - python test-templates.py
