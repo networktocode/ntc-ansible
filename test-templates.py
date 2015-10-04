@@ -15,7 +15,7 @@ def compare(list_one, list_two):
 
 if __name__ == "__main__":
 
-    sys.path.append(os.getcwd())
+    sys.path.append(os.getcwd() + '/gtextfsm-0.2.1/textfsm')
 
     HOSTS = 'hosts'
 
