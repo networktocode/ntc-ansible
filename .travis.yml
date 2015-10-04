@@ -5,7 +5,7 @@ language: python
 python:
   - "2.7"
 
-sudo: required
+sudo: false
 
 before_install:
   - sudo apt-get update -qq
@@ -18,7 +18,7 @@ before_install:
   - pip install pip --upgrade
 
 install:
-  - sudo pip install ansible
+  - pip install ansible
   - sudo pip install gtextfsm
 
 script:
