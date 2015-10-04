@@ -12,9 +12,10 @@ before_install:
   - sudo apt-get install git
   - git clone https://github.com/ktbyers/netmiko.git
   - cd netmiko
-  - sudo python setup.py install
-  - sudo pip install -r requirements.txt
+  - python setup.py install
+  - pip install -r requirements.txt
   - cd ..
+  - pip install pip --upgrade
 
 install:
   - pip install ansible
