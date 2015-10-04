@@ -20,7 +20,7 @@ if __name__ == "__main__":
        module_name='get_test_info',
        module_args='',
        pattern='localhost',
-       hosts_list=HOSTS
+       host_list=HOSTS
     )
 
     results = runner.run()
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         module_name='ntc_show_command',
         module_args=args,
         pattern='localhost',
-        hosts_list=HOSTS
+        host_list=HOSTS
         )
         results = runner.run()
 
@@ -64,7 +64,7 @@ if __name__ == "__main__":
                     module_name='include_vars',
                     module_args=parsed,
                     pattern='localhost',
-                    hosts_list=HOSTS
+                    host_list=HOSTS
                 )
                 results = runner.run()
                 results['response'] = rsp['contacted']['localhost']['response']
