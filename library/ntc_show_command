@@ -112,7 +112,6 @@ EXAMPLES = '''
     password={{ password }}
 
 '''
-import os
 import os.path
 import socket
 from netmiko import ConnectHandler
