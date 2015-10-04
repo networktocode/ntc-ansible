@@ -23,4 +23,4 @@ install:
   - pip install ansible
 
 script:
-  - python test-templates.py
+  - sudo python test-templates.py
