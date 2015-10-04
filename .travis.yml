@@ -1,0 +1,15 @@
+---
+
+language: python
+
+python:
+  - "2.7"
+
+before_install:
+  - sudo apt-get update -qq
+
+install:
+  - pip install ansible
+
+script:
+  - python test-templates.py
