@@ -5,12 +5,14 @@ language: python
 python:
   - "2.7"
 
+sudo: false
+
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install git
+  - apt-get update -qq
+  - apt-get install git
   - git clone https://github.com/ktbyers/netmiko.git
   - cd netmiko
-  - sudo python setup.py install
+  - python setup.py install
   - pip install -r requirements.txt
   - cd ..
 
