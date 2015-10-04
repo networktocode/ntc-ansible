@@ -1,9 +1,0 @@
----
-parsed_sample:
-- name: default
-  status: active
-  vlan_id: "1"
-
-- name: WEB
-  status: active
-  vlan_id: "10"
