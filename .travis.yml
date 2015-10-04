@@ -9,7 +9,7 @@ sudo: false
 
 before_install:
   # - sudo apt-get update -qq
-  - apt-get install git
+  #- apt-get install git
   - git clone https://github.com/ktbyers/netmiko.git
   - cd netmiko
   - python setup.py install
