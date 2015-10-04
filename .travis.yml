@@ -5,7 +5,7 @@ language: python
 python:
   - "2.7"
 
-sudo: false
+sudo: required
 
 before_install:
   - sudo apt-get update -qq
