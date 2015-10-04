@@ -20,6 +20,7 @@ before_install:
 install:
   - pip install ansible
   - sudo pip install gtextfsm
+  - pip install gtextfsm
 
 script:
   - python test-templates.py
