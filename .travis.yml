@@ -18,8 +18,8 @@ before_install:
   - pip install pip --upgrade
 
 install:
-  - pip install ansible
-  - pip install gtextfsm
+  - sudo pip install ansible
+  - sudo pip install gtextfsm
 
 script:
   - python test-templates.py
