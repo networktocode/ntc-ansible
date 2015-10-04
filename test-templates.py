@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     # print json.dumps(responses, indent=4)
     with_parsed = []
-
+    print json.dumps(responses, indent=4)
     for rsp in responses:
         # print json.dumps(rsp, indent=4)
         # print rsp['contacted']['localhost']['invocation']['module_args']
