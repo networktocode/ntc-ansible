@@ -4,26 +4,18 @@
 DOCUMENTATION = '''
 ---
 
-module: ansible_docstring
-short_description: Create markdown file for a modules docs
+module: get_test_info
+short_description: Pull required info for tests templates automagically
 description:
-    - Offers ability to dynamically create local markdown files
-      (web docs) to be used offline for custom modules without
-      requiring use of 'make webdocs'.  Also works on Core modules.
-    - Only a single dir is supported in this release (no recursive dirs)
+    - Offers ability to dynamically create a list of dictionaries
+      with info required to test all templates.  This will loop through
+      the tests dir and build each dictionary to have command, platform,
+      rawfile, parsedfile, and path for each.
 author: Jason Edelman (@jedelman8)
-requirements:
-    - Ansible must be installed
-    - Modules must have proper Ansible doc and example strings
-    - 'modules' must be the variable name that is registered in the playbook
-    - The Jinja template called ansible-docs.j2 is required
-notes:
-    - This module uses module_docs that that is part of the Ansible project
-      to extract the required strings from Ansible modules
 options:
     path:
         description:
-            - absolute path to a directory where the Ansible module(s) are stored
+            - location where tests are located
         required: true
         default: null
         choices: []
@@ -31,13 +23,8 @@ options:
 '''
 
 EXAMPLES = '''
-# FULL PLAYBOOK EXAMPLE
-  - name: get docs and examples for modules
-    ansible_docstring: path=/usr/share/ansible/files/
-    register: modules
+- get_test_info:
 
-  - name: build web/markdown ansible docs
-    template: src=templates/ansible-docs.j2 dest=web/ansiblefilesdoc.md
 '''
 
 from os import walk
@@ -79,5 +66,3 @@ def main():
 
 from ansible.module_utils.basic import *
 main()
-
-# cisco_ios-3k_show_ip_bgp_summary.parsed
