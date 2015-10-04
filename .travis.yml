@@ -21,6 +21,8 @@ before_install:
   - cd gtextfsm-0.2.1
   - python setup.py install
   - cd ..
+  - export PYTHONPATH=$PYTHONPATH:/home/travis/virtualenv/python2.7.9/gtextfsm-0.2.1/textfsm/
+  - export PYTHONPATH=$PYTHONPATH:/home/travis/gtextfsm-0.2.1/textfsm/
 
 install:
   - pip install ansible
