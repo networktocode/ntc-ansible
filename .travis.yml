@@ -11,6 +11,7 @@ before_install:
   - git clone https://github.com/ktbyers/netmiko.git
   - cd netmiko
   - sudo python setup.py install
+  - pip install -r requirements.txt
   - cd ..
 
 install:
