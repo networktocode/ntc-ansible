@@ -120,8 +120,7 @@ try:
     import clitable
     from clitable import CliTableError
 except ImportError:
-    import sys
-    module.fail_json(msg=sys.path)
+    TEST = True
 
 
 def clitable_to_dict(cli_table):
@@ -170,6 +169,9 @@ def main():
         ),
         supports_check_mode=False
     )
+    if TEST:
+        import sys
+        module.fail_json(msg=sys.path)
 
     connection = module.params['connection']
     platform = module.params['platform']
