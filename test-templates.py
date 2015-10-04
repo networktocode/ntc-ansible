@@ -4,6 +4,7 @@ import ansible.runner
 import json
 import sys
 
+
 def compare(list_one, list_two):
     msg = ''
     for el in list_one:
@@ -13,6 +14,8 @@ def compare(list_one, list_two):
     return 0,msg
 
 if __name__ == "__main__":
+
+    sys.path.append(os.getcwd())
 
     HOSTS = 'hosts'
 

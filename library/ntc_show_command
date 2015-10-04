@@ -113,12 +113,10 @@ EXAMPLES = '''
 
 '''
 import os
-import sys
 import os.path
 import socket
 from netmiko import ConnectHandler
 
-sys.path.append(os.getcwd())
 import clitable
 from clitable import CliTableError
 
