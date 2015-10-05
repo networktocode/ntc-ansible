@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/networktocode/ntc-ansible.svg?branch=master)](https://travis-ci.org/networktocode/ntc-ansible)
+
 # Ansible Modules for Network Automation
 ### *And even get structured data back from CLI devices!*
 
