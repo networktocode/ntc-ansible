@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     # print json.dumps(responses, indent=4)
     with_parsed = []
-    print json.dumps(responses, indent=4)
+    # print json.dumps(responses, indent=4)
     for rsp in responses:
         # print json.dumps(rsp, indent=4)
         # print rsp['contacted']['localhost']['invocation']['module_args']
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                     host_list=HOSTS
                 )
                 results = runner.run()
-                print json.dumps(results, indent=4)
+                # print json.dumps(results, indent=4)
                 results['response'] = rsp['contacted']['localhost']['response']
                 # print rsp.get('response')
                 with_parsed.append(results)
