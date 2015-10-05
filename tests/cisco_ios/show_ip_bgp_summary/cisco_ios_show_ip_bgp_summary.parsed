@@ -1,7 +1,7 @@
 ---
 parsed_sample:
 
-- bgp_neigh: '10.0.0.1aa'
+- bgp_neigh: '10.0.0.1'
   neigh_as: '65000'
   state_pfxrcd: '558720'
 
