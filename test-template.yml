@@ -30,7 +30,7 @@
       platform: "{{ platform }}"
       command: "{{ command }}"
     with_fileglob:
-      - "{{ TEST_DIR }}/{{ platform }}/{{ template_name}}*.raw"
+      - "{{ TEST_DIR }}/{{ platform }}/{{ command_variable}}/{{ template_name}}*.raw"
     register: ntc_result
 
   - name: read parsed sample files
