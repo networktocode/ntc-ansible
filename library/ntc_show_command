@@ -170,9 +170,6 @@ def main():
         ),
         supports_check_mode=False
     )
-    if TEST:
-        import sys
-        module.fail_json(msg=sys.path)
 
     connection = module.params['connection']
     platform = module.params['platform']
