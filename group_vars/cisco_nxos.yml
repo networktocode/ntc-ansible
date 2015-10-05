@@ -3,3 +3,4 @@
 platform: cisco_nxos
 
 vlan_command: show vlan
+port-channel_summary_command: "show port-channel summary"
