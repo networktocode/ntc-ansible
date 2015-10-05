@@ -3,6 +3,7 @@
 import ansible.runner
 import json
 import sys
+import os
 
 def compare(list_one, list_two):
     msg = ''
@@ -14,10 +15,14 @@ def compare(list_one, list_two):
 
 if __name__ == "__main__":
 
+
+    HOSTS = 'hosts'
+
     runner = ansible.runner.Runner(
        module_name='get_test_info',
        module_args='',
-       pattern='localhost'
+       pattern='localhost',
+       host_list=HOSTS
     )
 
     results = runner.run()
@@ -37,7 +42,8 @@ if __name__ == "__main__":
         runner = ansible.runner.Runner(
         module_name='ntc_show_command',
         module_args=args,
-        pattern='localhost'
+        pattern='localhost',
+        host_list=HOSTS
         )
         results = runner.run()
 
@@ -45,7 +51,7 @@ if __name__ == "__main__":
 
     # print json.dumps(responses, indent=4)
     with_parsed = []
-
+    # print json.dumps(responses, indent=4)
     for rsp in responses:
         # print json.dumps(rsp, indent=4)
         # print rsp['contacted']['localhost']['invocation']['module_args']
@@ -59,14 +65,18 @@ if __name__ == "__main__":
                 runner = ansible.runner.Runner(
                     module_name='include_vars',
                     module_args=parsed,
-                    pattern='localhost'
+                    pattern='localhost',
+                    host_list=HOSTS
                 )
                 results = runner.run()
+                # print json.dumps(results, indent=4)
                 results['response'] = rsp['contacted']['localhost']['response']
                 # print rsp.get('response')
                 with_parsed.append(results)
 
     #    print json.dumps(with_parsed, indent=4)
+
+    failed = False
 
     for each in with_parsed:
         text = each['contacted']['localhost']['invocation']['module_args']
@@ -75,7 +85,7 @@ if __name__ == "__main__":
         result = each['response']
 
         rc,msg = compare(result, parsed_sample)
-        failed = False
+
         print command
         if rc != 0:
             print '----> failed'
