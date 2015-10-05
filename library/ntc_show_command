@@ -116,9 +116,10 @@ import os.path
 import socket
 from netmiko import ConnectHandler
 
+from clitable import CliTableError
 try:
     import clitable
-    from clitable import CliTableError
+
 except ImportError:
     TEST = True
 
