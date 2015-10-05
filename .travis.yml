@@ -7,7 +7,7 @@ python:
 
 sudo: false
 
-before_install:
+install:
   # - sudo apt-get update -qq
   #- apt-get install git
   - git clone https://github.com/ktbyers/netmiko.git
@@ -24,9 +24,8 @@ before_install:
   - cd ..
   - export PYTHONPATH=$PYTHONPATH:/home/travis/virtualenv/python2.7.9/gtextfsm-0.2.1/textfsm/
   - export PYTHONPATH=$PYTHONPATH:/home/travis/build/networktocode/ntc-ansible/gtextfsm-0.2.1/textfsm
-
-install:
   - pip install ansible
+  - pip install gtextfsm
 
 script:
   - python test-templates.py
