@@ -76,6 +76,8 @@ if __name__ == "__main__":
 
     #    print json.dumps(with_parsed, indent=4)
 
+    failed = False
+
     for each in with_parsed:
         text = each['contacted']['localhost']['invocation']['module_args']
         command = text.split('/')[-1].split('.')[0]
@@ -83,7 +85,7 @@ if __name__ == "__main__":
         result = each['response']
 
         rc,msg = compare(result, parsed_sample)
-        failed = False
+
         print command
         if rc != 0:
             print '----> failed'
