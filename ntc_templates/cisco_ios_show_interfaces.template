@@ -1,0 +1,21 @@
+Value Required INTERFACE (\S+)
+Value LINK_STATUS (\w+)
+Value PROTOCOL_STATUS (.*)
+Value HARDWARE_TYPE ([\w ]+)
+Value ADDRESS ([a-zA-Z0-9]+.[a-zA-Z0-9]+.[a-zA-Z0-9]+)
+Value BIA ([a-zA-Z0-9]+.[a-zA-Z0-9]+.[a-zA-Z0-9]+)
+Value DESCRIPTION (.*)
+Value MTU (\d+\s+\w+)
+Value BANDWIDTH (\d+\s+\w+)
+Value DELAY (\d+\s+\w+)
+Value ENCAPSULATION (\w+)
+Value QUEUE_STRATEGY (.*)
+
+Start
+  ^${INTERFACE} is ${LINK_STATUS}.*protocol is ${PROTOCOL_STATUS}
+  ^\s+Hardware is ${HARDWARE_TYPE} -> Continue
+  ^.*address is ${ADDRESS}.*bia ${BIA}
+  ^\s+Description: ${DESCRIPTION}
+  ^\s+MTU ${MTU}.*BW ${BANDWIDTH}.*DLY ${DELAY}
+  ^\s+Encapsulation ${ENCAPSULATION}
+  ^\s+Queueing strategy: ${QUEUE_STRATEGY} -> Record
