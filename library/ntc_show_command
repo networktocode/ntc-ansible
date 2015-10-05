@@ -117,11 +117,11 @@ import socket
 from netmiko import ConnectHandler
 
 from clitable import CliTableError
-try:
-    import clitable
+#try:
+import clitable
 
-except ImportError:
-    TEST = True
+#except ImportError:
+#    TEST = True
 
 
 def clitable_to_dict(cli_table):
