@@ -18,7 +18,7 @@ parsed_sample:
 
 - intf: Ethernet0/2
   ipaddr: unassigned
-  proto: down 
+  proto: down
   status: administratively down
 
 - intf: Ethernet0/3

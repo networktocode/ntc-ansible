@@ -6,9 +6,6 @@ parsed_sample:
   vlan_id: "1"
 
 - name: VLAN
-  vlan_id: "1"
-
-- name: VLAN
   vlan_id: "10"
 
 - name: VLAN

@@ -112,12 +112,16 @@ EXAMPLES = '''
     password={{ password }}
 
 '''
-
 import os.path
 import socket
 from netmiko import ConnectHandler
-import clitable
+
 from clitable import CliTableError
+#try:
+import clitable
+
+#except ImportError:
+#    TEST = True
 
 
 def clitable_to_dict(cli_table):
