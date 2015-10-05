@@ -21,8 +21,8 @@ short_description: verify that ntc template test case passes
 description:
     - This module verifies that the result received from TextFSM
       for a particular template matches the expected output from
-      a test scenario. It does so by comparing two lists of   
-      dictionaries going through elements of one and checking if 
+      a test scenario. It does so by comparing two lists of
+      dictionaries going through elements of one and checking if
       the element 'is in' the second list.
 author: Michael Kashin
 requirements:
@@ -32,7 +32,7 @@ options:
         description:
             - a list of dictionaries received from ntc_show_command module
         required: true
-        default: null 
+        default: null
         choices: []
         aliases: []
     sample:
@@ -59,7 +59,7 @@ def compare(list_one, list_two):
         if el not in list_two:
             msg = str(el) + " is not found in sample input"
             return 1,msg
-    return 0,msg 
+    return 0,msg
 
 def main():
 
@@ -70,12 +70,12 @@ def main():
         ),
         supports_check_mode=False
     )
-    
+
     result_dict = module.params['result']
     sample_dict = module.params['sample']
 
     rc,msg = compare(result_dict, sample_dict)
-   
+
     if rc != 0:
         module.fail_json(msg=msg)
     else:
