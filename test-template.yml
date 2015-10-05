@@ -34,7 +34,7 @@
     register: ntc_result
 
   - name: read parsed sample files
-    include_vars: "{{ item.item | split('.') | first }}.parsed"
+    include_vars: "{{ item.item | regex_replace('\\.raw$', '.parsed') }}"
     with_items: "{{ ntc_result.results }}"
     register: ntc_result
 
