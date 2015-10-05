@@ -84,6 +84,13 @@ options:
         default: null
         choices: []
         aliases: []
+    port:
+        description:
+            - SSH port to use to connect to the target device
+        required: false
+        default: 22
+        choices: []
+        aliases: []
     username:
         description:
             - Username used to login to the target device
@@ -162,6 +169,7 @@ def main():
             template_dir=dict(default='ntc_templates'),
             command=dict(required=True),
             host=dict(required=False),
+            port=dict(default=22, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
         ),
@@ -180,6 +188,7 @@ def main():
     command = module.params['command']
     username = module.params['username']
     password = module.params['password']
+    port = int(module.params['port'])
 
     if module.params['host']:
         host = socket.gethostbyname(module.params['host'])
@@ -204,6 +213,7 @@ def main():
         device = ConnectHandler(
                     device_type=device_type,
                     ip=socket.gethostbyname(host),
+                    port=port,
                     username=username,
                     password=password
                     )
