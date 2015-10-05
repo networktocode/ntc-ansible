@@ -134,25 +134,12 @@ import clitable
 def clitable_to_dict(cli_table):
     """Converts TextFSM cli_table object to list of dictionaries
     """
-
-    # number of rows within the table excluding the headers
-    object_rows = cli_table.size
-
-    rows = []
-
-    # build list of row objects - each row is list-like
-    for each in range(0, object_rows):
-        cli_table.row_index = each + 1
-        rows.append(cli_table.row)
-
     objs = []
-    for row in rows:
-        temp = {}
-        index = 0
-        for each in row:
-            temp[cli_table.header[index].lower()] = each
-            index += 1
-        objs.append(temp)
+    for row in cli_table:
+        temp_dict = {}
+        for index, element in enumerate(row):
+            temp_dict[cli_table.header[index].lower()] = element
+        objs.append(temp_dict)
 
     return objs
 
