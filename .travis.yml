@@ -8,10 +8,12 @@ python:
 sudo: false
 
 install:
+  # - sudo apt-get update -qq
+  #- apt-get install git
   - git clone https://github.com/ktbyers/netmiko.git
   - cd netmiko
   - python setup.py install
-  #- pip install -r requirements.txt
+  - pip install -r requirements.txt
   - cd ..
   - which python
   - wget https://pypi.python.org/packages/source/g/gtextfsm/gtextfsm-0.2.1.tar.gz
@@ -20,6 +22,7 @@ install:
   - pwd
   - python setup.py install
   - cd ..
+  #- export PYTHONPATH=$PYTHONPATH:/home/travis/virtualenv/python2.7.9/gtextfsm-0.2.1/textfsm/
   - export PYTHONPATH=$PYTHONPATH:/home/travis/build/networktocode/ntc-ansible/gtextfsm-0.2.1/textfsm
   - pip install ansible
   - pip install terminal
