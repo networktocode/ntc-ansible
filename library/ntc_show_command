@@ -213,7 +213,7 @@ def main():
 
     cli_table = clitable.CliTable(index_file, template_dir)
 
-    attrs = {'Command': command, 'platform': platform}
+    attrs = {'Command': command, 'Platform': platform}
 
     try:
         cli_table.ParseCmd(rawtxt, attrs)
