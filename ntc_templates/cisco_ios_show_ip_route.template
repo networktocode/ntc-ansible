@@ -29,3 +29,5 @@ Routes
   #
   # Clear all variables on empty lines
   ^\s* -> Clearall
+
+EOF
