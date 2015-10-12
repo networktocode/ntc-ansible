@@ -6,7 +6,7 @@
 ---
 ### Requirements
 * netmiko
-* TestFSM
+* TextFSM (https://code.google.com/p/textfsm/)
 * terminal
 
 ---
