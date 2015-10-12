@@ -1,4 +1,4 @@
-Value Filldown Protocol (C|S|R|B|D|O|i)
+Value Filldown Protocol (C|S|R|B|D|O|i|L)
 Value Filldown Type (\w{0,2})
 Value Required,Filldown Network ([0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})
 Value Filldown Mask (\/\d{1,2})
@@ -29,3 +29,5 @@ Routes
   #
   # Clear all variables on empty lines
   ^\s* -> Clearall
+
+EOF
