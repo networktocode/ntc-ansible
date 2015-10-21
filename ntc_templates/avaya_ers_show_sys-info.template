@@ -1,0 +1,5 @@
+Value UPTIME ((\d+\s\w+.s.,?\s?)(\d+:)(\d+:)(\d+))
+
+Start
+  ^sysUpTime:\s+${UPTIME} -> Record
+
