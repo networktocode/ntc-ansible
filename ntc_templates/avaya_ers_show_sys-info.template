@@ -1,5 +1,14 @@
-Value UPTIME ((\d+\s\w+.s.,?\s?)(\d+:)(\d+:)(\d+))
+Value SYSTEM_NAME (.*)
+Value SYSTEM_LOCATION (.*)
+Value SYSTEM_CONTACT (.*)
+Value IP_ADDRESS (.*)
+Value SYSTEM_UP_TIME (.*)
 
 Start
-  ^sysUpTime:\s+${UPTIME} -> Record
+  ^sysName:\.+\s${SYSTEM_NAME}
+  ^sysLocation:\.+\s${SYSTEM_LOCATION}
+  ^sysContact:\.+\s${SYSTEM_CONTACT}
+  ^Operational Software:\.+\s${PRODUCT_VERSION}
+  ^Installed software:\.+\s${BOOTLOADER_VERSION}
+  ^sysUpTime:\.+\s${SYSTEM_UP_TIME}
 
