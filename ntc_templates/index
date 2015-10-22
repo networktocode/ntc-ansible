@@ -21,4 +21,5 @@ cisco_nxos_show_port-channel_summary.template, .*, cisco_nxos, sh[[ow]] po[[rt-c
 cisco_nxos_show_flogi_database.template, .*, cisco_nxos, sh[[ow]] fl[[ogi]] d[[atabase]]
 cisco_ios_show_interfaces.template, .*, cisco_ios, sh[[ow]] int[[erfaces]]
 cisco_ios_show_clock.template, .*, cisco_ios, sh[[ow]] c[[lock]]
-cisco_nxos_show_clock.template, .*, cisco_nxos, sh[[ow]] c[[lock]]
+cisco_ios_show_interfaces_status.template, .*, cisco_ios, sh[[ow]] int[[erfaces]] s[[tatus]]
+
