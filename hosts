@@ -22,3 +22,6 @@ hp1
 
 [cisco_ios]
 router1
+
+[arista_eos]
+arista1

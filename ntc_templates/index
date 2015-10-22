@@ -22,3 +22,5 @@ cisco_nxos_show_flogi_database.template, .*, cisco_nxos, sh[[ow]] fl[[ogi]] d[[a
 cisco_ios_show_interfaces.template, .*, cisco_ios, sh[[ow]] int[[erfaces]]
 cisco_ios_show_clock.template, .*, cisco_ios, sh[[ow]] c[[lock]]
 cisco_nxos_show_clock.template, .*, cisco_nxos, sh[[ow]] c[[lock]]
+cisco_nxos_show_interface_status.template, .*, cisco_nxos, sh[[ow]] int[[erface]] s[[tatus]]
+arista_eos_show_vlan.template, .*, arista_eos, sh[[ow]] vl[[an]]
