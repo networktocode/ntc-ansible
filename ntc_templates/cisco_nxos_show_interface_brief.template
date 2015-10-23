@@ -1,0 +1,19 @@
+Value INTERFACE ([\w+/]+)
+Value VRF (\S+)
+Value STATUS (up|down)
+Value IP (\d+\.\d+\.\d+\.\d+)
+Value SPEED (\S+)
+Value MTU (\d+)
+Value VLAN ([\d+--]+)
+Value TYPE (\S+)
+Value MODE (routed|access|trunk)
+Value REASON (\S+((\s\w+)+)?)
+Value PORTCH (\S+)
+Value DESCRIPTION (\S+((\s\w+)+)?)
+
+Start
+  ^${INTERFACE}\s+${VRF}\s+${STATUS}\s+${IP}\s+${SPEED}\s+${MTU} -> Record  
+  ^${INTERFACE}\s+${VLAN}\s+${TYPE}\s+${MODE}\s+${STATUS}\s+${REASON}\s+${SPEED}\s+${PORTCH} -> Record
+  ^${INTERFACE}\s+${STATUS}\s+${DESCRIPTION} -> Record
+  ^${INTERFACE}\s+${TYPE}\s+${STATUS}\s+${REASON} -> Record
+# \s+${VLAN}\s+${TYPE}\s+${MODE}\s+${STATUS}\s+${REASON}\s+{SPEED}\s+${PORTCH}
