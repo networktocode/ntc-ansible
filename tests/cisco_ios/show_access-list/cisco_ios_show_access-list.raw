@@ -1,0 +1,102 @@
+---
+parsed_sample:
+- name: Virtual-Access1.1#1
+  sn: "10"
+  action: permit
+  protocol: igmp
+  source: any
+  destination: host 1.1.1.1
+  modifier: ""
+  option: ""
+
+- name: Virtual-Access1.1#1
+  sn: 20
+  action: permit
+  protocol: icmp
+  source: host 1.1.1.1
+  destination: any
+  modifier: ""
+  option: ""
+
+- name: Virtual-Access1.1#1
+  sn: "30"
+  action: deny
+  protocol: ip
+  source: host 44.33.66.36
+  destination: host 1.1.1.1
+  modifier: ""
+  option: ""
+
+- name: Virtual-Access1.1#1
+  sn: "40"
+  action: permit
+  protocol: udp
+  source: any
+  destination: host 1.1.1.1
+  modifier: ""
+  option: ""
+
+- name: "Virtual-Access1.1#2"
+  sn: "10"
+  action: "permit"
+  protocol: "igmp"
+  source: "any"
+  destination: "host 13.1.1.2"
+  modifier: ""
+  option: ""
+
+- name: "Virtual-Access1.1#2"
+  sn: "20"
+  action: "permit"
+  protocol: "icmp"
+  source: "host 13.1.1.2"
+  destination: "any"
+  modifier: ""
+  option: ""
+
+- name: "102"
+  sn: "10"
+  action: "permit"
+  protocol: "tcp"
+  source: "any"
+  destination: "host 192.168.1.100"
+  modifier: "eq"
+  option: "ftp"
+
+- name: "102"
+  sn: "20"
+  action: "permit"
+  protocol: "tcp"
+  source: "any"
+  destination: "host 192.168.1.100"
+  modifier: "gt"
+  option: "1024"
+
+- name: "VLAN-TEST"
+  sn: "10"
+  action: "permit"
+  protocol: "ip"
+  source: "any"
+  destination: "any"
+  modifier: ""
+  option: ""
+
+- name: "VLAN-TEST"
+  sn: "20"
+  action: "deny"
+  protocol: "ip"
+  source: "any"
+  destination: "any"
+  modifier: ""
+  option: ""
+
+
+
+
+
+
+
+
+
+
+

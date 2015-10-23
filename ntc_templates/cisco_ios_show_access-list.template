@@ -1,0 +1,15 @@
+Value Filldown ID (.*)
+Value Required SN (\d+)
+Value ACTION (\w+)
+Value PROTOCOL (\w+)
+Value SOURCE (host\s\d+\.\d+\.\d+\.\d+|any|\d+\.\d+\.\d+\.\d+\s\d+\.\d+\.\d+\.\d+)
+Value DESTINATION (host\s\d+\.\d+\.\d+\.\d+|any|\d+\.\d+\.\d+\.\d+\s\d+\.\d+\.\d+\.\d+)
+Value MODIFIER (\w+)
+Value OPTION (\S+)
+
+Start
+  ^.*list\s${ID}
+  ^\s+${SN}\s${ACTION}\s${PROTOCOL}\s${SOURCE}\s${DESTINATION}\s${MODIFIER}\s${OPTION} -> Record
+  ^\s+${SN}\s${ACTION}\s${PROTOCOL}\s${SOURCE}\s${DESTINATION} -> Record
+
+
