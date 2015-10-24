@@ -25,4 +25,4 @@ cisco_nxos_show_clock.template, .*, cisco_nxos, sh[[ow]] c[[lock]]
 arista_eos_show_vlan.template, .*, arista_eos, sh[[ow]] vl[[an]]
 cisco_nxos_show_interface_status.template, .*, cisco_nxos, sh[[ow]] int[[erface]] s[[tatus]]
 cisco_nxos_show_inventory.template, .*, cisco_nxos, sh[[ow]] inv[[entory]]
-
+.
