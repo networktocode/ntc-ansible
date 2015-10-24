@@ -174,6 +174,9 @@ def main():
 
         if commands:
             output = device.send_config_set(commands)
+            if "'^' marker" in output:
+                module.fail_json(msg="Error executing command:\
+                                 {}".format(output))
 
         try:
             if commands_file:
@@ -186,7 +189,7 @@ def main():
     results = {}
     results['response'] = output 
 
-    module.exit_json(**results)
+    module.exit_json(changed=True, **results)
 
 
 if __name__ == "__main__":
