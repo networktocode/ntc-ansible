@@ -81,9 +81,9 @@ hp-comware_5900
 ## ntc_write_command
 Writes config data to devices that don't have an API
 
-  *[Synopsis](#ntc_write_synopsis)
-  *[Options](#ntc_write_options)
-  *[Examples](#ntc_write_examples)
+  * [Synopsis](#ntc_write_synopsis)
+  * [Options](#ntc_write_options)
+  * [Examples](#ntc_write_examples)
 
 ### ntc_write_synopsis
 This module writes configuration data to non-API enabled devices, via CLI, using netmiko for SSH connectivity.
