@@ -85,10 +85,10 @@ Writes config data to devices that don't have an API
   *[Options](#ntc_write_options)
   *[Examples](#ntc_write_examples)
 
-### ntc_write synopsis
+### ntc_write_synopsis
 This module writes configuration data to non-API enabled devices, via CLI, using netmiko for SSH connectivity.
 
-### ntc_write options
+### ntc_write_options
 
 | Parameter     | Required | Default | Choices | Comments                                                                                                                                           |
 |---------------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -102,7 +102,7 @@ This module writes configuration data to non-API enabled devices, via CLI, using
 | commands      | no       |         |         | Commands should be in a list format. config t isn't needed, as netmiko will automatically enter config mode to execute commands                    |
 | commands_file | no       |         |         | the commands_file option can be very useful if you generate commands based upon the results of a ntc_show_command play.                            |
 
-### ntc_write examples
+### ntc_write_examples
 
 Example using the commands option
 ```
