@@ -187,7 +187,7 @@ def main():
             module.fail_json(msg="Unable to locate: {}".format(commands_file))
 
     results = {}
-    results['response'] = output 
+    results['response'] = output
 
     module.exit_json(changed=True, **results)
 
