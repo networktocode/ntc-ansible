@@ -1,2 +1,4 @@
 myhosts
 *.pyc
+.tox/
+.tmp/
