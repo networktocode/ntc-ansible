@@ -1,4 +1,6 @@
-Value BANNER (.*)
+Value List BANNER (.*)
 
 Start
+  ^${BANNER}
   ^${BANNER} -> Record
+
