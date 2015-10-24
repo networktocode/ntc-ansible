@@ -1,0 +1,17 @@
+---
+- name: test ntc_write_command
+  hosts: cisco_ios 
+  connection: local
+  gather_facts: False
+
+  tasks:
+  - name: execute ntc_write_command module
+    ntc_write_command:
+      connection: ssh
+      platform: "cisco_ios"
+      commands:
+        - snmp-server location HOME
+      host: "{{ inventory_hostname }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      secret: "{{ secret }}"

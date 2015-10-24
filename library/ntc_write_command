@@ -88,7 +88,7 @@ options:
         default: null
         choices: []
         aliases: []
-    enable_password:
+    secret:
         description:
             - Password used to login to the target device
         required: false
@@ -109,7 +109,7 @@ EXAMPLES = '''
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
-    enable_password: "{{ enable_password }}"
+    secret: "{{ secret }}"
 
 # write config from file
 - ntc_write_command:
@@ -119,7 +119,7 @@ EXAMPLES = '''
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
-    enable_password: "{{ enable_password }}"
+    secret: "{{ secret }}"
 '''
 
 
@@ -136,7 +136,7 @@ def main():
             port=dict(default=22, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
-            enable_password=dict(required=False, type='str'),
+            secret=dict(required=False, type='str'),
         ),
         required_together=(
             ['host', 'password', 'username'],
@@ -151,7 +151,7 @@ def main():
     commands_file = module.params['commands_file']
     username = module.params['username']
     password = module.params['password']
-    enable_password = module.params['enable_password']
+    secret = module.params['secret']
     port = int(module.params['port'])
 
     if module.params['host']:
@@ -166,8 +166,8 @@ def main():
                                 ip=socket.gethostbyname(host),
                                 port=port,
                                 username=username,
-                                password=password
-                                secret=enable_password)
+                                password=password,
+                                secret=secret)
 
         if secret:
             device.enable()
@@ -184,7 +184,7 @@ def main():
             module.fail_json(msg="Unable to locate: {}".format(commands_file))
 
     results = {}
-    results['response'] = structured_data
+    results['response'] = output 
 
     module.exit_json(**results)
 
