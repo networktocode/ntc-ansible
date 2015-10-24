@@ -123,12 +123,16 @@ import os.path
 import socket
 from netmiko import ConnectHandler
 
-from clitable import CliTableError
-#try:
-import clitable
-
-#except ImportError:
-#    TEST = True
+HAS_TEXTFSM = True
+try:
+    from clitable import CliTableError
+    import clitable
+except:
+    try:
+        from textfsm.clitable import CliTableError
+        import textfsm.clitable as clitable
+    except:
+        HAS_TEXTFSM = False
 
 
 def clitable_to_dict(cli_table):
@@ -165,6 +169,8 @@ def main():
         ),
         supports_check_mode=False
     )
+    if not HAS_TEXTFSM:
+        module.fail_json(msg='This module requires TextFSM')
 
     connection = module.params['connection']
     platform = module.params['platform']
