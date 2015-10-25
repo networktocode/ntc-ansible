@@ -123,7 +123,7 @@ EXAMPLES = '''
 '''
 
 module = AnsibleModule(
-     argument_spec=dict(
+    argument_spec=dict(
         connection=dict(choices=['ssh'],
                         default='ssh'),
         platform=dict(required=True),
@@ -193,7 +193,7 @@ def main(module):
         except:
             module.fail_json(msg="Unable to locate: {}".format(commands_file))
 
-    if (error_params(platform,output)):
+    if (error_params(platform, output)):
         module.fail_json(msg="Error executing command:\
                          {}".format(output))
 
