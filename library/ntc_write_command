@@ -122,27 +122,37 @@ EXAMPLES = '''
     secret: "{{ secret }}"
 '''
 
+module = AnsibleModule(
+     argument_spec=dict(
+        connection=dict(choices=['ssh'],
+                        default='ssh'),
+        platform=dict(required=True),
+        commands=dict(required=False),
+        commands_file=dict(required=False),
+        host=dict(required=False),
+        port=dict(default=22, required=False),
+        username=dict(required=False, type='str'),
+        password=dict(required=False, type='str'),
+        secret=dict(required=False, type='str'),
+    ),
+    required_together=(
+        ['host', 'password', 'username'],
+    ),
+    supports_check_mode=False
+)
 
-def main():
 
-    module = AnsibleModule(
-        argument_spec=dict(
-            connection=dict(choices=['ssh'],
-                            default='ssh'),
-            platform=dict(required=True),
-            commands=dict(required=False),
-            commands_file=dict(required=False),
-            host=dict(required=False),
-            port=dict(default=22, required=False),
-            username=dict(required=False, type='str'),
-            password=dict(required=False, type='str'),
-            secret=dict(required=False, type='str'),
-        ),
-        required_together=(
-            ['host', 'password', 'username'],
-        ),
-        supports_check_mode=False
-    )
+def error_params(platform, command_output):
+    if 'cisco_ios' in platform:
+        if "Invalid input detected at '^' marker" in command_output:
+            return True
+        elif "Ambiguous command" in command_output:
+            return True
+        else:
+            return False
+
+
+def main(module):
 
     connection = module.params['connection']
     platform = module.params['platform']
@@ -174,9 +184,6 @@ def main():
 
         if commands:
             output = device.send_config_set(commands)
-            if "'^' marker" in output:
-                module.fail_json(msg="Error executing command:\
-                                 {}".format(output))
 
         try:
             if commands_file:
@@ -186,6 +193,10 @@ def main():
         except:
             module.fail_json(msg="Unable to locate: {}".format(commands_file))
 
+    if (error_params(platform,output)):
+        module.fail_json(msg="Error executing command:\
+                         {}".format(output))
+
     results = {}
     results['response'] = output
 
@@ -193,4 +204,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(module)
