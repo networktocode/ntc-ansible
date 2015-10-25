@@ -1,0 +1,18 @@
+---
+parsed_sample:
+- vlan: "100"
+  mac: "5087.89a1.de75"
+  type: "static"
+  age: "-"
+  secure: "F"
+  ntfy: "F"
+  ports: "sup-eth1(R)"
+
+- vlan: "my_vlan"
+  mac: "5087.89a1.d8d5"
+  type: "static"
+  age: "-"
+  secure: "T"
+  ntfy: "T"
+  ports: "sup-eth2(R)"
+
