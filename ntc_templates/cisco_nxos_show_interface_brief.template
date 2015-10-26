@@ -12,24 +12,24 @@ Value PORTCH (\S+)
 Value DESCRIPTION (\S+((\s\w+)+)?)
 
 Start
-  ^Port\s+VRF\s+Status\s+IP\s+Address\s+Speed\s+MTU -> Management  
+  ^Port\s+VRF\s+Status\s+IP\s+Address\s+Speed\s+MTU -> Management 
+  ^Interface\s+Ch\s+ -> Ethernet 
+  ^Interface\s+Status\s+Description -> Loopback
+  ^Interface\s+Secondary\s+VLAN\(Type\)\s+Status\s+Reason -> VLAN
 
 Management
   ^${INTERFACE}\s+${VRF}\s+${STATUS}\s+${IP}\s+${SPEED}\s+${MTU} -> Record
-  ^Interface\s+Ch\s -> Ethernet
+  ^Ethernet\s+VLAN\s+Type\s+Mode\s+Status\s+Reason\s+Speed\s+Port -> Start
 
 Ethernet
   ^${INTERFACE}\s+${VLAN}\s+${TYPE}\s+${MODE}\s+${STATUS}\s+${REASON}\s+${SPEED}\s+${PORTCH} -> Record
-  ^Port-channel\s+VLAN\s+Type\s+Mode\s+Status\s+Reason\s+Speed\s+Protocol -> PortChannel
-
-PortChannel
-  ^${INTERFACE}\s+${VLAN}\s+${TYPE}\s+${MODE}\s+${STATUS}\s+${REASON}\s+${SPEED}\s+${PORTCH} -> Record
-  ^Interface\s+Status\s+Description -> Loopback
+  ^Interface\s+Status\s+Description -> Start
 
 Loopback
   ^${INTERFACE}\s+${STATUS}\s+${DESCRIPTION} -> Record
-  ^Interface\s+Secondary\s+VLAN\(Type\)\s+Status\s+Reason -> VLAN
+  ^Interface\s+Secondary\s+VLAN\(Type\)\s+Status\s+Reason -> Start
 
 VLAN
   ^${INTERFACE}\s+${TYPE}\s+${STATUS}\s+${REASON} -> Record
+
 
