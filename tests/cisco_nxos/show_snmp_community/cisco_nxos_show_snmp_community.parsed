@@ -1,0 +1,26 @@
+---
+parsed_sample:
+- community: "Community_test-1"
+  group_access: "network-operator"
+  context: "C0n_text!"
+  acl_filter: "T3st-ACL#$"
+
+  community: "WEWORK"
+  group_access: "network-operator"
+  context: ""
+  acl_filter: ""
+
+  community: "RW"
+  group_access: "network-admin"
+  context: "_C0n"
+  acl_filter: ""
+
+  community: "networktocode"
+  group_access: "network-operator"
+  context: ""
+  acl_filter: ""
+
+  community: "YANKS"
+  group_access: "network-admin"
+  context: ""
+  acl_filter: "my_acl"
