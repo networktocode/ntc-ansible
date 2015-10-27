@@ -1,4 +1,4 @@
-Value VLAN (\S+)
+Value VLAN (\d+)
 Value MAC (\S+)
 Value TYPE (\S+)
 Value AGE (\S+)
