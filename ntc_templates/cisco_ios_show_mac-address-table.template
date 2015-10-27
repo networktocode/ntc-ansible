@@ -1,6 +1,6 @@
 Value DESTINATION_ADDRESS (\w+\.\w+\.\w+)
 Value TYPE (\w+)
-Value VLAN (\S+)
+Value VLAN (\d+)
 Value DESTINATION_PORT (\S+)
 
 Start
