@@ -12,3 +12,9 @@ parsed_sample:
   interface: "Vlan900"
   physical_interface: "Ethernet1/12"
 
+- address: "90.10.10.4"
+  age: "-"
+  mac: "000d.ece7.df7d"
+  interface: "-"
+  physical_interface: "-"
+
