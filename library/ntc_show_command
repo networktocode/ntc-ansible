@@ -91,6 +91,13 @@ options:
         default: 22
         choices: []
         aliases: []
+    delay:
+        description:
+            - Wait for command output from target device
+        required: false
+        default: 1
+        choices: []
+        aliases: []
     username:
         description:
             - Username used to login to the target device
@@ -137,16 +144,22 @@ EXAMPLES = '''
     ssh_key_file='/path/to/ssh/key/id_dsa'
 
 '''
+
 import os.path
 import socket
 from netmiko import ConnectHandler
 
-from clitable import CliTableError
-#try:
-import clitable
 
-#except ImportError:
-#    TEST = True
+HAS_TEXTFSM = True
+try:
+    from clitable import CliTableError
+    import clitable
+except:
+    try:
+        from textfsm.clitable import CliTableError
+        import textfsm.clitable as clitable
+    except:
+        HAS_TEXTFSM = False
 
 
 def clitable_to_dict(cli_table):
@@ -175,6 +188,7 @@ def main():
             command=dict(required=True),
             host=dict(required=False),
             port=dict(default=22, required=False),
+            delay=dict(default=1, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
             use_keys=dict(required=False),
@@ -185,6 +199,8 @@ def main():
         ),
         supports_check_mode=False
     )
+    if not HAS_TEXTFSM:
+        module.fail_json(msg='This module requires TextFSM')
 
     connection = module.params['connection']
     platform = module.params['platform']
@@ -198,6 +214,7 @@ def main():
     use_keys = module.params['use_keys']
     ssh_key_file = module.params['ssh_key_file']
     port = int(module.params['port'])
+    delay = int(module.params['delay'])
 
     if module.params['host']:
         host = socket.gethostbyname(module.params['host'])
@@ -223,6 +240,7 @@ def main():
                     device_type=device_type,
                     ip=socket.gethostbyname(host),
                     port=port,
+                    delay_factor=delay,
                     username=username,
                     password=password,
                     use_keys=use_keys,
@@ -252,5 +270,7 @@ def main():
 
     module.exit_json(**results)
 
+
 from ansible.module_utils.basic import *
-main()
+if __name__ == "__main__":
+    main()

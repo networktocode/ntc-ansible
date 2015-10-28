@@ -61,6 +61,8 @@ hp-comware_5900
 | file  |   no  |  | <ul></ul> |  If using connection=offline, this is the file (with path) of a file that contains raw text output, i.e. 'show command' and then the contents of the file will be rendered with the the TextFSM template  |
 | password  |   no  |  | <ul></ul> |  Password used to login to the target device  |
 | index_file  |   no  |  index  | <ul></ul> |  name of index file.  file location must be relative to the template_dir  |
+| port | no | 22 | <ul></ul> | specify an alternative ssh port |
+| delay | no | 1 | <ul></ul> | wait for command output from a target device |
 
 #### Examples
 
