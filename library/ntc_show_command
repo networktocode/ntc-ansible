@@ -91,6 +91,13 @@ options:
         default: 22
         choices: []
         aliases: []
+    delay:
+        description:
+            - Wait for command output from target device
+        required: false
+        default: 1
+        choices: []
+        aliases: []
     username:
         description:
             - Username used to login to the target device
@@ -119,9 +126,11 @@ EXAMPLES = '''
     password={{ password }}
 
 '''
+
 import os.path
 import socket
 from netmiko import ConnectHandler
+
 
 HAS_TEXTFSM = True
 try:
@@ -161,6 +170,7 @@ def main():
             command=dict(required=True),
             host=dict(required=False),
             port=dict(default=22, required=False),
+            delay=dict(default=1, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
         ),
@@ -182,6 +192,7 @@ def main():
     username = module.params['username']
     password = module.params['password']
     port = int(module.params['port'])
+    delay = int(module.params['delay'])
 
     if module.params['host']:
         host = socket.gethostbyname(module.params['host'])
@@ -207,6 +218,7 @@ def main():
                     device_type=device_type,
                     ip=socket.gethostbyname(host),
                     port=port,
+                    delay_factor=delay,
                     username=username,
                     password=password
                     )
@@ -234,5 +246,7 @@ def main():
 
     module.exit_json(**results)
 
+
 from ansible.module_utils.basic import *
-main()
+if __name__ == "__main__":
+    main()
