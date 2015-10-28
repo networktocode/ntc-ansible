@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 
-import os.path
-import socket
-from ansible.module_utils.basic import *
-from netmiko import ConnectHandler
-
-
 # Copyright 2015 James Williams <james.williams@packetgeek.net>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -122,24 +116,9 @@ EXAMPLES = '''
     secret: "{{ secret }}"
 '''
 
-module = AnsibleModule(
-    argument_spec=dict(
-        connection=dict(choices=['ssh'],
-                        default='ssh'),
-        platform=dict(required=True),
-        commands=dict(required=False),
-        commands_file=dict(required=False),
-        host=dict(required=False),
-        port=dict(default=22, required=False),
-        username=dict(required=False, type='str'),
-        password=dict(required=False, type='str'),
-        secret=dict(required=False, type='str'),
-    ),
-    required_together=(
-        ['host', 'password', 'username'],
-    ),
-    supports_check_mode=False
-)
+import os.path
+import socket
+from netmiko import ConnectHandler
 
 
 def error_params(platform, command_output):
@@ -152,7 +131,26 @@ def error_params(platform, command_output):
             return False
 
 
-def main(module):
+def main():
+
+    module = AnsibleModule(
+        argument_spec=dict(
+            connection=dict(choices=['ssh'],
+                            default='ssh'),
+            platform=dict(required=True),
+            commands=dict(required=False),
+            commands_file=dict(required=False),
+            host=dict(required=False),
+            port=dict(default=22, required=False),
+            username=dict(required=False, type='str'),
+            password=dict(required=False, type='str'),
+            secret=dict(required=False, type='str'),
+        ),
+        required_together=(
+            ['host', 'password', 'username'],
+        ),
+        supports_check_mode=False
+    )
 
     connection = module.params['connection']
     platform = module.params['platform']
@@ -203,5 +201,6 @@ def main(module):
     module.exit_json(changed=True, **results)
 
 
+from ansible.module_utils.basic import *
 if __name__ == "__main__":
-    main(module)
+    main()
