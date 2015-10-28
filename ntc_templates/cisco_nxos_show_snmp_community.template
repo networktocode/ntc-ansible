@@ -1,0 +1,11 @@
+Value Required COMMUNITY (\S+)
+Value Required GROUP_ACCESS (\S+)
+Value CONTEXT (\S+)
+Value ACL_FILTER (\S+)
+
+Start
+  ^-+\s+ -> Community
+
+Community
+  ^${COMMUNITY}\s+${GROUP_ACCESS}\s+(${CONTEXT})?\s+(${ACL_FILTER})? -> Record
+  ^${COMMUNITY}\s+${GROUP_ACCESS} -> Record

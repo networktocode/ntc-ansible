@@ -1,0 +1,7 @@
+Community            Group / Access      context    acl_filter
+---------            --------------      -------    ----------
+Community_test-1      network-operator    C0n_text!  T3st-ACL#$
+WEWORK                network-operator
+RW                    network-admin       _C0n
+networktocode         network-operator               
+YANKS                 network-admin                  my_acl
