@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 
-import os.path
-import socket
-from netmiko import ConnectHandler
-from ansible.module_utils.basic import *
-
-
 # Copyright 2015 Jason Edelman <jason@networktocode.com>
 # Network to Code, LLC
 #
@@ -133,6 +127,11 @@ EXAMPLES = '''
 
 '''
 
+import os.path
+import socket
+from netmiko import ConnectHandler
+
+
 HAS_TEXTFSM = True
 try:
     from clitable import CliTableError
@@ -248,5 +247,6 @@ def main():
     module.exit_json(**results)
 
 
+from ansible.module_utils.basic import *
 if __name__ == "__main__":
     main()
