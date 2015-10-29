@@ -28,3 +28,7 @@ cisco_nxos_show_ip_arp_detail.template, .*, cisco_nxos, sh[[ow]] i[[p]] a[[rp]] 
 cisco_ios_show_interfaces_status.template, .*, cisco_ios, sh[[ow]] int[[erfaces]] st[[atus]]
 cisco_nxos_show_vpc.template, .*, cisco_nxos, sh[[ow]] vpc
 cisco_nxos_show_interface_brief.template, .*, cisco_nxos, sh[[ow]] int[erface] br[[ief]]
+cisco_ios_show_inventory.template, .*, cisco_ios, sh[[ow]] inven[[tory]]
+cisco_nxos_show_interface_status.template, .*, cisco_nxos, sh[[ow]] int[[erface]] st[[atus]]
+cisco_nxos_show_feature.template, .*, cisco_nxos, sh[[ow]] feat[[ure]]
+arista_eos_show_vlan.template, .*, arista_eos, sh[[ow]] vl[[an]]
