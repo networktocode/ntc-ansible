@@ -13,6 +13,7 @@
 ### Modules
 
   * [ntc_show_command - gets config data from devices that don't have an api](#ntc_show_command)
+  * [ntc_config_command - writes config data to devices that don't have an api](#ntc_config_command)
 
 ---
 
@@ -79,6 +80,59 @@ hp-comware_5900
 
 ```
 
+## ntc_config_command
+Writes config data to devices that don't have an API
+
+  * [Synopsis](#ntc_config_synopsis)
+  * [Options](#ntc_config_options)
+  * [Examples](#ntc_config_examples)
+
+### ntc_config_synopsis
+This module writes configuration data to non-API enabled devices, via CLI, using netmiko for SSH connectivity.
+
+### ntc_config_options
+
+| Parameter     | Required | Default | Choices | Comments                                                                                                                                           |
+|---------------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| username      | no       |         |         | Username used to login to the target device                                                                                                        |
+| password      | no       |         |         | Password used to login to the target device                                                                                                        |
+| secret        | no       |         |         | Specify the administrative password to allow ntc_config_command to make changes. On cisco devices, this is the equivalent to the enable password.   |
+| connection    | no       | ssh     | ssh     | Connect to device using netmiko                                                                                                                    |
+| port          | no       | 22      |         | Specify the port for netmiko to SSH to. The default is 22.                                                                                         |
+| platform      | yes      |         |         | Required by netmiko in order to use the proper connection module for the type of device. It follows the same naming scheme as the ntc_show_command |
+| host          | yes      |         |         | IP Address or hostname (resolvable by Ansible control host)                                                                                        |
+| commands      | no       |         |         | Commands should be in a list format. config t isn't needed, as netmiko will automatically enter config mode to execute commands                    |
+| commands_file | no       |         |         | the commands_file option can be very useful if you generate commands based upon the results of a ntc_show_command play.                            |
+
+### ntc_config_examples
+
+Example using the commands option
+```
+# write vlan data
+- ntc_config_command:
+    connection: ssh
+    platform: cisco_ios
+    commands:
+      - vlan 10
+      - name vlan_10
+      - end
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    secret: "{{ secret }}"
+```
+Example using the commands_file option
+```
+# write config from file
+- ntc_config_command:
+    connection: ssh
+    platform: cisco_ios
+    commands_file: "dynamically_created_config.txt"
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    secret: "{{ secret }}"
+```
 ---
 
 
