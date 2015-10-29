@@ -1,12 +1,12 @@
 ---
-- name: test ntc_write_command
+- name: test ntc_config_command
   hosts: cisco_ios 
   connection: local
   gather_facts: False
 
   tasks:
-  - name: execute ntc_write_command module
-    ntc_write_command:
+  - name: execute ntc_config_command module
+    ntc_config_command:
       connection: ssh
       platform: "cisco_ios"
       commands:
