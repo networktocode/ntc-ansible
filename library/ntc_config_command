@@ -16,7 +16,7 @@
 
 DOCUMENTATION = '''
 ---
-module: ntc_write_command
+module: ntc_config_command
 short_description: Writes config data to devices that don't have an API
 description:
     - This module write config data to devices that don't have an API.
@@ -84,7 +84,7 @@ options:
         aliases: []
     secret:
         description:
-            - Password used to login to the target device
+            - Password used to enter a privileged mode on the target device
         required: false
         default: null
         choices: []
@@ -93,7 +93,7 @@ options:
 EXAMPLES = '''
 
 # write vlan data
-- ntc_write_command:
+- ntc_config_command:
     connection: ssh
     platform: cisco_nxos
     commands:
@@ -106,7 +106,7 @@ EXAMPLES = '''
     secret: "{{ secret }}"
 
 # write config from file
-- ntc_write_command:
+- ntc_config_command:
     connection: ssh
     platform: cisco_nxos
     commands_file: "dynamically_created_config.txt"
