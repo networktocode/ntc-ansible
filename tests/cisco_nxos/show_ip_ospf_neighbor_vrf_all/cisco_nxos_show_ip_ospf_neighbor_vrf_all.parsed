@@ -39,6 +39,6 @@ parsed_sample:
     local_ipaddr: "77.77.77.77"
     neighbor_ipaddr: "10.0.0.6"
     ospf_pid: "3333"
-    state: "FULL/ -"
-    uptime: "7w2d"
+    state: "INIT/DROTHER"
+    uptime: "-"
     vrf: "CUSTVRF2"

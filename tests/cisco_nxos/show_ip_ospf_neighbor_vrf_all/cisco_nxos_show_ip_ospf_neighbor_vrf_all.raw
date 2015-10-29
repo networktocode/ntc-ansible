@@ -13,4 +13,4 @@ router1# sh ip ospf neighbors vrf all
  Total number of neighbors: 2
  Neighbor ID     Pri State            Up Time  Address         Interface
  10.0.0.5          1 FULL/ -          7w2d     66.66.66.66     Po3 
- 10.0.0.6          1 FULL/ -          7w2d     77.77.77.77     Po4 
+ 10.0.0.6          1 INIT/DROTHER     -        77.77.77.77     Po4 
