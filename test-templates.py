@@ -70,7 +70,14 @@ if __name__ == "__main__":
                 )
                 results = runner.run()
                 # print json.dumps(results, indent=4)
-                results['response'] = rsp['contacted']['localhost']['response']
+                try:
+                    results['response'] = rsp['contacted']['localhost']['response']
+                except KeyError:
+                    print 'FAILED'
+                    print each
+                    print rsp
+                    sys.exit(1)
+
                 # print rsp.get('response')
                 with_parsed.append(results)
 
