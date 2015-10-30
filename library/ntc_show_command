@@ -218,12 +218,11 @@ def main():
                     device_type=device_type,
                     ip=socket.gethostbyname(host),
                     port=port,
-                    delay_factor=delay,
                     username=username,
                     password=password
                     )
 
-        rawtxt = device.send_command(command)
+        rawtxt = device.send_command(command, delay_factor=delay)
 
     elif connection == 'offline':
         with open(raw_file, 'r') as data:
