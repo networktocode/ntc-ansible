@@ -36,3 +36,4 @@ cisco_nxos_show_mac_address-table.template, .*, cisco_nxos, sh[[ow]] m[[ac]] add
 cisco_ios_show_mac-address-table.template, .*, cisco_ios, sh[[ow]] m[[ac-address-table]]
 cisco_nxos_show_ip_ospf_neighbor_vrf.template, .*, cisco_nxos, sh[[ow]] ip ospf nei[[ghbor]] vrf (\S+)
 cisco_ios_show_snmp_community.template, .*, cisco_ios, sh[[ow]] sn[[mp]] com[[munity]]
+cisco_nxos_show_inventory.template, .*, cisco_nxos, sh[[ow]] inv[[entory]]
