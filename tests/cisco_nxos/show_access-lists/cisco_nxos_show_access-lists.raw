@@ -5,9 +5,6 @@ IP access list acl-test
         40 permit tcp 1.1.1.1/32 range time bgp any
         50 permit tcp 1.1.1.1/32 addrgroup TEST
         60 permit tcp addrgroup TEST-START addrgroup TEST_FINISH
-IPv6 access list copp-system-p-acl-bgp6
-        10 permit tcp any gt 1024 any eq bgp
-        20 permit tcp any eq bgp any gt 1024
 IP access list copp-system-p-acl-eigrp
         10 permit eigrp any any
 IP access list copp-system-p-acl-hsrp
