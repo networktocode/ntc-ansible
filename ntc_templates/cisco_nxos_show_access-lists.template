@@ -1,0 +1,13 @@
+Value Filldown NAME (.*)
+Value Required SN (\d+)
+Value ACTION (\w+)
+Value PROTOCOL ([^any][\w+\d+]+)
+Value SOURCE ([\w+\d+]+\.[\w+\d+]+\.[\w+\d+]+\s[\w+\d+]+\.[\w+\d+]+\.[\w+\d+]+|any|\d+\.\d+\.\d+\.\d+/\d+|addrgroup\s\S+|\S+)
+Value RANGE (\S+\s\S+)
+Value PORT (eq\s\S+|gt\s\S+|lt\s\S+|neq\s\S+)
+Value DESTINATION ([\w+\d+]+\.[\w+\d+]+\.[\w+\d+]+\s[\w+\d+]+\.[\w+\d+]+\.[\w+\d+]+|any|\d+\.\d+\.\d+\.\d+/\d+|addrgroup\s\S+|\S+) 
+Value MODIFIER (.*)
+
+Start
+  ^.*list\s+${NAME} 
+  ^\s+${SN}\s+${ACTION}(\s+${PROTOCOL})*\s+${SOURCE}(\s+${PORT})*(\s+range\s${RANGE})*\s+${DESTINATION}(\s+${MODIFIER})* -> Record
