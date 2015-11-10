@@ -7,4 +7,4 @@ Value YEAR (\d+)
 
 Start
   ^${DAYWEEK}\s+${MONTH}\s+${DAY}\s+${TIME}\s+${YEAR}
-  ^.imezone(:|\sis)\s+${TIMEZONE} -> Record
+  ^[t|T]imezone(:|\sis)\s+${TIMEZONE} -> Record
