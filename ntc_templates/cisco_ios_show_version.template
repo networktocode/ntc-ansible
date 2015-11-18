@@ -1,0 +1,10 @@
+Value UPTIME (.+)
+Value RUNNING_IMAGE (\S+)
+Value HARDWARE (WS-C\S+)
+Value CONFIG_REGISTER (\S+)
+
+Start
+  ^\S+\s+uptime\s+is\s+${UPTIME}
+  ^[sS]ystem\s+image\s+file\s+is\s+".*flash:${RUNNING_IMAGE}"
+  ^[Cc]isco\s+${HARDWARE}.+
+  ^[Cc]onfiguration\s+register\s+is\s+${CONFIG_REGISTER} -> Record
