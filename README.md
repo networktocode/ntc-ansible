@@ -71,12 +71,12 @@ hp-comware_5900
 
 # get vlan data
 - ntc_show_command:
-    connection=ssh
-    platform=cisco_nxos
-    command='show vlan'
-    host={{ inventory_hostname }}
-    username={{ username }}
-    password={{ password }}
+    connection: ssh
+    platform: cisco_nxos
+    command: 'show vlan'
+    host: {{ inventory_hostname }}
+    username: {{ username }}
+    password: {{ password }}
 
 ```
 
