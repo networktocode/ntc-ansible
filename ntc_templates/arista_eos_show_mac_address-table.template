@@ -1,0 +1,19 @@
+Value VLAN (\d+)
+Value MAC (\S+)
+Value TYPE (STATIC|DYNAMIC)
+#Value PORTS (\w+|\w.*\w)
+Value List PORTS (\w+(\s\w+){0,10})
+Value MOVES (\d+)
+Value LAST_MOVE (.*)
+
+Start
+  ^(\s+)*${VLAN}\s+${MAC}\s+${TYPE}\s+${PORTS}\s+${MOVES}\s+${LAST_MOVE} -> Record
+  ^(\s+)*${VLAN}\s+${MAC}\s+${TYPE}\s+${PORTS} -> Record
+  ^\s+Multicast\s+Mac\s+Address\s+Table -> Multicast
+
+Multicast
+  ^(\s+)*\d+\S+ -> Continue.Record
+  ^(\s+)*${VLAN}\s+${MAC}\s+${TYPE}\s+${PORTS} 
+  ^\s+${PORTS} 
+
+

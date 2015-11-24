@@ -51,3 +51,4 @@ arista_eos_show_ip_access-lists.template, .*, arista_eos, sh[[ow]] i[[p]] acce[[
 cisco_nxos_show_lldp_neighbors.template, .*, cisco_nxos, sh[[ow]] ll[[dp]] nei[[ghbors]]
 cisco_ios_show_cdp_neighbors.template, .*, cisco_ios, sh[[ow]] c[[dp]] neig[[hbors]]
 cisco_ios_show_lldp_neighbors.template, .*, cisco_ios, sh[[ow]] lld[[p]] neig[[hbors]]
+arista_eos_show_mac_address-table.template, .*, arista_eos, sh[[ow]] ma[[c]] addr[[ess-table]]
