@@ -1,0 +1,45 @@
+---
+parsed_sample:
+- vlan: "1"
+  mac: "000a.000a.000a"
+  type: "STATIC"
+  ports: ['Et1']
+  moves: ""
+  last_move: ""
+
+- vlan: "3909"
+  mac: "001c.822f.6a80"
+  type: "DYNAMIC"
+  ports: ["Po1"]
+  moves: "1"
+  last_move: "0:07:08 ago"
+
+- vlan: "3912"
+  mac: "001c.822b.033e"
+  type: "DYNAMIC"
+  ports: ["Et11"]
+  moves: "1"
+  last_move: "9 days, 15:57:23 ago"
+
+- vlan: "3992"
+  mac: "001c.8220.1319"
+  type: "DYNAMIC"
+  ports: ["Po1"]
+  moves: ""
+  last_move: ""
+
+- vlan: "3992"
+  mac: "001c.8221.07b9"
+  type: "DYNAMIC"
+  ports: ["Po6"]
+  moves: "1"
+  last_move: "4 days, 15:13:15 ago"
+
+- vlan: "4"
+  mac: "0112.3057.8423"
+  type: "STATIC"
+  ports: ["Et1 Et2 Po1 Po2 Po3 Po4 Po5 Po6 Po7 Po8", "Et19 Et20"]
+  moves: ""
+  last_move: ""
+
+
