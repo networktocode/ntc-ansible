@@ -4,7 +4,7 @@ Value SECURITY_NAME (\S+)
 Value STORAGE_TYPE (\S+)
 
 Start
-  ^Community\sname:\s+${NAME}
+  ^Community\s+name:\s+${NAME}.* -> Record
   ^Community\sIndex:\s+${INDEX}
   ^Community\sSecurityName:\s+${SECURITY_NAME}
   ^storage-type:\s${STORAGE_TYPE} -> Record
