@@ -6,4 +6,5 @@ Value DAY (\d+)
 Value YEAR (\d+)
 
 Start
-  ^${TIME}\s${TIMEZONE}\s${DAYWEEK}\s${MONTH}\s${DAY}\s${YEAR} -> Record 
+  ^[\*]?${TIME}\s${TIMEZONE}\s${DAYWEEK}\s${MONTH}\s${DAY}\s${YEAR} -> Record
+ 
