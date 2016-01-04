@@ -112,6 +112,22 @@ options:
         default: null
         choices: []
         aliases: []
+    use_keys:
+        description:
+            - Option to use ssh keys for login
+        required: false
+        default: false
+        choices: []
+        aliases: []
+    ssh_key_file:
+        description:
+            - Path to ssh key file to use for login
+        required: false
+        default: null
+        choices: []
+        aliases: []
+
+
 
 '''
 EXAMPLES = '''
@@ -124,6 +140,8 @@ EXAMPLES = '''
     host={{ inventory_hostname }}
     username={{ username }}
     password={{ password }}
+    use_keys=false
+    ssh_key_file='/path/to/ssh/key/id_dsa'
 
 '''
 
@@ -173,6 +191,8 @@ def main():
             delay=dict(default=1, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
+            use_keys=dict(required=False),
+            ssh_key_file=dict(required=False),
         ),
         required_together=(
             ['host', 'password', 'username'],
@@ -191,6 +211,8 @@ def main():
     command = module.params['command']
     username = module.params['username']
     password = module.params['password']
+    use_keys = module.params['use_keys']
+    ssh_key_file = module.params['ssh_key_file']
     port = int(module.params['port'])
     delay = int(module.params['delay'])
 
@@ -219,7 +241,9 @@ def main():
                     ip=socket.gethostbyname(host),
                     port=port,
                     username=username,
-                    password=password
+                    password=password,
+                    use_keys=use_keys,
+                    key_file=ssh_key_file,
                     )
 
         rawtxt = device.send_command(command, delay_factor=delay)
