@@ -2,7 +2,7 @@ Value VERSION (\d+\.\d+(.+).*)
 Value HOSTNAME (\S+)
 Value UPTIME (.+)
 Value RUNNING_IMAGE (\S+)
-Value HARDWARE (WS-C\S+)
+Value HARDWARE ((WS-C\S+)|(\d+))
 Value SERIAL (\S+)
 Value CONFIG_REGISTER (\S+)
 
