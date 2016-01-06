@@ -17,17 +17,13 @@
 
 DOCUMENTATION = '''
 ---
-module: ntc_file_copy
-short_description: Copy a file to a remote network device over SCP.
+module: ntc_reboot
+short_description: Reboot a network device.
 description:
-    - Copy a file to the flash (or bootflash) remote network device on supported platforms over SCP.
+    - Reboot a network device, optionally on a timer.
     - Supported platforms: Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 Notes:
-    - On NXOS, the feature must be enabled with feature scp-server.
-    - On IOS and Arista EOS, the user must be at privelege 15.
-    - If the file is already present (md5 sums match), no transfer will take place.
-    - Check mode will tell you if the file would be copied.
-    - The same user credentials are used on the API/SSH channel and the SCP file transfer channel.
+    - The timer is only supported for IOS devices.
 author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
 requirements:
@@ -38,16 +34,16 @@ options:
             - Switch platform
         required: true
         choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios']
-    local_file:
+    timer:
         description:
-            - Path to local file. Local directory must exist.
-        required: true
-    remote_file:
-        description:
-            - Remote file path to be copied to flash. Remote directories must exist.
-              If omitted, the name of the local file will be used.
+            - Time in minutes after which the device will be rebooted.
         required: false
         default: null
+    confirm:
+        description:
+            - Safeguard boolean. Set to true if you're sure you want to reboot.
+        required: false
+        default: false
     host:
         description:
             - Hostame or IP address of switch.
@@ -66,7 +62,7 @@ options:
         required: false
     transport:
         description:
-            - Transport protocol for API-based devices. Not used for actual file transfer.
+            - Transport protocol for API-based devices.
         required: false
         default: https
         choices: ['http', 'https']
@@ -79,9 +75,9 @@ options:
 '''
 
 EXAMPLES = '''
-- ntc_file_copy:
+- ntc_reboot:
     platform: cisco_nxos_nxapi
-    local_file: /path/to/file
+    confirm: true
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
@@ -89,15 +85,15 @@ EXAMPLES = '''
 
 - ntc_file_copy:
     platform: arista_eos_eapi
-    local_file: /path/to/file
-    remote_file: /path/to/remote_file
+    confirm: true
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
 
 - ntc_file_copy:
     platform: cisco_ios
-    local_file: "{{ local_file_1 }}"
+    confirm: true
+    timer: 5
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
@@ -105,24 +101,12 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-transfer_status:
-    description: Whether a file was transfered. "No Transfer" or "Sent".
+rebooted:
+    description: Whether the device was instructed to reboot.
     returned: success
-    type: string
-    sample: 'Sent'
-local_file:
-    description: The path of the local file.
-    returned: success
-    type: string
-    sample: '/path/to/local/file'
-remote_file:
-    description: The path of the remote file.
-    returned: success
-    type: string
-    sample: '/path/to/remote/file'
+    type: boolean
+    sample: true
 '''
-
-import os
 
 try:
     HAS_PYNTC = True
@@ -145,8 +129,8 @@ def main():
         argument_spec=dict(
             platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI],
                           required=True),
-            local_file=dict(required=True),
-            remote_file=dict(required=False),
+            confirm=dict(required=False, default=False, type='bool', choices=BOOLEANS),
+            timer=dict(requred=False, type='int'),
             host=dict(required=True),
             username=dict(required=True, type='str'),
             password=dict(required=True, type='str'),
@@ -154,7 +138,7 @@ def main():
             transport=dict(default='https', choices=['http', 'https']),
             port=dict(required=False, type='int')
         ),
-        supports_check_mode=True
+        supports_check_mode=False
     )
 
     if not HAS_PYNTC:
@@ -169,8 +153,17 @@ def main():
     port = module.params['port']
     secret = module.params['secret']
 
-    local_file = module.params['local_file']
-    remote_file = module.params['remote_file']
+    confirm = module.params['confirm']
+    timer = module.params['timer']
+
+    if not confirm:
+        module.fail_json(msg='confirm must be set to true for this module to work.')
+
+    supported_timer_platforms = [PLATFORM_IOS]
+
+    if timer is not None \
+            and platform not in supported_timer_platforms:
+        module.fail_json(msg='Timer parameter not supported on platform %s.' % platform)
 
     kwargs = {}
     if transport is not None:
@@ -186,32 +179,18 @@ def main():
     device.open()
 
     changed = False
-    transfer_status = 'No Transfer'
-    file_exists = True
+    rebooted = False
 
-    if not os.path.isfile(local_file):
-        module.fail_json(msg="Local file {} not found".format(local_file))
-
-    if remote_file is not None:
-        device.stage_file_copy(local_file, remote_file)
+    if timer is not None:
+        device.reboot(confirm=True, timer=timer)
     else:
-        device.stage_file_copy(local_file)
-        remote_file = os.path.basename(local_file)
+        device.reboot(confirm=True)
 
-    if not device.file_copy_remote_exists():
-        changed = True
-        file_exists = False
-
-    if not module.check_mode and not file_exists:
-        try:
-            device.file_copy()
-            transfer_status = 'Sent'
-        except Exception as e:
-            module.fail_json(msg=str(e))
+    changed = True
+    rebooted = True
 
     device.close()
-
-    module.exit_json(changed=changed, transfer_status=transfer_status, local_file=local_file, remote_file=remote_file)
+    module.exit_json(changed=changed, rebooted=rebooted)
 
 from ansible.module_utils.basic import *
 main()
