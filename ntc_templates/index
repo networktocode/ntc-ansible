@@ -52,3 +52,4 @@ cisco_nxos_show_lldp_neighbors.template, .*, cisco_nxos, sh[[ow]] ll[[dp]] nei[[
 cisco_ios_show_cdp_neighbors.template, .*, cisco_ios, sh[[ow]] c[[dp]] neig[[hbors]]
 cisco_ios_show_lldp_neighbors.template, .*, cisco_ios, sh[[ow]] lld[[p]] neig[[hbors]]
 cisco_ios_show_version.template, .*, cisco_ios, sh[[ow]] ver[[sion]]
+cisco_ios_show_vlan.template, .*, cisco_ios, sh[[ow]] vlan
