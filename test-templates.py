@@ -16,7 +16,7 @@ def compare(list_one, list_two):
 if __name__ == "__main__":
 
 
-    HOSTS = 'hosts'
+    HOSTS = 'test_hosts'
 
     runner = ansible.runner.Runner(
        module_name='get_test_info',
