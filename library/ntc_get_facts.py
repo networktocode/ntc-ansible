@@ -80,11 +80,15 @@ options:
     ntc_host:
         description:
             - The name of a host as specified in an NTC configuration file.
+        required: false
+        default: null
     ntc_conf_file:
         description:
             - The path to a local NTC configuration file. If omitted, and ntc_host is specified,
               the system will look for a file given by the path in the environment variable PYNTC_CONF,
               and then in the users home directory for a file called .ntc.conf.
+        required: false
+        default: null
 '''
 
 EXAMPLES = '''
@@ -168,7 +172,7 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI],
-                          required=True),
+                          required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),

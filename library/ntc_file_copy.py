@@ -76,6 +76,18 @@ options:
               80 for HTTP; 443 for HTTPS; 22 for SSH.
         required: false
         default: null
+    ntc_host:
+        description:
+            - The name of a host as specified in an NTC configuration file.
+        required: false
+        default: null
+    ntc_conf_file:
+        description:
+            - The path to a local NTC configuration file. If omitted, and ntc_host is specified,
+              the system will look for a file given by the path in the environment variable PYNTC_CONF,
+              and then in the users home directory for a file called .ntc.conf.
+        required: false
+        default: null
 '''
 
 EXAMPLES = '''
@@ -86,6 +98,15 @@ EXAMPLES = '''
     username: "{{ username }}"
     password: "{{ password }}"
     transport: http
+
+- ntc_file_copy:
+    ntc_host: n9k1
+    ntc_conf_file: .ntc.conf
+    local_file: /path/to/file
+
+- ntc_file_copy:
+    ntc_host: eos_leaf
+    local_file: /path/to/file
 
 - ntc_file_copy:
     platform: arista_eos_eapi
@@ -126,7 +147,7 @@ import os
 
 try:
     HAS_PYNTC = True
-    from pyntc import ntc_device
+    from pyntc import ntc_device, ntc_device_by_name
 except ImportError:
     HAS_PYNTC = False
 
@@ -140,21 +161,34 @@ platform_to_device_type = {
     PLATFORM_IOS: 'ios',
 }
 
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
             platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI],
-                          required=True),
+                          required=False),
+            host=dict(required=False),
+            username=dict(required=False, type='str'),
+            password=dict(required=False, type='str'),
+            secret=dict(required=False),
+            transport=dict(required=False, default='https', choices=['http', 'https']),
+            port=dict(required=False, type='int'),
+            ntc_host=dict(required=False),
+            ntc_conf_file=dict(required=False),
             local_file=dict(required=True),
             remote_file=dict(required=False),
-            host=dict(required=True),
-            username=dict(required=True, type='str'),
-            password=dict(required=True, type='str'),
-            secret=dict(required=False),
-            transport=dict(default='https', choices=['http', 'https']),
-            port=dict(required=False, type='int')
         ),
-        supports_check_mode=True
+        mutually_exclusive=[['host', 'ntc_host'],
+                            ['ntc_host', 'secret'],
+                            ['ntc_host', 'transport'],
+                            ['ntc_host', 'port'],
+                            ['ntc_conf_file', 'secret'],
+                            ['ntc_conf_file', 'transport'],
+                            ['ntc_conf_file', 'port'],
+                           ],
+        required_one_of=[['host', 'ntc_host']],
+        required_together=[['host', 'username', 'password', 'platform']],
+        supports_check_mode=False
     )
 
     if not HAS_PYNTC:
@@ -165,23 +199,29 @@ def main():
     username = module.params['username']
     password = module.params['password']
 
+    ntc_host = module.params['ntc_host']
+    ntc_conf_file = module.params['ntc_conf_file']
+
     transport = module.params['transport']
     port = module.params['port']
     secret = module.params['secret']
 
+    if ntc_host is not None:
+        device = ntc_device_by_name(ntc_host, ntc_conf_file)
+    else:
+        kwargs = {}
+        if transport is not None:
+            kwargs['transport'] = transport
+        if port is not None:
+            kwargs['port'] = port
+        if secret is not None:
+            kwargs['secret'] = secret
+
+        device_type = platform_to_device_type[platform]
+        device = ntc_device(device_type, host, username, password, **kwargs)
+
     local_file = module.params['local_file']
     remote_file = module.params['remote_file']
-
-    kwargs = {}
-    if transport is not None:
-        kwargs['transport'] = transport
-    if port is not None:
-        kwargs['port'] = port
-    if secret is not None:
-        kwargs['secret'] = secret
-
-    device_type = platform_to_device_type[platform]
-    device = ntc_device(device_type, host, username, password, **kwargs)
 
     device.open()
 
