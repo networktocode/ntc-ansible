@@ -133,6 +133,50 @@ Example using the commands_file option
     password: "{{ password }}"
     secret: "{{ secret }}"
 ```
+
+## ntc System Modules
+
+In addition to ``ntc_show_command`` and ``ntc_config_command``, these system feature modules are available:
+
+- ntc_save_config (Save the running config and optionally pull it down for local use.)
+- ntc_file_copy (Copy a file to your network device.)
+- ntc_reboot (Reboot your network device.)
+- ntc_get_facts (Get facts about your network device.)
+
+These modules take traditional device connection parameters (platform, host, username, password, transport, secret, port), but can also point to an ``ntc_host`` in an NTC configuration file. The configuration file path can be supplied with ``ntc_conf_file``, or can be omitted. If omitted, the env variable ``PYTNC_CONF`` will be checked, and then ``~/.ntc.conf``.
+
+In this file, each section is headed with a line ``[<device_type>:<ntc_host>]``.
+
+Sample ntc configuration file:
+```
+[nxos:n9k1]
+host: 1.1.1.1
+username: ntc
+password: ntc123
+transport: https
+port: 8443
+
+[eos:spine1]
+host: 2.2.2.2
+username: admin
+password: arista
+transport: https
+
+[eos:veos]
+host: 3.3.3.3
+username: ntc
+password: ntc123
+transport: https
+
+[ios:c3560]
+host: 4.4.4.4
+username: cisco
+password: !cisco123!
+secret: cisco
+port: 22
+```
+
+
 ---
 
 

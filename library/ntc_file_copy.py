@@ -188,7 +188,7 @@ def main():
                            ],
         required_one_of=[['host', 'ntc_host']],
         required_together=[['host', 'username', 'password', 'platform']],
-        supports_check_mode=False
+        supports_check_mode=True
     )
 
     if not HAS_PYNTC:
