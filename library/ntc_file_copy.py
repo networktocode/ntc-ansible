@@ -22,7 +22,7 @@ short_description: Copy a file to a remote network device over SCP.
 description:
     - Copy a file to the flash (or bootflash) remote network device on supported platforms over SCP.
     - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
-Notes:
+notes:
     - On NXOS, the feature must be enabled with feature scp-server.
     - On IOS and Arista EOS, the user must be at privelege 15.
     - If the file is already present (md5 sums match), no transfer will take place.

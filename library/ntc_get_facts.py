@@ -23,8 +23,7 @@ description:
     - Reboot a network device, optionally on a timer.
     - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 notes:
-    - Facts to be returned: uptime (string), uptime (seconds), model, vendor,
-      os_version, serial_number, hostname, fqdn, vlans, interfaces
+    - Facts to be returned: uptime (string), uptime (seconds), model, vendor, os_version, serial_number, hostname, fqdn, vlans, interfaces.
 author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
 requirements:
