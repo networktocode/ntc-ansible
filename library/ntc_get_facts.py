@@ -126,29 +126,30 @@ facts:
     returned: success
     type: dictionary
     sample: {
-    "uptime_string": "00:00:21:53",
-    "uptime": 1313,
-    "vlans": [
-        "1",
-        "2",
-        "3",
-        "4",
-    ],
-    "vendor": "cisco",
-    "os_version": "7.0(3)I2(1)",
-    "serial_number": "SAL1819S6LU",
-    "model": "Nexus9000 C9396PX Chassis",
-    "hostname": "N9K1",
-    "fqdn": "N/A"
-    "interfaces": [
-        "mgmt0",
-        "Ethernet1/1",
-        "Ethernet1/2",
-        "Ethernet1/3",
-        "Ethernet1/4",
-        "Ethernet1/5",
-        "Ethernet1/6",
-    ]
+        "uptime_string": "00:00:21:53",
+        "uptime": 1313,
+        "vlans": [
+            "1",
+            "2",
+            "3",
+            "4",
+        ],
+        "vendor": "cisco",
+        "os_version": "7.0(3)I2(1)",
+        "serial_number": "SAL1819S6LU",
+        "model": "Nexus9000 C9396PX Chassis",
+        "hostname": "N9K1",
+        "fqdn": "N/A"
+        "interfaces": [
+            "mgmt0",
+            "Ethernet1/1",
+            "Ethernet1/2",
+            "Ethernet1/3",
+            "Ethernet1/4",
+            "Ethernet1/5",
+            "Ethernet1/6",
+        ]
+    }
 }
 '''
 
