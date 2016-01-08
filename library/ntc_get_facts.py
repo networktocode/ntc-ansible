@@ -21,7 +21,7 @@ module: ntc_get_facts
 short_description: Get facts about a remote network device.
 description:
     - Reboot a network device, optionally on a timer.
-    - Supported platforms: Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
+    - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 notes:
     - Facts to be returned:
         - uptime (string)

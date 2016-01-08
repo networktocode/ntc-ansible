@@ -21,7 +21,7 @@ module: ntc_reboot
 short_description: Reboot a network device.
 description:
     - Reboot a network device, optionally on a timer.
-    - Supported platforms: Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
+    - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 Notes:
     - The timer is only supported for IOS devices.
 author: Jason Edelman (@jedelman8)
