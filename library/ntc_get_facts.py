@@ -139,7 +139,7 @@ facts:
         "serial_number": "SAL1819S6LU",
         "model": "Nexus9000 C9396PX Chassis",
         "hostname": "N9K1",
-        "fqdn": "N/A"
+        "fqdn": "N/A",
         "interfaces": [
             "mgmt0",
             "Ethernet1/1",
