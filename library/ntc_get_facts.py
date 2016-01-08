@@ -228,7 +228,7 @@ def main():
     facts = device.facts
     device.close()
 
-    module.exit_json(facts=facts)
+    module.exit_json(ansible_facts=facts)
 
 from ansible.module_utils.basic import *
 main()
