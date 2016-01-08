@@ -150,7 +150,6 @@ facts:
             "Ethernet1/6",
         ]
     }
-}
 '''
 
 try:
