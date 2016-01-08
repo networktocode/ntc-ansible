@@ -24,6 +24,7 @@ description:
     - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 notes:
     - Facts to be returned include - uptime (string), uptime (seconds), model, vendor, os_version, serial_number, hostname, fqdn, vlans, interfaces.
+    - Facts are automatically added to Ansible facts environment. No need to register them.
 author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
 requirements:
@@ -111,26 +112,61 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-facts:
-    description: Dictionary of facts
+uptime_string:
+    description: The device uptime represented as a string format DD:HH:MM:SS.
     returned: success
-    type: dictionary
-    sample: {
-        "uptime_string": "00:00:21:53",
-        "uptime": 1313,
-        "vlans": [
+    type: string
+    sample: "00:00:21:53"
+uptime:
+    description: The device uptime represented as an integer number of strings.
+    returned: success
+    type: int
+    sample: 1313
+vlans:
+    description: List of VLAN IDs.
+    returned: success
+    type: List
+    sample: [
             "1",
             "2",
             "3",
             "4",
-        ],
-        "vendor": "cisco",
-        "os_version": "7.0(3)I2(1)",
-        "serial_number": "SAL1819S6LU",
-        "model": "Nexus9000 C9396PX Chassis",
-        "hostname": "N9K1",
-        "fqdn": "N/A",
-        "interfaces": [
+        ]
+vendor:
+    description: Vendor of network device.
+    returned: success
+    type: string
+    sample: "cisco"
+os_version:
+    description: Operating System version on network device.
+    returned: success
+    type: string
+    sample: "7.0(3)I2(1)"
+serial_number:
+    description: Serial number on network device.
+    returned: success
+    type: string
+    sample: "SAL1819S6LU"
+model:
+    description: Hardware model of network device.
+    returned: success
+    type: string
+    sample: "Nexus9000 C9396PX Chassis"
+hostname:
+    description: Hostname of network device.
+    returned: success
+    type: string
+    sample: "N9K1"
+fqdn:
+    description: Fully-qualified domain name.
+    returned: success
+    type: string
+    sample: "N9K1.ntc.com"
+interfaces:
+    description: List of interfaces.
+    returned: success
+    type: list
+    sample: [
             "mgmt0",
             "Ethernet1/1",
             "Ethernet1/2",
@@ -138,8 +174,7 @@ facts:
             "Ethernet1/4",
             "Ethernet1/5",
             "Ethernet1/6",
-        ]
-    }
+    ]
 '''
 
 try:
