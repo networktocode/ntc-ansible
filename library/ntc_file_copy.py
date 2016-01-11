@@ -232,24 +232,21 @@ def main():
     if not os.path.isfile(local_file):
         module.fail_json(msg="Local file {} not found".format(local_file))
 
-    if remote_file is not None:
-        device.stage_file_copy(local_file, remote_file)
-    else:
-        device.stage_file_copy(local_file)
-        remote_file = os.path.basename(local_file)
-
-    if not device.file_copy_remote_exists():
+    if not device.file_copy_remote_exists(local_file, remote_file):
         changed = True
         file_exists = False
 
     if not module.check_mode and not file_exists:
         try:
-            device.file_copy()
+            device.file_copy(local_file, remote_file)
             transfer_status = 'Sent'
         except Exception as e:
             module.fail_json(msg=str(e))
 
     device.close()
+
+    if remote_file is None:
+        remote_file = os.path.basename(local_file)
 
     module.exit_json(changed=changed, transfer_status=transfer_status, local_file=local_file, remote_file=remote_file)
 
