@@ -69,7 +69,7 @@ options:
         description:
             - Transport protocol for API-based devices.
         required: false
-        default: https
+        default: null
         choices: ['http', 'https']
     port:
         description:
@@ -155,7 +155,7 @@ def main():
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
             secret=dict(required=False),
-            transport=dict(required=False, default='https', choices=['http', 'https']),
+            transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),

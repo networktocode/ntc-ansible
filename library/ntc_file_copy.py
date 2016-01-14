@@ -68,7 +68,7 @@ options:
         description:
             - Transport protocol for API-based devices. Not used for actual file transfer.
         required: false
-        default: https
+        default: null
         choices: ['http', 'https']
     port:
         description:
@@ -98,16 +98,13 @@ EXAMPLES = '''
     username: "{{ username }}"
     password: "{{ password }}"
     transport: http
-
 - ntc_file_copy:
     ntc_host: n9k1
     ntc_conf_file: .ntc.conf
     local_file: /path/to/file
-
 - ntc_file_copy:
     ntc_host: eos_leaf
     local_file: /path/to/file
-
 - ntc_file_copy:
     platform: arista_eos_eapi
     local_file: /path/to/file
@@ -115,7 +112,6 @@ EXAMPLES = '''
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
-
 - ntc_file_copy:
     platform: cisco_ios
     local_file: "{{ local_file_1 }}"
@@ -171,7 +167,7 @@ def main():
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
             secret=dict(required=False),
-            transport=dict(required=False, default='https', choices=['http', 'https']),
+            transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),

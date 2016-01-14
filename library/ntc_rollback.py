@@ -17,16 +17,15 @@
 
 DOCUMENTATION = '''
 ---
-module: ntc_save_config
-short_description: Save the running config locally and/or remotely.
+module: ntc_rollback
+short_description: Set a checkpoint or rollback to a checkpoint
 description:
-    - Save the running configuration as the startup configuration or to a file on the network device.
-      Optionally, save the running configuration to this computer.
+    - This module offers the ability to set a configuration checkpoint file or rollback
+      to a configuration checkpoint file on supported Cisco or Arista switches.
     - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 notes:
     - This module is not idempotent.
 author: Jason Edelman (@jedelman8)
-version_added: 1.9.2
 requirements:
     - pyntc
 options:
@@ -35,15 +34,14 @@ options:
             - Vendor and platform identifier.
         required: true
         choices: ['cisco_nxos_nxapi', 'cisco_ios', 'arista_eos_eapi']
-    remote_file:
+    checkpoint_file:
         description:
-            - Name of remote file to save the running configuration. If omitted it will be
-              saved to the startup configuration.
+            - Name of checkpoint file to create. Mutually exclusive with rollback_to.
         required: false
         default: null
-    local_file:
+    rollback_to:
         description:
-            - Name of local file to save the running configuration. If omitted it won't be locally saved.
+            - Name of checkpoint file to rollback to. Mutually exclusive with checkpoint_file.
         required: false
         default: null
     host:
@@ -90,50 +88,26 @@ options:
 '''
 
 EXAMPLES = '''
-- ntc_save_config:
-    platform: cisco_nxos_nxapi
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+- ntc_rollback:
+    ntc_host: eos1
+    checkpoint_file: backup.cfg
 
-- ntc_save_config:
-    ntc_host: n9k1
-
-- ntc_save_config:
-    platform: arista_eos_eapi
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-    remote_file: running_config_copy.cfg
-    transport: https
-
-# You can get the timestamp by setting get_facts to True, then you can append it to your filename.
-
-- ntc_save_config:
-    platform: cisco_ios
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-    local_file: config_{{ inventory_hostname }}_{{ ansible_date_time.date | replace('-','_') }}.cfg
+- ntc_rollback:
+    ntc_host: eos1
+    rollback_to: backup.cfg
 '''
 
 RETURN = '''
-local_file:
-    description: The local file path of the saved running config.
+filename:
+    description: The filename of the checkpoint/rollback file.
     returned: success
     type: string
-    sample: '/path/to/config.cfg'
-remote_file:
-    description: The remote file name of the saved running config.
+    sample: 'backup.cfg'
+status:
+    description: Which operation took place and whether it was successful.
     returned: success
     type: string
-    sample: 'config_backup.cfg'
-remote_save_successful:
-    description: Whether the remote save was successful.
-        May be false if a remote save was unsuccessful because a file with same name already exists.
-    returned: success
-    type: bool
-    sample: true
+    sample: 'rollback executed'
 '''
 
 try:
@@ -165,8 +139,8 @@ def main():
             port=dict(required=False, type='int'),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
-            remote_file=dict(required=False),
-            local_file=dict(required=False),
+            checkpoint_file=dict(required=False),
+            rollback_to=dict(required=False),
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -175,6 +149,7 @@ def main():
                             ['ntc_conf_file', 'secret'],
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
+                            ['checkpoint_file', 'rollback_to'],
                            ],
         required_one_of=[['host', 'ntc_host']],
         required_together=[['host', 'username', 'password', 'platform']],
@@ -210,25 +185,28 @@ def main():
         device_type = platform_to_device_type[platform]
         device = ntc_device(device_type, host, username, password, **kwargs)
 
-    remote_file = module.params['remote_file']
-    local_file = module.params['local_file']
+    checkpoint_file = module.params['checkpoint_file']
+    rollback_to = module.params['rollback_to']
 
     device.open()
 
-    if remote_file:
-        remote_save_successful = device.save(remote_file)
-    else:
-        remote_save_successful = device.save()
-
-    changed = remote_save_successful
-    if local_file:
-        device.backup_running_config(local_file)
+    status = None
+    filename = None
+    changed = False
+    try:
+        if checkpoint_file:
+            device.checkpoint(checkpoint_file)
+            status = 'checkpoint file created'
+        elif rollback_to:
+            device.rollback(rollback_to)
+            status = 'rollback executed'
         changed = True
+        filename = rollback_to or checkpoint_file
+    except Exception as e:
+        module.fail_json(msg=str(e))
 
     device.close()
-
-    remote_file = remote_file or '(Startup Config)'
-    module.exit_json(changed=changed, remote_save_successful=remote_save_successful, remote_file=remote_file, local_file=local_file)
+    module.exit_json(changed=changed, status=status, filename=filename)
 
 from ansible.module_utils.basic import *
 main()
