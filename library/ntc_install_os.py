@@ -25,7 +25,10 @@ description:
 notes:
     - Do not include full file paths, just the name of the file(s) stored on the top level flash directory.
     - You must know if your platform supports taking a kickstart image as a parameter. If supplied but not supported, errors may occur.
+    - It may be useful to use this module in conjuction with ntc_file_copy and ntc_reboot.
     - With NXOS devices, this module attempts to install the software immediately, wich may trigger a reboot.
+    - With NXOS devices, install process may take up to 10 minutes, especially if the device reboots.
+    - Tested on Nexus 3000, 5000, 9000.
     - In check mode, the module tells you if the current boot images are set to the desired images.
 author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
@@ -39,7 +42,7 @@ options:
         choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios']
     system_image_file:
         description:
-            - Name of the boot image file on flash.
+            - Name of the system (or combined) image file on flash.
         required: true
     kickstart_image_file:
         description:
@@ -89,11 +92,35 @@ options:
 '''
 
 EXAMPLES = '''
+- ntc_install_os:
+    ntc_host: n9k1
+    system_image_file: n9000-dk9.6.1.2.I3.1.bin
 
+- ntc_install_os:
+    ntc_host: n3k1
+    system_image_file: n3000-uk9.6.0.2.U6.5.bin
+    kickstart_image_file: n3000-uk9-kickstart.6.0.2.U6.5.bin
+
+- ntc_install_os:
+    ntc_host: c2801
+    system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
 '''
 
 RETURN = '''
-
+install_state:
+    returned: always
+    type: dictionary
+    sample: {
+        "kick": "n5000-uk9-kickstart.7.2.1.N1.1.bin",
+        "sys": "n5000-uk9.7.2.1.N1.1.bin",
+        "status": "This is the log of last installation.\n
+            Continuing with installation process, please wait.\n
+            The login will be disabled until the installation is completed.\n
+            Performing supervisor state verification. \n
+            SUCCESS\n
+            Supervisor non-disruptive upgrade successful.\n
+            Install has been successful.\n",
+    }
 '''
 
 import time

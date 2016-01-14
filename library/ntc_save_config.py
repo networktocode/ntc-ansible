@@ -22,7 +22,7 @@ short_description: Save the running config locally and/or remotely.
 description:
     - Save the running configuration as the startup configuration or to a file on the network device.
       Optionally, save the running configuration to this computer.
-    - Supported platforms include Cisco Nexus switches with NX-API; Arista switches with eAPI.
+    - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 notes:
     - This module is not idempotent.
 author: Jason Edelman (@jedelman8)
