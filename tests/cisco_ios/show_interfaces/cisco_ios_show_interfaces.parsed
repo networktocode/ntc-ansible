@@ -2,6 +2,7 @@
 parsed_sample:
 
 - address: fa16.3e57.336f
+  ip_address: ''
   bandwidth: 1000000 Kbit
   bia: fa16.3e57.336f
   delay: 10 usec
@@ -15,6 +16,7 @@ parsed_sample:
   queue_strategy: fifo
 
 - address: fa16.3e4f.41cc
+  ip_address: ''
   bandwidth: 1000000 Kbit
   bia: fa16.3e4f.41cc
   delay: 10 usec
@@ -28,6 +30,7 @@ parsed_sample:
   queue_strategy: fifo
 
 - address: fa16.3ea3.3e49
+  ip_address: ''
   bandwidth: 1000000 Kbit
   bia: fa16.3ea3.3e49
   delay: 10 usec
@@ -41,6 +44,7 @@ parsed_sample:
   queue_strategy: fifo
 
 - address: fa16.3e31.2c47
+  ip_address: ''
   bandwidth: 1000000 Kbit
   bia: fa16.3e31.2c47
   delay: 10 usec
@@ -54,6 +58,7 @@ parsed_sample:
   queue_strategy: fifo
 
 - address: fa16.3ec8.50ab
+  ip_address: ''
   bandwidth: 1000000 Kbit
   bia: fa16.3ec8.50ab
   delay: 10 usec
@@ -67,6 +72,7 @@ parsed_sample:
   queue_strategy: fifo
 
 - address: fa16.3e4f.41cc
+  ip_address: ''
   bandwidth: 100000 Kbit
   bia: fa16.3e4f.41cc
   delay: 100 usec
@@ -80,6 +86,7 @@ parsed_sample:
   queue_strategy: fifo
 
 - address: ''
+  ip_address: ''
   bandwidth: 8000000 Kbit
   bia: ''
   delay: 5000 usec
@@ -93,6 +100,7 @@ parsed_sample:
   queue_strategy: fifo
 
 - address: fa16.3e57.8001
+  ip_address: 10.255.0.16/16
   bandwidth: 1000000 Kbit
   bia: fa16.3e57.8001
   delay: 10 usec
