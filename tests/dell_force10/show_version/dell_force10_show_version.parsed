@@ -1,6 +1,7 @@
 ---
 
 parsed_sample:
-  - os_version: "9.9(0.0)"
-    uptime: '1 week(s), 2 day(s), 9 hour(s), 5 minute(s)''
-    status: S4820T
+
+- os_version: "9.9(0.0)"
+  uptime: '1 week(s), 2 day(s), 9 hour(s), 5 minute(s)'
+  status: S4820T
