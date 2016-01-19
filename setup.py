@@ -11,7 +11,7 @@ setup(
   download_url='https://github.com/networktocode/ntc-ansible/tarball/0.1.0',
   install_requires=[
       'pynxos',
-      'pyntc',,
+      'pyntc',
       'netmiko'
   ],
 )
