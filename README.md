@@ -1,186 +1,34 @@
 [![Build Status](https://travis-ci.org/networktocode/ntc-ansible.svg?branch=master)](https://travis-ci.org/networktocode/ntc-ansible)
 
-# Ansible Modules for Network Automation
-### *And even get structured data back from CLI devices!*
+Docs currently being updated.
 
----
-### Requirements
-* netmiko
-* TextFSM (https://code.google.com/p/textfsm/)
-* terminal
+# Multi-vendor Ansible Modules for Network Automation
 
----
+### Dependencies
+
+To install the dependencies:
+
+```
+pip install ntc-ansible
+```
+
+
 ### Modules
 
-  * [ntc_show_command - gets config data from devices that don't have an api](#ntc_show_command)
-  * [ntc_config_command - writes config data to devices that don't have an api](#ntc_config_command)
-
----
-
-## ntc_show_command
-Gets config data from devices that don't have an API
-
-  * [Synopsis](#synopsis)
-  * [``platform`` Naming Convention](#platform-naming-convention)
-  * [Options](#options)
-  * [Examples](#examples)
-
-#### Synopsis
-This module offers structured data for CLI enabled devices by using the TextFSM library for templating and netmiko for SSH connectivity.
-
-#### ``platform`` Naming Convention
-The ``platform`` parameter given to the modules should be of the form:``<netmiko_device_type>[-<hardware_type>]``.
-In plain English, that means it should start with a supported ``netmiko`` device type, followed by an optional hyphen
-and arbitrary hardware specific identifier.
-
-Valid ``platform`` names:
-```
-cisco_ios-c3k
-cisco_ios-c6k
-cisco_ios
-cisco_nxos
-hp_comware
-```
-
-Invalid ``platform`` names:
-```
-cisco-ios-c3k
-csco_ios
-hp-comware_5900
-```
-
-#### Options
-
-| Parameter     | required    | default  | choices    | comments |
-| ------------- |-------------| ---------|----------- |--------- |
-| username  |   no  |  | <ul></ul> |  Username used to login to the target device  |
-| platform  |   yes  |  ssh  | <ul></ul> |  Platform FROM the index file  |
-| template_dir  |   no  |  ntc_templates  | <ul></ul> |  path where TextFSM templates are stored. Default path is ntc with ntc in the same working dir as the playbook being run  |
-| host  |   no  |  | <ul></ul> |  IP Address or hostname (resolvable by Ansible control host)  |
-| connection  |   no  |  ssh  | <ul> <li>ssh</li>  <li>offline</li> </ul> |  connect to device using netmiko or read from offline file for testing  |
-| command  |   yes  |  | <ul></ul> |  Command to execute on target device  |
-| file  |   no  |  | <ul></ul> |  If using connection=offline, this is the file (with path) of a file that contains raw text output, i.e. 'show command' and then the contents of the file will be rendered with the the TextFSM template  |
-| password  |   no  |  | <ul></ul> |  Password used to login to the target device  |
-| index_file  |   no  |  index  | <ul></ul> |  name of index file.  file location must be relative to the template_dir  |
-| port | no | 22 | <ul></ul> | specify an alternative ssh port |
-| delay | no | 1 | <ul></ul> | wait for command output from a target device |
-
-#### Examples
-
-```
-
-# get vlan data
-- ntc_show_command:
-    connection=ssh
-    platform=cisco_nxos
-    command='show vlan'
-    host={{ inventory_hostname }}
-    username={{ username }}
-    password={{ password }}
-
-```
-
-## ntc_config_command
-Writes config data to devices that don't have an API
-
-  * [Synopsis](#ntc_config_synopsis)
-  * [Options](#ntc_config_options)
-  * [Examples](#ntc_config_examples)
-
-### ntc_config_synopsis
-This module writes configuration data to non-API enabled devices, via CLI, using netmiko for SSH connectivity.
-
-### ntc_config_options
-
-| Parameter     | Required | Default | Choices | Comments                                                                                                                                           |
-|---------------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| username      | no       |         |         | Username used to login to the target device                                                                                                        |
-| password      | no       |         |         | Password used to login to the target device                                                                                                        |
-| secret        | no       |         |         | Specify the administrative password to allow ntc_config_command to make changes. On cisco devices, this is the equivalent to the enable password.   |
-| connection    | no       | ssh     | ssh     | Connect to device using netmiko                                                                                                                    |
-| port          | no       | 22      |         | Specify the port for netmiko to SSH to. The default is 22.                                                                                         |
-| platform      | yes      |         |         | Required by netmiko in order to use the proper connection module for the type of device. It follows the same naming scheme as the ntc_show_command |
-| host          | yes      |         |         | IP Address or hostname (resolvable by Ansible control host)                                                                                        |
-| commands      | no       |         |         | Commands should be in a list format. config t isn't needed, as netmiko will automatically enter config mode to execute commands                    |
-| commands_file | no       |         |         | the commands_file option can be very useful if you generate commands based upon the results of a ntc_show_command play.                            |
-
-### ntc_config_examples
-
-Example using the commands option
-```
-# write vlan data
-- ntc_config_command:
-    connection: ssh
-    platform: cisco_ios
-    commands:
-      - vlan 10
-      - name vlan_10
-      - end
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-    secret: "{{ secret }}"
-```
-Example using the commands_file option
-```
-# write config from file
-- ntc_config_command:
-    connection: ssh
-    platform: cisco_ios
-    commands_file: "dynamically_created_config.txt"
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-    secret: "{{ secret }}"
-```
-
-## ntc System Modules
-
-In addition to ``ntc_show_command`` and ``ntc_config_command``, these system feature modules are available:
-
-- ntc_save_config (Save the running config and optionally pull it down for local use.)
-- ntc_file_copy (Copy a file to your network device.)
-- ntc_reboot (Reboot your network device.)
-- ntc_get_facts (Get facts about your network device.)
-
-These modules take traditional device connection parameters (platform, host, username, password, transport, secret, port), but can also point to an ``ntc_host`` in an NTC configuration file. The configuration file path can be supplied with ``ntc_conf_file``, or can be omitted. If omitted, the env variable ``PYTNC_CONF`` will be checked, and then ``~/.ntc.conf``.
-
-In this file, each section is headed with a line ``[<device_type>:<ntc_host>]``.
-
-Sample ntc configuration file:
-```
-[nxos:n9k1]
-host: 1.1.1.1
-username: ntc
-password: ntc123
-transport: https
-port: 8443
-
-[eos:spine1]
-host: 2.2.2.2
-username: admin
-password: arista
-transport: https
-
-[eos:veos]
-host: 3.3.3.3
-username: ntc
-password: ntc123
-transport: https
-
-[ios:c3560]
-host: 4.4.4.4
-username: cisco
-password: !cisco123!
-secret: cisco
-port: 22
-```
+  * ntc_show_command - gets structured data from devices that don't have an API.  This module uses SSH to connect to devices.  Supports as many device types as netmiko supports.
+  * ntc_config_command - sends commands to devices that don't have an API.  This module uses SSH to connect to devices.  Supports as many device types as netmiko supports.
+  * ntc_save_config - saves the running config and optionally copies it to the Ansible control host for an offline backup.  Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
+  * ntc_file_copy - copies a file from the Ansible control host to a network device. Uses SSH for IOS, NX-API for Nexus, and eAPI for Arista.
+  * ntc_reboot - reboots a network device. Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
+  * ntc_get_facts - gathers facts from a network device.  Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
+  * ntc_rollback - performs two major functions.  (1) Creates a checkpoint file or backup running config on box. (2) Rolls back to the previously created checkpoint/backup config.  Use case is to create the checkpoint/backup as the first task in a playbook and then rollback to it _if_ needed using block/rescue, i.e. try/except in Ansible. Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
+  * ntc_install_os - installs a new operating system or just sets boot options.  Depends on platform.  Does not issue a "reload" command, but the device may perform an automatic reboot.  Common workflow is to use ntc_file_copy, ntc_install_os, and then ntc_reboot (if needed) for upgrades.  Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
 
 
----
+### Documentation
 
+Add link for docs.
 
----
-Created by Network to Code, LLC
-For:
-2015
+### Examples
+
+See [Examples](examples.md)

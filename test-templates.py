@@ -3,18 +3,17 @@
 import ansible.runner
 import json
 import sys
-import os
+
 
 def compare(list_one, list_two):
     msg = ''
     for el in list_one:
         if el not in list_two:
             msg = str(el) + " is not found in sample input"
-            return 1,msg
-    return 0,msg
+            return 1, msg
+    return 0, msg
 
 if __name__ == "__main__":
-
 
     HOSTS = 'test_hosts'
 
@@ -29,7 +28,6 @@ if __name__ == "__main__":
 
     tests = results['contacted']['localhost']['tests']
 
-
     responses = []
     for test_case in tests:
         filepath = test_case.get('path')
@@ -40,10 +38,10 @@ if __name__ == "__main__":
         args = dict(file=filepath + '/' + rawfile, platform=platform,
                     command=command, connection='offline')
         runner = ansible.runner.Runner(
-        module_name='ntc_show_command',
-        module_args=args,
-        pattern='localhost',
-        host_list=HOSTS
+            module_name='ntc_show_command',
+            module_args=args,
+            pattern='localhost',
+            host_list=HOSTS
         )
         results = runner.run()
 
@@ -86,12 +84,15 @@ if __name__ == "__main__":
     failed = False
 
     for each in with_parsed:
+        print '****'
+        print each
+        print '****'
         text = each['contacted']['localhost']['invocation']['module_args']
         command = text.split('/')[-1].split('.')[0]
         parsed_sample = each['contacted']['localhost']['ansible_facts']['parsed_sample']
         result = each['response']
 
-        rc,msg = compare(result, parsed_sample)
+        rc, msg = compare(result, parsed_sample)
 
         print command
         if rc != 0:
