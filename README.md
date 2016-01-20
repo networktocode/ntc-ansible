@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/networktocode/ntc-ansible.svg?branch=master)](https://travis-ci.org/networktocode/ntc-ansible)
 
-Docs currently being updated.  
+Docs currently being updated.
 
 # Multi-vendor Ansible Modules for Network Automation
 
@@ -27,7 +27,7 @@ pip install ntc-ansible
 
 ### Documentation
 
-Add link for docs. 
+Add link for docs.
 
 ### Examples
 

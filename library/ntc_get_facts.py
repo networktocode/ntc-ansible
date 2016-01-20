@@ -21,19 +21,10 @@ module: ntc_get_facts
 short_description: Get facts about a remote network device.
 description:
     - Reboot a network device, optionally on a timer.
-    - Supported platforms: Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
+    - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 notes:
-    - Facts to be returned:
-        - uptime (string)
-        - uptime (seconds)
-        - model
-        - vendor
-        - os_version
-        - serial_number
-        - hostname
-        - fqdn
-        - vlans
-        - interfaces
+    - Facts to be returned include - uptime (string), uptime (seconds), model, vendor, os_version, serial_number, hostname, fqdn, vlans, interfaces.
+    - Facts are automatically added to Ansible facts environment. No need to register them.
 author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
 requirements:
@@ -42,34 +33,51 @@ options:
     platform:
         description:
             - Switch platform
-        required: true
+        required: false
+        default: null
         choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios']
     host:
         description:
             - Hostame or IP address of switch.
-        required: true
+        required: false
+        default: null
     username:
         description:
             - Username used to login to the target device
-        required: true
+        required: false
+        default: null
     password:
         description:
             - Password used to login to the target device
-        required: true
+        required: false
+        default: null
     secret:
         description:
             - Enable secret for devices connecting over SSH.
         required: false
+        default: null
     transport:
         description:
             - Transport protocol for API-based devices.
         required: false
-        default: https
+        default: null
         choices: ['http', 'https']
     port:
         description:
             - TCP/UDP port to connect to target device. If omitted standard port numbers will be used.
               80 for HTTP; 443 for HTTPS; 22 for SSH.
+        required: false
+        default: null
+    ntc_host:
+        description:
+            - The name of a host as specified in an NTC configuration file.
+        required: false
+        default: null
+    ntc_conf_file:
+        description:
+            - The path to a local NTC configuration file. If omitted, and ntc_host is specified,
+              the system will look for a file given by the path in the environment variable PYNTC_CONF,
+              and then in the users home directory for a file called .ntc.conf.
         required: false
         default: null
 '''
@@ -81,6 +89,13 @@ EXAMPLES = '''
     username: "{{ username }}"
     password: "{{ password }}"
     transport: http
+
+- ntc_get_facts:
+    ntc_host: n9k1
+    ntc_conf_file: .ntc.conf
+
+- ntc_get_facts:
+    ntc_host: eos_leaf
 
 - ntc_get_facts:
     platform: arista_eos_eapi
@@ -97,40 +112,74 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-facts:
-    description: Dictionary of facts
+uptime_string:
+    description: The device uptime represented as a string format DD:HH:MM:SS.
     returned: success
-    type: dictionary
-    sample: {
-    "uptime_string": "00:00:21:53",
-    "uptime": 1313,
-    "vlans": [
-        "1",
-        "2",
-        "3",
-        "4",
-    ],
-    "vendor": "cisco",
-    "os_version": "7.0(3)I2(1)",
-    "serial_number": "SAL1819S6LU",
-    "model": "Nexus9000 C9396PX Chassis",
-    "hostname": "N9K1",
-    "fqdn": "N/A"
-    "interfaces": [
-        "mgmt0",
-        "Ethernet1/1",
-        "Ethernet1/2",
-        "Ethernet1/3",
-        "Ethernet1/4",
-        "Ethernet1/5",
-        "Ethernet1/6",
+    type: string
+    sample: "00:00:21:53"
+uptime:
+    description: The device uptime represented as an integer number of strings.
+    returned: success
+    type: int
+    sample: 1313
+vlans:
+    description: List of VLAN IDs.
+    returned: success
+    type: List
+    sample: [
+            "1",
+            "2",
+            "3",
+            "4",
+        ]
+vendor:
+    description: Vendor of network device.
+    returned: success
+    type: string
+    sample: "cisco"
+os_version:
+    description: Operating System version on network device.
+    returned: success
+    type: string
+    sample: "7.0(3)I2(1)"
+serial_number:
+    description: Serial number on network device.
+    returned: success
+    type: string
+    sample: "SAL1819S6LU"
+model:
+    description: Hardware model of network device.
+    returned: success
+    type: string
+    sample: "Nexus9000 C9396PX Chassis"
+hostname:
+    description: Hostname of network device.
+    returned: success
+    type: string
+    sample: "N9K1"
+fqdn:
+    description: Fully-qualified domain name.
+    returned: success
+    type: string
+    sample: "N9K1.ntc.com"
+interfaces:
+    description: List of interfaces.
+    returned: success
+    type: list
+    sample: [
+            "mgmt0",
+            "Ethernet1/1",
+            "Ethernet1/2",
+            "Ethernet1/3",
+            "Ethernet1/4",
+            "Ethernet1/5",
+            "Ethernet1/6",
     ]
-}
 '''
 
 try:
     HAS_PYNTC = True
-    from pyntc import ntc_device
+    from pyntc import ntc_device, ntc_device_by_name
 except ImportError:
     HAS_PYNTC = False
 
@@ -148,14 +197,26 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI],
-                          required=True),
-            host=dict(required=True),
-            username=dict(required=True, type='str'),
-            password=dict(required=True, type='str'),
+                          required=False),
+            host=dict(required=False),
+            username=dict(required=False, type='str'),
+            password=dict(required=False, type='str'),
             secret=dict(required=False),
-            transport=dict(default='https', choices=['http', 'https']),
-            port=dict(required=False, type='int')
+            transport=dict(required=False, choices=['http', 'https']),
+            port=dict(required=False, type='int'),
+            ntc_host=dict(required=False),
+            ntc_conf_file=dict(required=False),
         ),
+        mutually_exclusive=[['host', 'ntc_host'],
+                            ['ntc_host', 'secret'],
+                            ['ntc_host', 'transport'],
+                            ['ntc_host', 'port'],
+                            ['ntc_conf_file', 'secret'],
+                            ['ntc_conf_file', 'transport'],
+                            ['ntc_conf_file', 'port'],
+                           ],
+        required_one_of=[['host', 'ntc_host']],
+        required_together=[['host', 'username', 'password', 'platform']],
         supports_check_mode=False
     )
 
@@ -167,20 +228,26 @@ def main():
     username = module.params['username']
     password = module.params['password']
 
+    ntc_host = module.params['ntc_host']
+    ntc_conf_file = module.params['ntc_conf_file']
+
     transport = module.params['transport']
     port = module.params['port']
     secret = module.params['secret']
 
-    kwargs = {}
-    if transport is not None:
-        kwargs['transport'] = transport
-    if port is not None:
-        kwargs['port'] = port
-    if secret is not None:
-        kwargs['secret'] = secret
+    if ntc_host is not None:
+        device = ntc_device_by_name(ntc_host, ntc_conf_file)
+    else:
+        kwargs = {}
+        if transport is not None:
+            kwargs['transport'] = transport
+        if port is not None:
+            kwargs['port'] = port
+        if secret is not None:
+            kwargs['secret'] = secret
 
-    device_type = platform_to_device_type[platform]
-    device = ntc_device(device_type, host, username, password, **kwargs)
+        device_type = platform_to_device_type[platform]
+        device = ntc_device(device_type, host, username, password, **kwargs)
 
     device.open()
     facts = device.facts

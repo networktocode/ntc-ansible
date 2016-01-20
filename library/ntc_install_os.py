@@ -17,14 +17,19 @@
 
 DOCUMENTATION = '''
 ---
-module: ntc_save_config
-short_description: Save the running config locally and/or remotely.
+module: ntc_install_os
+short_description: Install an operating system by setting the boot options like boot image and kickstart image.
 description:
-    - Save the running configuration as the startup configuration or to a file on the network device.
-      Optionally, save the running configuration to this computer.
+    - Set boot options like boot image and kickstart image.
     - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 notes:
-    - This module is not idempotent.
+    - Do not include full file paths, just the name of the file(s) stored on the top level flash directory.
+    - You must know if your platform supports taking a kickstart image as a parameter. If supplied but not supported, errors may occur.
+    - It may be useful to use this module in conjuction with ntc_file_copy and ntc_reboot.
+    - With NXOS devices, this module attempts to install the software immediately, wich may trigger a reboot.
+    - With NXOS devices, install process may take up to 10 minutes, especially if the device reboots.
+    - Tested on Nexus 3000, 5000, 9000.
+    - In check mode, the module tells you if the current boot images are set to the desired images.
 author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
 requirements:
@@ -32,18 +37,16 @@ requirements:
 options:
     platform:
         description:
-            - Vendor and platform identifier.
+            - Switch platform
         required: true
-        choices: ['cisco_nxos_nxapi', 'cisco_ios', 'arista_eos_eapi']
-    remote_file:
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios']
+    system_image_file:
         description:
-            - Name of remote file to save the running configuration. If omitted it will be
-              saved to the startup configuration.
-        required: false
-        default: null
-    local_file:
+            - Name of the system (or combined) image file on flash.
+        required: true
+    kickstart_image_file:
         description:
-            - Name of local file to save the running configuration. If omitted it won't be locally saved.
+            - Name of the kickstart image file on flash.
         required: false
         default: null
     host:
@@ -52,11 +55,11 @@ options:
         required: true
     username:
         description:
-            - Username used to login to the target device.
+            - Username used to login to the target device
         required: true
     password:
         description:
-            - Password used to login to the target device.
+            - Password used to login to the target device
         required: true
     secret:
         description:
@@ -64,8 +67,7 @@ options:
         required: false
     transport:
         description:
-            - Transport protocol for API. Only needed for NX-API and eAPI.
-              If omitted, platform-specific default will be used.
+            - Transport protocol for API-based devices.
         required: false
         default: null
         choices: ['http', 'https']
@@ -90,51 +92,38 @@ options:
 '''
 
 EXAMPLES = '''
-- ntc_save_config:
-    platform: cisco_nxos_nxapi
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-
-- ntc_save_config:
+- ntc_install_os:
     ntc_host: n9k1
+    system_image_file: n9000-dk9.6.1.2.I3.1.bin
 
-- ntc_save_config:
-    platform: arista_eos_eapi
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-    remote_file: running_config_copy.cfg
-    transport: https
+- ntc_install_os:
+    ntc_host: n3k1
+    system_image_file: n3000-uk9.6.0.2.U6.5.bin
+    kickstart_image_file: n3000-uk9-kickstart.6.0.2.U6.5.bin
 
-# You can get the timestamp by setting get_facts to True, then you can append it to your filename.
-
-- ntc_save_config:
-    platform: cisco_ios
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-    local_file: config_{{ inventory_hostname }}_{{ ansible_date_time.date | replace('-','_') }}.cfg
+- ntc_install_os:
+    ntc_host: c2801
+    system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
 '''
 
 RETURN = '''
-local_file:
-    description: The local file path of the saved running config.
-    returned: success
-    type: string
-    sample: '/path/to/config.cfg'
-remote_file:
-    description: The remote file name of the saved running config.
-    returned: success
-    type: string
-    sample: 'config_backup.cfg'
-remote_save_successful:
-    description: Whether the remote save was successful.
-        May be false if a remote save was unsuccessful because a file with same name already exists.
-    returned: success
-    type: bool
-    sample: true
+install_state:
+    returned: always
+    type: dictionary
+    sample: {
+        "kick": "n5000-uk9-kickstart.7.2.1.N1.1.bin",
+        "sys": "n5000-uk9.7.2.1.N1.1.bin",
+        "status": "This is the log of last installation.\n
+            Continuing with installation process, please wait.\n
+            The login will be disabled until the installation is completed.\n
+            Performing supervisor state verification. \n
+            SUCCESS\n
+            Supervisor non-disruptive upgrade successful.\n
+            Install has been successful.\n",
+    }
 '''
+
+import time
 
 try:
     HAS_PYNTC = True
@@ -152,6 +141,11 @@ platform_to_device_type = {
     PLATFORM_IOS: 'ios',
 }
 
+
+def already_set(current_boot_options, system_image_file, kickstart_image_file):
+    return current_boot_options.get('sys') == system_image_file \
+        and current_boot_options.get('kick') == kickstart_image_file
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -165,8 +159,8 @@ def main():
             port=dict(required=False, type='int'),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
-            remote_file=dict(required=False),
-            local_file=dict(required=False),
+            system_image_file=dict(required=True),
+            kickstart_image_file=dict(required=False),
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -178,7 +172,7 @@ def main():
                            ],
         required_one_of=[['host', 'ntc_host']],
         required_together=[['host', 'username', 'password', 'platform']],
-        supports_check_mode=False
+        supports_check_mode=True
     )
 
     if not HAS_PYNTC:
@@ -210,25 +204,52 @@ def main():
         device_type = platform_to_device_type[platform]
         device = ntc_device(device_type, host, username, password, **kwargs)
 
-    remote_file = module.params['remote_file']
-    local_file = module.params['local_file']
+    system_image_file = module.params['system_image_file']
+    kickstart_image_file = module.params['kickstart_image_file']
+
+    if kickstart_image_file == 'null':
+        kickstart_image_file = None
 
     device.open()
-
-    if remote_file:
-        remote_save_successful = device.save(remote_file)
-    else:
-        remote_save_successful = device.save()
-
-    changed = remote_save_successful
-    if local_file:
-        device.backup_running_config(local_file)
+    current_boot_options = device.get_boot_options()
+    changed = False
+    if not already_set(current_boot_options, system_image_file, kickstart_image_file):
         changed = True
 
-    device.close()
+    if not module.check_mode and changed == True:
+        if device.device_type == 'nxos':
+            timeout = 600
+            device.set_timeout(timeout)
+            try:
+                start_time = time.time()
+                device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
+            except:
+                pass
+            elapsed_time = time.time() - start_time
 
-    remote_file = remote_file or '(Startup Config)'
-    module.exit_json(changed=changed, remote_save_successful=remote_save_successful, remote_file=remote_file, local_file=local_file)
+            device.set_timeout(30)
+            try:
+                install_state = device.get_boot_options()
+            except:
+                install_state = {}
+
+            while elapsed_time < timeout and not install_state:
+                try:
+                    install_state = device.get_boot_options()
+                except:
+                    time.sleep(10)
+                    elapsed_time += 10
+        else:
+            device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
+            install_state = device.get_boot_options()
+
+        if not already_set(install_state, system_image_file, kickstart_image_file):
+            module.fail_json(msg='Install not successful', install_state=install_state)
+    else:
+        install_state = current_boot_options
+
+    device.close()
+    module.exit_json(changed=changed, install_state=install_state)
 
 from ansible.module_utils.basic import *
 main()
