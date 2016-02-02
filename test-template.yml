@@ -7,12 +7,12 @@
   vars_prompt:
     - name: template_name
       prompt: "Enter the name of the template to verify:"
-      default: "cisco_nxos_show_ip_route"
+      default: "hp_procurve_show_vlans"
       private: no
 
     - name: platform
       prompt: "Enter the platform"
-      default: "cisco_nxos"
+      default: "hp_procurve"
       private: no
 
   tasks:
