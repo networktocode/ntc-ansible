@@ -7,7 +7,7 @@
   vars_prompt:
     - name: template_name
       prompt: "Enter the name of the template to verify:"
-      default: "hp_procurve_show_vlans"
+      default: "hp_procurve_show_arp"
       private: no
 
     - name: platform
