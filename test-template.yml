@@ -18,10 +18,10 @@
   tasks:
 
   - name: extract command from template name
-    set_fact: command_variable="{{ template_name | split(platform + "_") | last }}"
+    set_fact: command_variable="{{ template_name | split(platform + '_') | last }}"
 
   - name: extract command string from command_variable
-    set_fact: command="{{ command_variable | split("_") | join(" ") }}"
+    set_fact: command="{{ command_variable | split('_') | join(' ') }}"
 
   - name: run TextFSM locally on test input
     ntc_show_command:
