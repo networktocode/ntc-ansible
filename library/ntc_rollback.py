@@ -117,14 +117,8 @@ except ImportError:
     HAS_PYNTC = False
 
 PLATFORM_NXAPI = 'cisco_nxos_nxapi'
-PLATFORM_IOS = 'cisco_ios'
+PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
-
-platform_to_device_type = {
-    PLATFORM_EAPI: 'eos',
-    PLATFORM_NXAPI: 'nxos',
-    PLATFORM_IOS: 'ios',
-}
 
 def main():
     module = AnsibleModule(
@@ -182,7 +176,7 @@ def main():
         if secret is not None:
             kwargs['secret'] = secret
 
-        device_type = platform_to_device_type[platform]
+        device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)
 
     checkpoint_file = module.params['checkpoint_file']
