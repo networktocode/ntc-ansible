@@ -112,6 +112,13 @@ options:
         default: null
         choices: []
         aliases: []
+    secret:
+        description:
+            - Password used to enter a privileged mode on the target device
+        required: false
+        default: null
+        choices: []
+        aliases: []
 
 '''
 EXAMPLES = '''
@@ -124,6 +131,16 @@ EXAMPLES = '''
     host={{ inventory_hostname }}
     username={{ username }}
     password={{ password }}
+
+# get snmp community
+- ntc_show_command:
+    connection=ssh
+    platform=cisco_nxos
+    command='show snmp community'
+    host={{ inventory_hostname }}
+    username={{ username }}
+    password={{ password }}
+    secret:{{ secret }}
 
 '''
 
@@ -173,6 +190,7 @@ def main():
             delay=dict(default=1, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
+            secret=dict(required=False, type='str'),
         ),
         required_together=(
             ['host', 'password', 'username'],
@@ -191,6 +209,7 @@ def main():
     command = module.params['command']
     username = module.params['username']
     password = module.params['password']
+    secret = module.params['secret']
     port = int(module.params['port'])
     delay = int(module.params['delay'])
 
@@ -219,8 +238,12 @@ def main():
                     ip=socket.gethostbyname(host),
                     port=port,
                     username=username,
-                    password=password
+                    password=password,
+                    secret=secret
                     )
+
+        if secret:
+            device.enable()
 
         rawtxt = device.send_command(command, delay_factor=delay)
 
