@@ -250,8 +250,6 @@ def main():
 
     if connection == 'ssh':
 
-        import getpass
-        print(getpass.getuser())
         device = ConnectHandler(
                     device_type=device_type,
                     ip=socket.gethostbyname(host),
