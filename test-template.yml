@@ -7,12 +7,12 @@
   vars_prompt:
     - name: template_name
       prompt: "Enter the name of the template to verify:"
-      default: "cisco_nxos_show_ip_route"
+      default: "dell_force10_show_arp"
       private: no
 
     - name: platform
       prompt: "Enter the platform"
-      default: "cisco_nxos"
+      default: "dell_force10"
       private: no
 
   tasks:
