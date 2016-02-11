@@ -132,14 +132,9 @@ except ImportError:
     HAS_PYNTC = False
 
 PLATFORM_NXAPI = 'cisco_nxos_nxapi'
-PLATFORM_IOS = 'cisco_ios'
+PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
-
-platform_to_device_type = {
-    PLATFORM_EAPI: 'eos',
-    PLATFORM_NXAPI: 'nxos',
-    PLATFORM_IOS: 'ios',
-}
+PLATFORM_JUNOS = 'juniper_junos_netconf'
 
 
 def already_set(current_boot_options, system_image_file, kickstart_image_file):
@@ -201,8 +196,11 @@ def main():
         if secret is not None:
             kwargs['secret'] = secret
 
-        device_type = platform_to_device_type[platform]
+        device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)
+
+    if device.device_type == PLATFORM_JUNOS:
+        module.fail_json(msg='Install OS for Juniper not supported.')
 
     system_image_file = module.params['system_image_file']
     kickstart_image_file = module.params['kickstart_image_file']

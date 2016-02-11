@@ -132,14 +132,10 @@ except ImportError:
     HAS_PYNTC = False
 
 PLATFORM_NXAPI = 'cisco_nxos_nxapi'
-PLATFORM_IOS = 'cisco_ios'
+PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
+PLATFORM_JUNOS = 'juniper_junos_netconf'
 
-platform_to_device_type = {
-    PLATFORM_EAPI: 'eos',
-    PLATFORM_NXAPI: 'nxos',
-    PLATFORM_IOS: 'ios',
-}
 
 def main():
     module = AnsibleModule(
@@ -196,7 +192,7 @@ def main():
         if secret is not None:
             kwargs['secret'] = secret
 
-        device_type = platform_to_device_type[platform]
+        device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)
 
     confirm = module.params['confirm']
@@ -205,10 +201,10 @@ def main():
     if not confirm:
         module.fail_json(msg='confirm must be set to true for this module to work.')
 
-    supported_timer_platforms = [PLATFORM_IOS]
+    supported_timer_platforms = [PLATFORM_IOS, PLATFORM_JUNOS]
 
     if timer is not None \
-            and platform not in supported_timer_platforms:
+            and device.device_type not in supported_timer_platforms:
         module.fail_json(msg='Timer parameter not supported on platform %s.' % platform)
 
     device.open()
