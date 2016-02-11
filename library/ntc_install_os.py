@@ -134,6 +134,7 @@ except ImportError:
 PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
+PLATFORM_JUNOS = 'juniper_junos_netconf'
 
 
 def already_set(current_boot_options, system_image_file, kickstart_image_file):
@@ -197,6 +198,9 @@ def main():
 
         device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)
+
+    if device.device_type == PLATFORM_JUNOS:
+        module.fail_json(msg='Install OS for Juniper not supported.')
 
     system_image_file = module.params['system_image_file']
     kickstart_image_file = module.params['kickstart_image_file']

@@ -145,6 +145,7 @@ except ImportError:
 PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
+PLATFORM_JUNOS = 'juniper_junos_netconf'
 
 
 def main():

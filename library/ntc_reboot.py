@@ -134,6 +134,7 @@ except ImportError:
 PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
+PLATFORM_JUNOS = 'juniper_junos_netconf'
 
 
 def main():
@@ -200,10 +201,10 @@ def main():
     if not confirm:
         module.fail_json(msg='confirm must be set to true for this module to work.')
 
-    supported_timer_platforms = [PLATFORM_IOS]
+    supported_timer_platforms = [PLATFORM_IOS, PLATFORM_JUNOS]
 
     if timer is not None \
-            and platform not in supported_timer_platforms:
+            and device.device_type not in supported_timer_platforms:
         module.fail_json(msg='Timer parameter not supported on platform %s.' % platform)
 
     device.open()
