@@ -144,7 +144,7 @@ def already_set(current_boot_options, system_image_file, kickstart_image_file):
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI],
+            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),

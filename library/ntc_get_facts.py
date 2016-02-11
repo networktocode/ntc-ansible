@@ -192,7 +192,7 @@ PLATFORM_JUNOS = 'juniper_junos_netconf'
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI],
+            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
