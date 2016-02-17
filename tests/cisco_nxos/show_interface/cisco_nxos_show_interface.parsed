@@ -12,7 +12,7 @@ parsed_sample:
       interface: "Vlan20" 
       ip_address: "10.1.20.3/24" 
       link_status: "down" 
-      mtu: "1500 bytes"
+      mtu: "1500"
 
     - address: "5087.89a1.d8ce"
       admin_state: "up"
@@ -25,7 +25,7 @@ parsed_sample:
       interface: "mgmt0"
       ip_address: "10.1.100.21/24"
       link_status: "up" 
-      mtu: "1500 bytes"
+      mtu: "1500"
 
     - address: "5087.89a1.d8d6"
       admin_state: "up"
@@ -38,5 +38,5 @@ parsed_sample:
       interface: "Ethernet1/1"
       ip_address: ""
       link_status: "up"
-      mtu: "1500 bytes"
+      mtu: "1500"
 

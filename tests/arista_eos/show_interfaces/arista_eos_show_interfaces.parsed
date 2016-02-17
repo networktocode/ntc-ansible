@@ -9,7 +9,7 @@ parsed_sample:
   interface: "Ethernet1"
   ip_address: "172.16.1.1/24"
   link_status: "up"
-  mtu: "1500 bytes"
+  mtu: "1500"
   protocol_status: "up (connected)"
 
 - address: "0800.27dc.5443"
@@ -20,7 +20,7 @@ parsed_sample:
   interface: "Ethernet2"
   ip_address: "172.16.2.1/24"
   link_status: "up"
-  mtu: "1500 bytes"
+  mtu: "1500"
   protocol_status: "up (connected)"
 
 - address: ""
@@ -31,7 +31,7 @@ parsed_sample:
   interface: "Loopback0"
   ip_address: "1.1.1.1/32"
   link_status: "up"
-  mtu: "65535 bytes"
+  mtu: "65535"
   protocol_status: "up (connected)"
 
 - address: "0800.27a5.02b7"
@@ -42,7 +42,7 @@ parsed_sample:
   interface: "Management1"
   ip_address: ""
   link_status: "up"
-  mtu: "1500 bytes"
+  mtu: "1500"
   protocol_status: "up (connected)"
 
 - address: "0800.27dc.5443"
@@ -53,7 +53,7 @@ parsed_sample:
   interface: "Vlan10"
   ip_address: "10.0.0.1/24"
   link_status: "down"
-  mtu: "1500 bytes"
+  mtu: "1500"
   protocol_status: "lowerlayerdown (notconnect)"
 
 - address: "0000.0000.0000"
@@ -64,5 +64,5 @@ parsed_sample:
   interface: "Port-Channel1"
   ip_address: ""
   link_status: "down"
-  mtu: "9214 bytes"
+  mtu: "9214"
   protocol_status: "lowerlayerdown (notconnect)"
