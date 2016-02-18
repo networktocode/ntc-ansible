@@ -119,7 +119,20 @@ options:
         default: null
         choices: []
         aliases: []
-
+    use_keys:
+        description:
+            - Boolean true/false if ssh key login should be attempted
+        required: false
+        default: false
+        choices: []
+        aliases: []
+    key_file:
+        description:
+            - Path to private ssh key used for login
+        required: false
+        default: null
+        choices: []
+        aliases: []
 '''
 EXAMPLES = '''
 
@@ -191,6 +204,8 @@ def main():
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
             secret=dict(required=False, type='str'),
+            use_keys=dict(required=False, default=False),
+            key_file=dict(required=False, default=None, type='str'),
         ),
         required_together=(
             ['host', 'password', 'username'],
@@ -210,6 +225,8 @@ def main():
     username = module.params['username']
     password = module.params['password']
     secret = module.params['secret']
+    use_keys = module.params['use_keys']
+    key_file = module.params['key_file']
     port = int(module.params['port'])
     delay = int(module.params['delay'])
 
@@ -239,9 +256,10 @@ def main():
                     port=port,
                     username=username,
                     password=password,
-                    secret=secret
-                    )
-
+                    secret=secret,
+                    use_keys=use_keys,
+                    key_file=key_file
+                    )   
         if secret:
             device.enable()
 
