@@ -88,6 +88,12 @@ options:
               and then in the users home directory for a file called .ntc.conf.
         required: false
         default: null
+    file_system:
+        description:
+            - The remote file system of the device, you need to change this if it's different,
+              from flash:
+        required: false
+        default: flash:
 '''
 
 EXAMPLES = '''
@@ -168,6 +174,7 @@ def main():
             ntc_conf_file=dict(required=False),
             local_file=dict(required=True),
             remote_file=dict(required=False),
+            file_system=dict(required=False, default='flash:'),
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -213,6 +220,7 @@ def main():
 
     local_file = module.params['local_file']
     remote_file = module.params['remote_file']
+    file_system = module.params['file_system']
 
     device.open()
 
@@ -223,13 +231,13 @@ def main():
     if not os.path.isfile(local_file):
         module.fail_json(msg="Local file {} not found".format(local_file))
 
-    if not device.file_copy_remote_exists(local_file, remote_file):
+    if not device.file_copy_remote_exists(local_file, remote_file, file_system=file_system):
         changed = True
         file_exists = False
 
     if not module.check_mode and not file_exists:
         try:
-            device.file_copy(local_file, remote_file)
+            device.file_copy(local_file, remote_file, file_system=file_system)
             transfer_status = 'Sent'
         except Exception as e:
             module.fail_json(msg=str(e))
