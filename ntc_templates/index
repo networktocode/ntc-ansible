@@ -35,6 +35,7 @@ arista_eos_show_vlan.template, .*, arista_eos, sh[[ow]] vl[[an]]
 cisco_nxos_show_mac_address-table.template, .*, cisco_nxos, sh[[ow]] m[[ac]] addr[[ess-table]]
 cisco_ios_show_mac-address-table.template, .*, cisco_ios, sh[[ow]] m[[ac-address-table]]
 cisco_nxos_show_ip_ospf_neighbor_vrf.template, .*, cisco_nxos, sh[[ow]] ip ospf nei[[ghbor]] vrf (\S+)
+cisco_nxos_show_ip_dhcp_relay_address.template, .*, cisco_nxos, sh[[ow]] ip dh[[cp]] r[[elay]] a[[ddress]]
 cisco_ios_show_snmp_community.template, .*, cisco_ios, sh[[ow]] sn[[mp]] com[[munity]]
 cisco_nxos_show_inventory.template, .*, cisco_nxos, sh[[ow]] inv[[entory]]
 cisco_nxos_show_access-lists.template, .*, cisco_nxos, sh[[ow]] acc[[ess-lists]]
