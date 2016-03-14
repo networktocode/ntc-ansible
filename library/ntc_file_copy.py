@@ -44,8 +44,14 @@ options:
         required: true
     remote_file:
         description:
-            - Remote file path to be copied to flash. Remote directories must exist.
+            - Remote file path of the copy. Remote directories must exist.
               If omitted, the name of the local file will be used.
+        required: false
+        default: null
+    file_system:
+        description:
+            - The remote file system of the device. If omitted,
+              devices that support a file_system parameter will use their default values.
         required: false
         default: null
     host:
@@ -168,6 +174,7 @@ def main():
             ntc_conf_file=dict(required=False),
             local_file=dict(required=True),
             remote_file=dict(required=False),
+            file_system=dict(required=False),
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -213,6 +220,7 @@ def main():
 
     local_file = module.params['local_file']
     remote_file = module.params['remote_file']
+    file_system = module.params['file_system']
 
     device.open()
 
@@ -223,13 +231,22 @@ def main():
     if not os.path.isfile(local_file):
         module.fail_json(msg="Local file {} not found".format(local_file))
 
-    if not device.file_copy_remote_exists(local_file, remote_file):
+    if file_system:
+        remote_exists = device.file_copy_remote_exists(local_file, remote_file, file_system=file_system)
+    else:
+        remote_exists = device.file_copy_remote_exists(local_file, remote_file)
+
+    if not remote_exists:
         changed = True
         file_exists = False
 
     if not module.check_mode and not file_exists:
         try:
-            device.file_copy(local_file, remote_file)
+            if file_system:
+                device.file_copy(local_file, remote_file, file_system=file_system)
+            else:
+                device.file_copy(local_file, remote_file)
+
             transfer_status = 'Sent'
         except Exception as e:
             module.fail_json(msg=str(e))
@@ -239,7 +256,7 @@ def main():
     if remote_file is None:
         remote_file = os.path.basename(local_file)
 
-    module.exit_json(changed=changed, transfer_status=transfer_status, local_file=local_file, remote_file=remote_file)
+    module.exit_json(changed=changed, transfer_status=transfer_status, local_file=local_file, remote_file=remote_file, file_system=file_system)
 
 from ansible.module_utils.basic import *
 main()
