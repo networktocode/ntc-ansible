@@ -55,5 +55,7 @@ cisco_ios_show_version.template, .*, cisco_ios, sh[[ow]] ver[[sion]]
 cisco_ios_show_vlan.template, .*, cisco_ios, sh[[ow]] vlan
 dell_force10_show_version.template, .*, dell_force10, sh[[ow]] ver[[sion]]
 dell_force10_show_vlan.template, .*, dell_force10, sh[[ow]] vl[[an]]
+hp_procurve_show_system.template, .*, hp_procurve, sh[[ow]] syst[[em]]
 hp_procurve_show_vlans.template, .*, hp_procurve, sh[[ow]] vl[[ans]]
 hp_procurve_show_arp.template, .*, hp_procurve, sh[[ow]] ar[[p]]
+hp_procurve_show_tech_buffers.template, .*, hp_procurve, sh[[ow]] tec[[h]] buf[[ffers]]
