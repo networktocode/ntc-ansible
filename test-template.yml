@@ -7,7 +7,7 @@
   vars_prompt:
     - name: template_name
       prompt: "Enter the name of the template to verify:"
-      default: "dell_force10_show_vlan_brief"
+      default: "dell_force10_show_vlan"
       private: no
 
     - name: platform
