@@ -1,0 +1,10 @@
+Value Filldown MODE ((\w+\s)+)
+Value ALIAS (\w+)
+Value COMMAND ((\w+(\s|\S))+)
+
+Start
+  ^${MODE}+aliases: -> ALIAS
+
+ALIAS
+  ^${MODE}+aliases: -> ALIAS  
+  ^\s+${ALIAS}\s+${COMMAND} -> Record
