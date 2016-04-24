@@ -246,6 +246,8 @@ def clitable_to_dict(cli_table):
 
 
 def get_structured_data(rawoutput, module):
+    index_file = module.params['index_file']
+    template_dir = module.params['template_dir']
     cli_table = clitable.CliTable(index_file, template_dir)
 
     attrs = dict(
@@ -277,7 +279,7 @@ def parse_raw_output(rawoutput, module):
             temp = dict(device=device, response=sd)
             structured_data_response_list.append(temp)
     else:
-        structured_data = get_structured_data(rawtxt, module)
+        structured_data = get_structured_data(rawoutput, module)
 
     return structured_data or structured_data_response_list
 
@@ -338,7 +340,7 @@ def main():
         module.fail_json(msg='specify host when connection=ssh/netmiko_ssh')
 
     if connection != 'offline':
-        if not host and trigger_device_list:
+        if not host and not trigger_device_list:
             module.fail_json(msg='specify host or trigger_device_list based on connection')
 
     if connection == 'offline' and not raw_file:
