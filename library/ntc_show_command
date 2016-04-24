@@ -245,6 +245,43 @@ def clitable_to_dict(cli_table):
     return objs
 
 
+def get_structured_data(rawoutput, module):
+    cli_table = clitable.CliTable(index_file, template_dir)
+
+    attrs = dict(
+        Command=module.params['command'],
+        Platform=module.params['platform']
+    )
+    try:
+        cli_table.ParseCmd(rawoutput, attrs)
+        structured_data = clitable_to_dict(cli_table)
+    except CliTableError as e:
+        # Invalid or Missing template
+        # module.fail_json(msg='parsing error', error=str(e))
+        # rather than fail, fallback to return raw text
+        structured_data = [rawoutput]
+
+    return structured_data
+
+
+def parse_raw_output(rawoutput, module):
+    """Returns a dict if using netmiko and list of dicts if using trigger
+    """
+    structured_data_response_list = []
+    structured_data = {}
+    if isinstance(rawoutput, dict):
+        for device, command_output in rawoutput.items():
+
+            raw_txt = command_output[module.params['command']]
+            sd = get_structured_data(raw_txt, module)
+            temp = dict(device=device, response=sd)
+            structured_data_response_list.append(temp)
+    else:
+        structured_data = get_structured_data(rawtxt, module)
+
+    return structured_data or structured_data_response_list
+
+
 def main():
 
     module = AnsibleModule(
@@ -358,41 +395,6 @@ def main():
     elif connection == 'offline':
         with open(raw_file, 'r') as data:
             rawtxt = data.read()
-
-    def get_structured_data(rawoutput, module):
-        cli_table = clitable.CliTable(index_file, template_dir)
-
-        attrs = dict(
-            Command=module.params['command'],
-            Platform=module.params['platform']
-        )
-        try:
-            cli_table.ParseCmd(rawoutput, attrs)
-            structured_data = clitable_to_dict(cli_table)
-        except CliTableError as e:
-            # Invalid or Missing template
-            # module.fail_json(msg='parsing error', error=str(e))
-            # rather than fail, fallback to return raw text
-            structured_data = [rawoutput]
-
-        return structured_data
-
-    def parse_raw_output(rawoutput, module):
-        """Returns a dict if using netmiko and list of dicts if using trigger
-        """
-        structured_data_response_list = []
-        structured_data = {}
-        if isinstance(rawoutput, dict):
-            for device, command_output in rawoutput.items():
-
-                raw_txt = command_output[module.params['command']]
-                sd = get_structured_data(raw_txt, module)
-                temp = dict(device=device, response=sd)
-                structured_data_response_list.append(temp)
-        else:
-            structured_data = get_structured_data(rawtxt, module)
-
-        return structured_data or structured_data_response_list
 
     results = {}
     results['response'] = []
