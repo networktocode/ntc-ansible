@@ -18,24 +18,32 @@
 DOCUMENTATION = '''
 ---
 module: ntc_show_command
-short_description: Gets config data from devices that don't have an API
+short_description: Gets output from show commands using SSH and tries to return structured data
 description:
-    - This module offers structured data for CLI enabled devices by
-      using the TextFSM library for templating and netmiko for SSH
-      connectivity
+    - This module connects to network devices using SSH and tries to
+      return structured data (JSON) using TextFSM templates. If a template
+      is not found, raw text is returned.  This module supports two drivers,
+      namely netmiko/SSH and trigger/SSH. Device support is dependent on
+      netmiko and trigger.  The ability to return structured data is dependent
+      on TextFSM templates.  You can still pass in optional param to the
+      Trigger Commando init using the optional args param which is a
+      dictionary. Many other params can be defined in the Trigger netdevices
+      file when using trigger/SSH. Currently, this module requires passing in
+      un/pwd even when a Trigger .tacacsrc file exists.
 author: Jason Edelman (@jedelman8)
 requirements:
     - netmiko
     - textfsm
     - terminal
+    - trigger
 options:
     connection:
         description:
             - connect to device using netmiko or read from offline file
-              for testing
+              for testing.  ssh is the same as netmiko_ssh.
         required: false
         default: ssh
-        choices: ['ssh', 'offline']
+        choices: ['ssh', 'offline', 'netmiko_ssh', 'trigger_ssh']
         aliases: []
     platform:
         description:
@@ -86,14 +94,14 @@ options:
         aliases: []
     port:
         description:
-            - SSH port to use to connect to the target device
+            - SSH port to use to connect to the target device when using netmiko
         required: false
         default: 22
         choices: []
         aliases: []
     delay:
         description:
-            - Wait for command output from target device
+            - Wait for command output from target device when using netmiko
         required: false
         default: 1
         choices: []
@@ -114,21 +122,21 @@ options:
         aliases: []
     secret:
         description:
-            - Password used to enter a privileged mode on the target device
+            - Password used to enter a privileged mode on the target device when using netmiko
         required: false
         default: null
         choices: []
         aliases: []
     use_keys:
         description:
-            - Boolean true/false if ssh key login should be attempted
+            - Boolean true/false if ssh key login should be attempted when nsing netmiko
         required: false
         default: false
         choices: []
         aliases: []
     key_file:
         description:
-            - Path to private ssh key used for login
+            - Path to private ssh key used for login when using netmiko
         required: false
         default: null
         choices: []
@@ -136,7 +144,7 @@ options:
 '''
 EXAMPLES = '''
 
-# get vlan data
+# get vlan data using netmiko
 - ntc_show_command:
     connection=ssh
     platform=cisco_nxos
@@ -145,7 +153,7 @@ EXAMPLES = '''
     username={{ username }}
     password={{ password }}
 
-# get snmp community
+# get snmp community using netmiko
 - ntc_show_command:
     connection=ssh
     platform=cisco_nxos
@@ -155,12 +163,56 @@ EXAMPLES = '''
     password={{ password }}
     secret:{{ secret }}
 
+# FEEDING SINGLE DEVICE TO TRIGGER USING HOST PARAM
+-  ntc_show_command:
+    connection: trigger_ssh
+    host: "{{ inventory_hostname }}"
+    platform: cisco_nxos
+    command: 'show version'
+    username: "{{ username }}"
+    password: "{{ password }}"
+
+# FEEDING SINGLE DEVICE TO TRIGGER USING LIST
+-  ntc_show_command:
+    connection: trigger_ssh
+    trigger_device_list:
+      - "{{ inventory_hostname }}"
+    platform: cisco_nxos
+    command: 'show version'
+    username: "{{ username }}"
+    password: "{{ password }}"
+
+# FEEDING LIST OF DEVICES TO TRIGGER
+- ntc_show_command:
+    connection: trigger_ssh
+    trigger_device_list:
+      - n9k1
+      - n9k2
+    platform: cisco_nxos
+    command: 'show version'
+    username: "{{ username }}"
+    password: "{{ password }}"
+  run_once: true
+
+# FEEDING SINGLE DEVICE TO NETIMKO
+-  ntc_show_command:
+    connection: netmiko_ssh
+    platform: cisco_nxos
+    command: 'show version'
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+
 '''
 
 import os.path
 import socket
-from netmiko import ConnectHandler
 
+HAS_NETMIKO = True
+try:
+    from netmiko import ConnectHandler
+except:
+    HAS_NETMIKO = False
 
 HAS_TEXTFSM = True
 try:
@@ -172,6 +224,12 @@ except:
         import textfsm.clitable as clitable
     except:
         HAS_TEXTFSM = False
+
+HAS_TRIGGER = True
+try:
+    from trigger.cmds import Commando
+except:
+    HAS_TRIGGER = False
 
 
 def clitable_to_dict(cli_table):
@@ -191,12 +249,13 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            connection=dict(choices=['ssh', 'offline'],
-                            default='ssh'),
+            connection=dict(choices=['ssh', 'offline', 'netmiko_ssh',
+                            'trigger_ssh'], default='netmiko_ssh'),
             platform=dict(required=True),
             file=dict(required=False),
             index_file=dict(default='index'),
             template_dir=dict(default='ntc_templates'),
+            trigger_device_list=dict(type='list', required=False),
             command=dict(required=True),
             host=dict(required=False),
             port=dict(default=22, required=False),
@@ -204,11 +263,18 @@ def main():
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
             secret=dict(required=False, type='str'),
-            use_keys=dict(required=False, default=False),
-            key_file=dict(required=False, default=None, type='str'),
+            use_keys=dict(required=False, default=False, type='bool'),
+            key_file=dict(required=False, default=None),
+            optional_args=dict(required=False, type='dict', default={}),
         ),
         required_together=(
-            ['host', 'password', 'username'],
+            ['password', 'username'],
+        ),
+        mutually_exclusive=(
+            ['host', 'trigger_device_list'],
+        ),
+        required_one_of=(
+            ['host', 'trigger_device_list'],
         ),
         supports_check_mode=False
     )
@@ -229,12 +295,12 @@ def main():
     key_file = module.params['key_file']
     port = int(module.params['port'])
     delay = int(module.params['delay'])
+    trigger_device_list = module.params['trigger_device_list']
+    optional_args = module.params['optional_args']
+    host = module.params['host']
 
-    if module.params['host']:
-        host = socket.gethostbyname(module.params['host'])
-
-    if connection == 'ssh' and not module.params['host']:
-        module.fail_json(msg='specify host if using connection=ssh')
+    if connection in ['ssh', 'netmiko_ssh'] and not module.params['host']:
+        module.fail_json(msg='specify host when connection=ssh/netmiko_ssh')
 
     if connection == 'offline' and not raw_file:
         module.fail_json(msg='specifiy file if using connection=offline')
@@ -248,41 +314,91 @@ def main():
     if raw_file and not os.path.isfile(raw_file):
         module.fail_json(msg='could not read raw text file')
 
-    if connection == 'ssh':
+    rawtxt = ''
+    if connection in ['ssh', 'netmiko_ssh']:
+        if not HAS_NETMIKO:
+            module.fail_json(msg='This module requires netmiko.')
 
         device = ConnectHandler(
-                    device_type=device_type,
-                    ip=socket.gethostbyname(host),
-                    port=port,
-                    username=username,
-                    password=password,
-                    secret=secret,
-                    use_keys=use_keys,
-                    key_file=key_file
-                    )   
+            device_type=device_type,
+            ip=host,
+            port=port,
+            username=username,
+            password=password,
+            secret=secret,
+            use_keys=use_keys,
+            key_file=key_file
+        )
         if secret:
             device.enable()
 
         rawtxt = device.send_command(command, delay_factor=delay)
 
+    elif connection == 'trigger_ssh':
+        if not HAS_TRIGGER:
+            module.fail_json(msg='This module requires trigger.')
+        kwargs = {}
+        kwargs['production_only'] = False
+        kwargs['force_cli'] = True
+        if optional_args:
+            kwargs.update(optional_args)
+
+        if host:
+            commando = Commando(devices=[host], commands=[command],
+                                creds=(username, password), **kwargs)
+            commando.run()
+            rawtxt = commando.results[host][command]
+        elif trigger_device_list:
+            commando = Commando(devices=trigger_device_list, commands=[command],
+                                creds=(username, password), **kwargs)
+            commando.run()
+
     elif connection == 'offline':
         with open(raw_file, 'r') as data:
             rawtxt = data.read()
 
-    cli_table = clitable.CliTable(index_file, template_dir)
+    def get_structured_data(rawoutput, module):
+        cli_table = clitable.CliTable(index_file, template_dir)
 
-    attrs = {'Command': command, 'Platform': platform}
+        attrs = dict(
+            Command=module.params['command'],
+            Platform=module.params['platform']
+        )
+        try:
+            cli_table.ParseCmd(rawoutput, attrs)
+            structured_data = clitable_to_dict(cli_table)
+        except CliTableError as e:
+            # Invalid or Missing template
+            # module.fail_json(msg='parsing error', error=str(e))
+            # rather than fail, fallback to return raw text
+            structured_data = [rawoutput]
 
-    try:
-        cli_table.ParseCmd(rawtxt, attrs)
-    except CliTableError as e:
-        module.fail_json(msg='parsing error',
-                         error=str(e))
+        return structured_data
 
-    structured_data = clitable_to_dict(cli_table)
+    def parse_raw_output(rawoutput, module):
+        """Returns a dict if using netmiko and list of dicts if using trigger
+        """
+        structured_data_response_list = []
+        structured_data = {}
+        if isinstance(rawoutput, dict):
+            for device, command_output in rawoutput.items():
+
+                raw_txt = command_output[module.params['command']]
+                sd = get_structured_data(raw_txt, module)
+                temp = dict(device=device, response=sd)
+                structured_data_response_list.append(temp)
+        else:
+            structured_data = get_structured_data(rawtxt, module)
+
+        return structured_data or structured_data_response_list
 
     results = {}
-    results['response'] = structured_data
+    results['response'] = []
+    results['response_list'] = []
+    if rawtxt:
+        results['response'] = parse_raw_output(rawtxt, module)
+    else:
+        results['response_list'] = parse_raw_output(commando.results, module)
 
     module.exit_json(**results)
 
