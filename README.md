@@ -23,6 +23,7 @@ Option 2:
 
 ```
 git clone https://github.com/networktocode/ntc-ansible
+cd ntc-ansible
 git submodule update --init --recursive
 ```
 
