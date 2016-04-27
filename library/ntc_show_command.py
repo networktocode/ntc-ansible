@@ -293,7 +293,7 @@ def main():
             platform=dict(required=True),
             file=dict(required=False),
             index_file=dict(default='index'),
-            template_dir=dict(default='ntc_templates'),
+            template_dir=dict(default='ntc_templates/templates'),
             trigger_device_list=dict(type='list', required=False),
             command=dict(required=True),
             host=dict(required=False),
