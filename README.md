@@ -11,6 +11,21 @@ To install the dependencies:
 pip install ntc-ansible
 ```
 
+There is a git sub-module now being used for the templates, so when you clone this repo for the templates and Ansible modules you should use the follow clone options:
+
+Option 1:
+
+```
+git clone https://github.com/networktocode/ntc-ansible --recursive
+```
+
+Option 2:
+
+```
+git clone https://github.com/networktocode/ntc-ansible
+git submodule update --init --recursive
+```
+
 
 ### Modules
 
