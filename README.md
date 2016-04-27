@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/networktocode/ntc-ansible.svg?branch=master)](https://travis-ci.org/networktocode/ntc-ansible)
 
 Docs currently being updated.
 
