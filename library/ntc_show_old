@@ -246,8 +246,6 @@ def clitable_to_dict(cli_table):
 
 
 def get_structured_data(rawoutput, module):
-    index_file = module.params['index_file']
-    template_dir = module.params['template_dir']
     cli_table = clitable.CliTable(index_file, template_dir)
 
     attrs = dict(
@@ -293,7 +291,7 @@ def main():
             platform=dict(required=True),
             file=dict(required=False),
             index_file=dict(default='index'),
-            template_dir=dict(default='ntc-templates/templates'),
+            template_dir=dict(default='ntc_templates'),
             trigger_device_list=dict(type='list', required=False),
             command=dict(required=True),
             host=dict(required=False),
@@ -340,7 +338,7 @@ def main():
         module.fail_json(msg='specify host when connection=ssh/netmiko_ssh')
 
     if connection != 'offline':
-        if not host and not trigger_device_list:
+        if not host and trigger_device_list:
             module.fail_json(msg='specify host or trigger_device_list based on connection')
 
     if connection == 'offline' and not raw_file:
