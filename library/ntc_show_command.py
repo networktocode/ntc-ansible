@@ -68,6 +68,13 @@ options:
         default: index
         choices: []
         aliases: []
+    local_file:
+        description:
+            - Specify local file to save raw output to
+        required: false
+        default: null
+        choices: []
+        aliases: []
     file:
         description:
             - If using connection=offline, this is the file (with path)
@@ -292,8 +299,10 @@ def main():
                             'trigger_ssh'], default='netmiko_ssh'),
             platform=dict(required=True),
             file=dict(required=False),
+            local_file=dict(required=False),
             index_file=dict(default='index'),
             template_dir=dict(default='ntc-templates/templates'),
+            use_templates=dict(required=False, default=True, type='bool'),
             trigger_device_list=dict(type='list', required=False),
             command=dict(required=True),
             host=dict(required=False),
@@ -322,12 +331,14 @@ def main():
     platform = module.params['platform']
     device_type = platform.split('-')[0]
     raw_file = module.params['file']
+    local_file = module.params['local_file']
     index_file = module.params['index_file']
     template_dir = module.params['template_dir']
     command = module.params['command']
     username = module.params['username']
     password = module.params['password']
     secret = module.params['secret']
+    use_templates = module.params['use_templates']
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
     port = int(module.params['port'])
@@ -349,11 +360,12 @@ def main():
     if template_dir.endswith('/'):
         template_dir.rstrip('/')
 
-    if not os.path.isfile(template_dir + '/' + index_file):
-        module.fail_json(msg='could not find or read index file')
+    if use_templates:
+        if not os.path.isfile(template_dir + '/' + index_file):
+            module.fail_json(msg='could not find or read index file')
 
-    if raw_file and not os.path.isfile(raw_file):
-        module.fail_json(msg='could not read raw text file')
+        if raw_file and not os.path.isfile(raw_file):
+            module.fail_json(msg='could not read raw text file')
 
     rawtxt = ''
     if connection in ['ssh', 'netmiko_ssh']:
@@ -398,13 +410,21 @@ def main():
         with open(raw_file, 'r') as data:
             rawtxt = data.read()
 
+    if local_file:
+        with open(local_file, 'w') as f:
+            f.write(rawtxt)
+
     results = {}
     results['response'] = []
     results['response_list'] = []
-    if rawtxt:
-        results['response'] = parse_raw_output(rawtxt, module)
-    else:
-        results['response_list'] = parse_raw_output(commando.results, module)
+
+    if use_templates:
+        if rawtxt:
+            results['response'] = parse_raw_output(rawtxt, module)
+        else:
+            results['response_list'] = parse_raw_output(commando.results, module)
+    elif rawtxt:
+        results['response'] = [rawtxt]
 
     module.exit_json(**results)
 
