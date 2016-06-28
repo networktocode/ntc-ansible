@@ -149,14 +149,14 @@ def main():
             connection=dict(choices=['ssh'],
                             default='ssh'),
             platform=dict(required=True),
-            commands=dict(required=False),
+            commands=dict(required=False, type='list'),
             commands_file=dict(required=False),
             host=dict(required=False),
             port=dict(default=22, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
             secret=dict(required=False, type='str'),
-            use_keys=dict(required=False, default=False),
+            use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None, type='str'),
         ),
         required_together=(
@@ -193,7 +193,7 @@ def main():
                                 secret=secret,
                                 use_keys=use_keys,
                                 key_file=key_file
-                                )   
+                                )
 
         if secret:
             device.enable()
