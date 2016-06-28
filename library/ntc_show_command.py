@@ -68,6 +68,13 @@ options:
         default: index
         choices: []
         aliases: []
+    use_templates:
+        description:
+            - Boolean true/false to enable/disable use of TextFSM templates for parsing
+        required: false
+        default: true
+        choices: ['true', 'false', 'yes', 'no']
+        aliases: []
     local_file:
         description:
             - Specify local file to save raw output to
