@@ -428,10 +428,12 @@ def main():
     if use_templates:
         if rawtxt:
             results['response'] = parse_raw_output(rawtxt, module)
-        else:
+        elif trigger_device_list:
             results['response_list'] = parse_raw_output(commando.results, module)
     elif rawtxt:
         results['response'] = [rawtxt]
+    elif trigger_device_list:
+        results['response'] = [commando.results]
 
     module.exit_json(**results)
 
