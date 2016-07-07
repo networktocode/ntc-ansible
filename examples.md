@@ -232,7 +232,7 @@ Get structured data (JSON) back using SSH to communicate to device.
 ```
 - ntc_show_command:
     connection=ssh
-    platform=cisco_ios
+    platform=cisco_ios_ssh
     command='show vlan'
     host={{ inventory_hostname }}
     username={{ username }}
@@ -247,7 +247,7 @@ Send commands list.
 ```
 - ntc_config_command:
     connection: ssh
-    platform: cisco_ios
+    platform: cisco_ios_ssh
     commands:
       - vlan 10
       - name vlan_10
@@ -263,7 +263,7 @@ Send commands from a file.
 ```yaml
 - ntc_config_command:
     connection: ssh
-    platform: cisco_ios
+    platform: cisco_ios_ssh
     commands_file: "dynamically_created_config.txt"
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
@@ -291,7 +291,7 @@ Does an equivalent of a `copy run start`
 
 ```
 - ntc_save_config:
-    platform=cisco_ios
+    platform=cisco_ios_ssh
     host={{ inventory_hostname }}
     username={{ username }}
     password={{ password }}
@@ -301,7 +301,7 @@ Does an equivalent of a `copy run filename.cfg`
 
 ```
 - ntc_save_config:
-    platform=cisco_ios
+    platform=cisco_ios_ssh
     remote_file=filename.cfg
     host={{ inventory_hostname }}
     username={{ username }}
@@ -312,7 +312,7 @@ Does an equivalent of a `copy run start` **AND** saves a local copy to the local
 
 ```
 - ntc_save_config:
-    platform=cisco_ios
+    platform=cisco_ios_ssh
     local_file=backups/{{ inventory_hostname }}.cfg
     host={{ inventory_hostname }}
     username={{ username }}
