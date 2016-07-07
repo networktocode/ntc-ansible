@@ -33,7 +33,7 @@ options:
         description:
             - Switch platform
         required: true
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
     timer:
         description:
             - Time in minutes after which the device will be rebooted.

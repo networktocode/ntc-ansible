@@ -37,7 +37,7 @@ options:
         description:
             - Switch platform
         required: true
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
     local_file:
         description:
             - Path to local file. Local directory must exist.
