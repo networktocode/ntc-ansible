@@ -392,7 +392,7 @@ def main():
         if secret:
             device.enable()
 
-        rawtxt = device.send_command(command, delay_factor=delay)
+        rawtxt = device.send_command_expect(command, delay_factor=delay)
 
     elif connection == 'trigger_ssh':
         if not HAS_TRIGGER:
