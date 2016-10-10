@@ -57,7 +57,7 @@ options:
             - path where TextFSM templates are stored. Default path is ntc
               with ntc in the same working dir as the playbook being run
         required: false
-        default: ntc_templates
+        default: "./ntc-templates/templates"
         choices: []
         aliases: []
     index_file:
