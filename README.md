@@ -27,7 +27,7 @@ If you have a "default" or No search path shown, open the config file that is sh
 
 # some basic default values...
 
-hostfile       = /etc/ansible/hosts
+inventory      = /etc/ansible/hosts
 library        = /home/ntc/projects/
 ```
 
