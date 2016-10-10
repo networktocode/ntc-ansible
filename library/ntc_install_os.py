@@ -39,7 +39,7 @@ options:
         description:
             - Switch platform
         required: true
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
     system_image_file:
         description:
             - Name of the system (or combined) image file on flash.

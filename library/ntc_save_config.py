@@ -34,7 +34,7 @@ options:
         description:
             - Vendor and platform identifier.
         required: true
-        choices: ['cisco_nxos_nxapi', 'cisco_ios', 'arista_eos_eapi']
+        choices: ['cisco_nxos_nxapi', 'cisco_ios_ssh', 'arista_eos_eapi']
     remote_file:
         description:
             - Name of remote file to save the running configuration. If omitted it will be

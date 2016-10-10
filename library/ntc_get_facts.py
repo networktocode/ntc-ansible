@@ -35,7 +35,7 @@ options:
             - Switch platform
         required: false
         default: null
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
     host:
         description:
             - Hostame or IP address of switch.
