@@ -84,6 +84,12 @@ Additionally, you'll need `lxml` can install like this on Ubuntu:
 sudo apt-get install zlib1g-dev libxml2-dev libxslt-dev python-dev
 ```
 
+Every so often `terminal` is not installed and it may need to be installed manually:
+
+```
+pip install terminal
+```
+
 
 ## Modules
 
