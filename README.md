@@ -4,7 +4,7 @@
 You need to perform **two** steps to start using these modules.
 
 1. Ensure this repository is in your Ansible module search path
-2. Install Python Dependencies 
+2. Install Dependencies 
 
 
 ## Ensure Modules are you in your search path
@@ -59,7 +59,7 @@ $ ansible-doc ntc_file_copy
 If that works, Ansible can find the modules and you can proceed to installing the deps below.
 
 
-## Install Python Dependencies
+## Install Dependencies
 
 **Option 1:**
 
@@ -75,6 +75,13 @@ _If you already cloned it above, you can just run the third statement below._
 git clone https://github.com/networktocode/ntc-ansible
 cd ntc-ansible
 sudo python setup.py install
+```
+
+
+Additionally, you'll need `lxml` can install like this on Ubuntu:
+
+```
+sudo apt-get install zlib1g-dev libxml2-dev libxslt-dev python-dev
 ```
 
 
