@@ -39,6 +39,11 @@ options:
             - Time in minutes after which the device will be rebooted.
         required: false
         default: null
+    timeout:
+        description:
+            - Time in seconds to wait for the device to come back up.
+        required: false
+        default: 240
     confirm:
         description:
             - Safeguard boolean. Set to true if you're sure you want to reboot.
@@ -123,7 +128,15 @@ rebooted:
     returned: success
     type: boolean
     sample: true
+reachable:
+    description: Whether the device is already reachable after rebooting.
+    returned: always
+    type: boolean
+    sample: true
 '''
+
+import paramiko
+import time
 
 try:
     HAS_PYNTC = True
@@ -135,6 +148,25 @@ PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
+
+
+def check_device(device, username, password, ip, timeout):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    success = True
+    attempts = timeout / 30
+    counter = 0
+    while counter < attempts:
+        try:
+            ssh.connect(ip, username=username, password=password,
+                        allow_agent=False, look_for_keys=False)
+            success = True
+            break
+        except:
+            time.sleep(30)
+            success = False
+            counter += 1
+    return success
 
 
 def main():
@@ -152,6 +184,7 @@ def main():
             ntc_conf_file=dict(required=False),
             confirm=dict(required=False, default=False, type='bool', choices=BOOLEANS),
             timer=dict(requred=False, type='int'),
+            timeout=dict(required=False, type='int', default=240)
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -197,6 +230,7 @@ def main():
 
     confirm = module.params['confirm']
     timer = module.params['timer']
+    timeout = module.params['timeout']
 
     if not confirm:
         module.fail_json(msg='confirm must be set to true for this module to work.')
@@ -217,11 +251,12 @@ def main():
     else:
         device.reboot(confirm=True)
 
+    reachable = check_device(device, username, password, host, timeout)
+
     changed = True
     rebooted = True
 
-    device.close()
-    module.exit_json(changed=changed, rebooted=rebooted)
+    module.exit_json(changed=changed, rebooted=rebooted, reachable=reachable)
 
 from ansible.module_utils.basic import *
 main()
