@@ -41,7 +41,8 @@ options:
         default: null
     timeout:
         description:
-            - Time in seconds to wait for the device to come back up.
+            - Time in seconds to wait for the device and API to come back up.
+              Uses specified port/protocol as defined with port and protocol params.
         required: false
         default: 240
     confirm:
@@ -129,13 +130,13 @@ rebooted:
     type: boolean
     sample: true
 reachable:
-    description: Whether the device is already reachable after rebooting.
+    description: Whether the device is reachable after rebooting on
+                 specified port.
     returned: always
     type: boolean
     sample: true
 '''
 
-import paramiko
 import time
 
 try:
@@ -150,16 +151,18 @@ PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
 
 
-def check_device(device, username, password, ip, timeout):
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+def check_device(module, username, password, host, timeout, kwargs):
     success = True
     attempts = timeout / 30
     counter = 0
     while counter < attempts:
         try:
-            ssh.connect(ip, username=username, password=password,
-                        allow_agent=False, look_for_keys=False)
+            if module.params['ntc_host'] is not None:
+                device = ntc_device_by_name(module.params['ntc_host'],
+                                            module.params['ntc_conf_file'])
+            else:
+                device_type = module.params['platform']
+                device = ntc_device(device_type, host, username, password, **kwargs)
             success = True
             break
         except:
@@ -214,10 +217,10 @@ def main():
     port = module.params['port']
     secret = module.params['secret']
 
+    kwargs = {}
     if ntc_host is not None:
         device = ntc_device_by_name(ntc_host, ntc_conf_file)
     else:
-        kwargs = {}
         if transport is not None:
             kwargs['transport'] = transport
         if port is not None:
@@ -251,7 +254,7 @@ def main():
     else:
         device.reboot(confirm=True)
 
-    reachable = check_device(device, username, password, host, timeout)
+    reachable = check_device(module, username, password, host, timeout, kwargs)
 
     changed = True
     rebooted = True
