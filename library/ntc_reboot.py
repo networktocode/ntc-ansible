@@ -152,10 +152,10 @@ PLATFORM_JUNOS = 'juniper_junos_netconf'
 
 
 def check_device(module, username, password, host, timeout, kwargs):
-    success = True
+    success = False
     attempts = timeout / 30
     counter = 0
-    while counter < attempts:
+    while counter < attempts and not success:
         try:
             if module.params['ntc_host'] is not None:
                 device = ntc_device_by_name(module.params['ntc_host'],
@@ -164,10 +164,8 @@ def check_device(module, username, password, host, timeout, kwargs):
                 device_type = module.params['platform']
                 device = ntc_device(device_type, host, username, password, **kwargs)
             success = True
-            break
         except:
             time.sleep(30)
-            success = False
             counter += 1
     return success
 
