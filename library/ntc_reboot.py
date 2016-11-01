@@ -130,8 +130,8 @@ rebooted:
     type: boolean
     sample: true
 reachable:
-    description: Whether the device is reachable after rebooting on
-                 specified port.
+    description: Whether the device is reachable on specified port
+                 after rebooting.
     returned: always
     type: boolean
     sample: true
