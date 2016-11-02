@@ -135,6 +135,13 @@ reachable:
     returned: always
     type: boolean
     sample: true
+atomic:
+    description: Whether the module has atomically completed all steps,
+                 including testing port and closing connection after
+                 rebooting.
+    returned: always
+    type: boolean
+    sample: true
 '''
 
 import time
@@ -155,6 +162,7 @@ def check_device(module, username, password, host, timeout, kwargs):
     success = False
     attempts = timeout / 30
     counter = 0
+    atomic = True
     while counter < attempts and not success:
         try:
             if module.params['ntc_host'] is not None:
@@ -164,10 +172,15 @@ def check_device(module, username, password, host, timeout, kwargs):
                 device_type = module.params['platform']
                 device = ntc_device(device_type, host, username, password, **kwargs)
             success = True
+            try:
+                device.close()
+            except:
+                atomic = False
+                pass
         except:
             time.sleep(30)
             counter += 1
-    return success
+    return success, atomic
 
 
 def main():
@@ -252,12 +265,12 @@ def main():
     else:
         device.reboot(confirm=True)
 
-    reachable = check_device(module, username, password, host, timeout, kwargs)
+    reachable, atomic = check_device(module, username, password, host, timeout, kwargs)
 
     changed = True
     rebooted = True
 
-    module.exit_json(changed=changed, rebooted=rebooted, reachable=reachable)
+    module.exit_json(changed=changed, rebooted=rebooted, reachable=reachable, atomic=atomic)
 
 from ansible.module_utils.basic import *
 main()
