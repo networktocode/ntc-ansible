@@ -106,14 +106,14 @@ EXAMPLES = '''
     ntc_conf_file: .ntc.conf
     confirm: true
 
-- ntc_file_copy:
+- ntc_reboot:
     platform: arista_eos_eapi
     confirm: true
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
 
-- ntc_file_copy:
+- ntc_reboot:
     platform: cisco_ios
     confirm: true
     timer: 5
@@ -162,7 +162,7 @@ def check_device(module, username, password, host, timeout, kwargs):
     success = False
     attempts = timeout / 30
     counter = 0
-    atomic = True
+    atomic = False
     while counter < attempts and not success:
         try:
             if module.params['ntc_host'] is not None:
@@ -172,6 +172,7 @@ def check_device(module, username, password, host, timeout, kwargs):
                 device_type = module.params['platform']
                 device = ntc_device(device_type, host, username, password, **kwargs)
             success = True
+            atomic = True
             try:
                 device.close()
             except:
@@ -265,6 +266,7 @@ def main():
     else:
         device.reboot(confirm=True)
 
+    time.sleep(10)
     reachable, atomic = check_device(module, username, password, host, timeout, kwargs)
 
     changed = True
