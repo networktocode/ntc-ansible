@@ -143,6 +143,12 @@ remote_file:
     returned: success
     type: string
     sample: '/path/to/remote/file'
+atomic:
+    description: Whether the module has atomically completed all steps,
+                 including closing connection after file delivering.
+    returned: always
+    type: boolean
+    sample: true
 '''
 
 import os
@@ -251,12 +257,18 @@ def main():
         except Exception as e:
             module.fail_json(msg=str(e))
 
-    device.close()
+    try:
+        device.close()
+        atomic = True
+    except:
+        atomic = False
 
     if remote_file is None:
         remote_file = os.path.basename(local_file)
 
-    module.exit_json(changed=changed, transfer_status=transfer_status, local_file=local_file, remote_file=remote_file, file_system=file_system)
+    module.exit_json(changed=changed, transfer_status=transfer_status,
+                     local_file=local_file, remote_file=remote_file,
+                     file_system=file_system, atomic=atomic)
 
 from ansible.module_utils.basic import *
 main()
