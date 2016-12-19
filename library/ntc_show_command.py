@@ -326,9 +326,9 @@ def main():
         module.fail_json(msg='specify host when connection='
                              'ssh/netmiko_ssh/netmiko_telnet')
 
-    if connection == 'netmiko_telnet' and not platform.startswith('cisco_ios'):
-        module.fail_json(msg='only cisco_ios and cisco_ios_telnet '
-                             'support netmiko_telnet connection')
+    if connection == 'netmiko_telnet' and platform != 'cisco_ios_telnet':
+        module.fail_json(msg='only cisco_ios_telnet supports '
+                             'netmiko_telnet connection')
 
     if platform == 'cisco_ios_telnet' and connection != 'netmiko_telnet':
         module.fail_json(msg='connection must be netmiko_telnet when platform '
@@ -339,7 +339,7 @@ def main():
     else:
         if connection == 'netmiko_telnet':
             port = 23
-        elif connection in ['netmiko_ssh', 'ssh']:
+        else:
             port = 22
 
     if connection != 'offline':
