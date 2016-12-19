@@ -23,11 +23,11 @@ description:
     - This module connects to network devices using SSH and tries to
       return structured data (JSON) using TextFSM templates. If a template
       is not found, raw text is returned.  This module supports two drivers,
-      namely netmiko/SSH and trigger/SSH. Device support is dependent on
-      netmiko and trigger.  The ability to return structured data is dependent
-      on TextFSM templates.  You can still pass in optional param to the
-      Trigger Commando init using the optional args param which is a
-      dictionary. Many other params can be defined in the Trigger netdevices
+      namely netmiko/SSH and trigger/SSH. This also support netmiko/Telnet for IOS devices.
+      Device support is dependent on netmiko and trigger.
+      The ability to return structured data is dependent on TextFSM templates.
+      You can still pass in optional param to the Trigger Commando init using the optional
+      args param which is a dictionary. Many other params can be defined in the Trigger netdevices
       file when using trigger/SSH. Currently, this module requires passing in
       un/pwd even when a Trigger .tacacsrc file exists.
 author: Jason Edelman (@jedelman8)
@@ -43,45 +43,34 @@ options:
               for testing.  ssh is the same as netmiko_ssh.
         required: false
         default: ssh
-        choices: ['ssh', 'offline', 'netmiko_ssh', 'trigger_ssh']
-        aliases: []
+        choices: ['ssh', 'offline', 'netmiko_ssh', 'trigger_ssh', 'netmiko_telnet']
     platform:
         description:
             - Platform FROM the index file
         required: true
-        default: ssh
-        choices: []
-        aliases: []
     template_dir:
         description:
             - path where TextFSM templates are stored. Default path is ntc
               with ntc in the same working dir as the playbook being run
         required: false
         default: "./ntc-templates/templates"
-        choices: []
-        aliases: []
     index_file:
         description:
             - name of index file.  file location must be relative to
               the template_dir
         required: false
         default: index
-        choices: []
-        aliases: []
     use_templates:
         description:
             - Boolean true/false to enable/disable use of TextFSM templates for parsing
         required: false
         default: true
         choices: ['true', 'false', 'yes', 'no']
-        aliases: []
     local_file:
         description:
             - Specify local file to save raw output to
         required: false
         default: null
-        choices: []
-        aliases: []
     file:
         description:
             - If using connection=offline, this is the file (with path)
@@ -90,71 +79,50 @@ options:
               be rendered with the the TextFSM template
         required: false
         default: null
-        choices: []
-        aliases: []
     command:
         description:
             - Command to execute on target device
         required: true
-        default: null
-        choices: []
-        aliases: []
     host:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
         required: false
         default: null
-        choices: []
-        aliases: []
     port:
         description:
-            - SSH port to use to connect to the target device when using netmiko
+            - Port to use to connect to the target device
         required: false
-        default: 22
-        choices: []
-        aliases: []
+        default: null
     delay:
         description:
             - Wait for command output from target device when using netmiko
         required: false
         default: 1
-        choices: []
-        aliases: []
     username:
         description:
             - Username used to login to the target device
         required: false
         default: null
-        choices: []
-        aliases: []
     password:
         description:
             - Password used to login to the target device
         required: false
         default: null
-        choices: []
-        aliases: []
     secret:
         description:
             - Password used to enter a privileged mode on the target device when using netmiko
         required: false
         default: null
-        choices: []
-        aliases: []
     use_keys:
         description:
             - Boolean true/false if ssh key login should be attempted when nsing netmiko
         required: false
         default: false
-        choices: []
-        aliases: []
     key_file:
         description:
             - Path to private ssh key used for login when using netmiko
         required: false
         default: null
-        choices: []
-        aliases: []
 '''
 EXAMPLES = '''
 
@@ -303,7 +271,7 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             connection=dict(choices=['ssh', 'offline', 'netmiko_ssh',
-                            'trigger_ssh'], default='netmiko_ssh'),
+                            'trigger_ssh', 'netmiko_telnet'], default='netmiko_ssh'),
             platform=dict(required=True),
             file=dict(required=False),
             local_file=dict(required=False),
@@ -313,7 +281,7 @@ def main():
             trigger_device_list=dict(type='list', required=False),
             command=dict(required=True),
             host=dict(required=False),
-            port=dict(default=22, required=False),
+            port=dict(required=False),
             delay=dict(default=1, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
@@ -348,14 +316,31 @@ def main():
     use_templates = module.params['use_templates']
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
-    port = int(module.params['port'])
     delay = int(module.params['delay'])
     trigger_device_list = module.params['trigger_device_list']
     optional_args = module.params['optional_args']
     host = module.params['host']
 
-    if connection in ['ssh', 'netmiko_ssh'] and not module.params['host']:
-        module.fail_json(msg='specify host when connection=ssh/netmiko_ssh')
+    if (connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet'] and
+            not module.params['host']):
+        module.fail_json(msg='specify host when connection='
+                             'ssh/netmiko_ssh/netmiko_telnet')
+
+    if connection == 'netmiko_telnet' and not platform.startswith('cisco_ios'):
+        module.fail_json(msg='only cisco_ios and cisco_ios_telnet '
+                             'support netmiko_telnet connection')
+
+    if platform == 'cisco_ios_telnet' and connection != 'netmiko_telnet':
+        module.fail_json(msg='connection must be netmiko_telnet when platform '
+                             'is cisco_ios_telnet')
+
+    if module.params['port']:
+        port = int(module.params['port'])
+    else:
+        if connection == 'netmiko_telnet':
+            port = 23
+        elif connection in ['netmiko_ssh', 'ssh']:
+            port = 22
 
     if connection != 'offline':
         if not host and not trigger_device_list:
@@ -375,7 +360,7 @@ def main():
             module.fail_json(msg='could not read raw text file')
 
     rawtxt = ''
-    if connection in ['ssh', 'netmiko_ssh']:
+    if connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet']:
         if not HAS_NETMIKO:
             module.fail_json(msg='This module requires netmiko.')
 
