@@ -87,12 +87,12 @@ options:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
         required: false
-        default: 22 for SSH. 23 for Telnet
+        default: null
     port:
         description:
             - Port to use to connect to the target device
         required: false
-        default: null
+        default: 22 for SSH. 23 for Telnet
     delay:
         description:
             - Wait for command output from target device when using netmiko
