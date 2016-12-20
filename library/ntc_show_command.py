@@ -326,13 +326,12 @@ def main():
         module.fail_json(msg='specify host when connection='
                              'ssh/netmiko_ssh/netmiko_telnet')
 
-    if connection == 'netmiko_telnet' and platform != 'cisco_ios_telnet':
-        module.fail_json(msg='only cisco_ios_telnet supports '
+    if connection == 'netmiko_telnet' and platform != 'cisco_ios':
+        module.fail_json(msg='only cisco_ios supports '
                              'netmiko_telnet connection')
 
-    if platform == 'cisco_ios_telnet' and connection != 'netmiko_telnet':
-        module.fail_json(msg='connection must be netmiko_telnet when platform '
-                             'is cisco_ios_telnet')
+    if platform == 'cisco_ios' and connection == 'netmiko_telnet':
+        device_type = 'cisco_ios_telnet'
 
     if module.params['port']:
         port = int(module.params['port'])
@@ -377,7 +376,7 @@ def main():
         if secret:
             device.enable()
 
-        rawtxt = device.send_command_expect(command, delay_factor=delay)
+        rawtxt = device.send_command_timing(command, delay_factor=delay)
 
     elif connection == 'trigger_ssh':
         if not HAS_TRIGGER:
