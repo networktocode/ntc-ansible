@@ -37,7 +37,6 @@ options:
         description:
             - Platform FROM the index file
         required: true
-        default: null
     commands:
         description:
             - Command to execute on target device
@@ -47,12 +46,10 @@ options:
         description:
             - Command to execute on target device
         required: true
-        default: null
     host:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
-        required: false
-        default: null
+        required: true
     port:
         description:
             - SSH port to use to connect to the target device
@@ -135,7 +132,7 @@ def main():
             platform=dict(required=True),
             commands=dict(required=False, type='list'),
             commands_file=dict(required=False),
-            host=dict(required=False),
+            host=dict(required=True),
             port=dict(required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
@@ -162,9 +159,6 @@ def main():
 
     if module.params['host']:
         host = socket.gethostbyname(module.params['host'])
-
-    if connection in ['ssh', 'telnet'] and not module.params['host']:
-        module.fail_json(msg='specify host if using connection=ssh')
 
     if connection == 'telnet' and platform != 'cisco_ios':
         module.fail_json(msg='only cisco_ios supports '

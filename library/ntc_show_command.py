@@ -43,7 +43,7 @@ options:
               for testing.  ssh is the same as netmiko_ssh.
         required: false
         default: ssh
-        choices: ['ssh', 'offline', 'netmiko_ssh', 'trigger_ssh', 'netmiko_telnet']
+        choices: ['ssh', 'offline', 'netmiko_ssh', 'trigger_ssh', 'netmiko_telnet', 'telnet']
     platform:
         description:
             - Platform FROM the index file
@@ -271,7 +271,7 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             connection=dict(choices=['ssh', 'offline', 'netmiko_ssh',
-                            'trigger_ssh', 'netmiko_telnet'], default='netmiko_ssh'),
+                            'trigger_ssh', 'netmiko_telnet', 'telnet'], default='netmiko_ssh'),
             platform=dict(required=True),
             file=dict(required=False),
             local_file=dict(required=False),
@@ -321,22 +321,22 @@ def main():
     optional_args = module.params['optional_args']
     host = module.params['host']
 
-    if (connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet'] and
+    if (connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet'] and
             not module.params['host']):
         module.fail_json(msg='specify host when connection='
                              'ssh/netmiko_ssh/netmiko_telnet')
 
-    if connection == 'netmiko_telnet' and platform != 'cisco_ios':
+    if connection in ['netmiko_telnet', 'telnet'] and platform != 'cisco_ios':
         module.fail_json(msg='only cisco_ios supports '
-                             'netmiko_telnet connection')
+                             'telnet/netmiko_telnet connection')
 
-    if platform == 'cisco_ios' and connection == 'netmiko_telnet':
+    if platform == 'cisco_ios' and connection in ['netmiko_telnet', 'telnet']:
         device_type = 'cisco_ios_telnet'
 
     if module.params['port']:
         port = int(module.params['port'])
     else:
-        if connection == 'netmiko_telnet':
+        if device_type == 'cisco_ios_telnet':
             port = 23
         else:
             port = 22
@@ -359,7 +359,7 @@ def main():
             module.fail_json(msg='could not read raw text file')
 
     rawtxt = ''
-    if connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet']:
+    if connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet']:
         if not HAS_NETMIKO:
             module.fail_json(msg='This module requires netmiko.')
 
