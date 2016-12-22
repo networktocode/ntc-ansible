@@ -98,6 +98,13 @@ options:
             - Wait for command output from target device when using netmiko
         required: false
         default: 1
+    global_delay_factor:
+        description:
+            - Sets delay between operations.
+        required: false
+        default: 1
+        choices: []
+        aliases: []
     username:
         description:
             - Username used to login to the target device
@@ -283,6 +290,7 @@ def main():
             host=dict(required=False),
             port=dict(required=False),
             delay=dict(default=1, required=False),
+            global_delay_factor=dict(default=1, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
             secret=dict(required=False, type='str'),
@@ -317,6 +325,7 @@ def main():
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
     delay = int(module.params['delay'])
+    global_delay_factor = int(module.params['global_delay_factor'])
     trigger_device_list = module.params['trigger_device_list']
     optional_args = module.params['optional_args']
     host = module.params['host']
@@ -371,7 +380,8 @@ def main():
             password=password,
             secret=secret,
             use_keys=use_keys,
-            key_file=key_file
+            key_file=key_file,
+            global_delay_factor=global_delay_factor
         )
         if secret:
             device.enable()
