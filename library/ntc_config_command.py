@@ -36,7 +36,7 @@ options:
     platform:
         description:
             - Platform FROM the index file
-        required: true
+        required: false
     commands:
         description:
             - Command to execute on target device
@@ -45,11 +45,19 @@ options:
     commands_file:
         description:
             - Command to execute on target device
-        required: true
+        required: flase
     host:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
-        required: true
+        required: false
+    provider:
+        description
+          - Dictionary which acts as a collection of arguments used to define the characteristics
+            of how to connect to the device.
+            Note - host, username, password and platform must be defined in either provider
+            or local param
+            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
+        required: false
     port:
         description:
             - SSH port to use to connect to the target device
@@ -84,6 +92,14 @@ options:
 
 EXAMPLES = '''
 
+vars:
+  nxos_provider:
+    host: "{{ inventory_hostname }}"
+    username: "ntc-ansible"
+    password: "ntc-ansible"
+    platform: "cisco_nxos"
+    connection: ssh
+
 # write vlan data
 - ntc_config_command:
     connection: ssh
@@ -106,6 +122,14 @@ EXAMPLES = '''
     username: "{{ username }}"
     password: "{{ password }}"
     secret: "{{ secret }}"
+
+- ntc_config_command:
+    commands:
+      - vlan 10
+      - name vlan_10
+      - end
+    provider: "{{ nxos_provider }}"
+
 '''
 
 import os.path
@@ -129,23 +153,28 @@ def main():
         argument_spec=dict(
             connection=dict(choices=['ssh', 'telnet'],
                             default='ssh'),
-            platform=dict(required=True),
+            platform=dict(required=False),
             commands=dict(required=False, type='list'),
             commands_file=dict(required=False),
-            host=dict(required=True),
+            host=dict(required=False),
             port=dict(required=False),
+            provider=dict(type='dict', required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
             secret=dict(required=False, type='str'),
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None, type='str'),
         ),
-        required_together=(
-            ['host', 'password', 'username'],
-        ),
         supports_check_mode=False
     )
 
+    provider = module.params['provider'] or {}
+
+    # allow local params to override provider
+    for param, pvalue in provider.items():
+        module.params[param] = module.params.get(param, None) or pvalue
+
+    host = module.params['host']
     connection = module.params['connection']
     platform = module.params['platform']
     device_type = platform.split('-')[0]
@@ -156,6 +185,12 @@ def main():
     secret = module.params['secret']
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
+
+
+    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
 
     if module.params['host']:
         host = socket.gethostbyname(module.params['host'])
