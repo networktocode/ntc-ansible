@@ -55,6 +55,7 @@ vlan_command: show vlan
         connection: ssh
         platform: "{{ platform }}"
         command: "{{ vlan_command }}"
+        template_dir: "/home/ntc/ntc-templates/template" # Specifies where to search templates
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
@@ -234,6 +235,7 @@ Get structured data (JSON) back using SSH to communicate to device.
     connection=ssh
     platform=cisco_ios_ssh
     command='show vlan'
+    template_dir: "/home/ntc/ntc-templates/template"
     host={{ inventory_hostname }}
     username={{ username }}
     password={{ password }}

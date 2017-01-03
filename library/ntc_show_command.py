@@ -131,6 +131,7 @@ EXAMPLES = '''
     connection=ssh
     platform=cisco_nxos
     command='show vlan'
+    template_dir: '/home/ntc/ntc-templates/template'
     host={{ inventory_hostname }}
     username={{ username }}
     password={{ password }}
@@ -140,6 +141,7 @@ EXAMPLES = '''
     connection=ssh
     platform=cisco_nxos
     command='show snmp community'
+    template_dir: '/home/ntc/ntc-templates/template'
     host={{ inventory_hostname }}
     username={{ username }}
     password={{ password }}
@@ -151,6 +153,7 @@ EXAMPLES = '''
     host: "{{ inventory_hostname }}"
     platform: cisco_nxos
     command: 'show version'
+    template_dir: '/home/ntc/ntc-templates/template'
     username: "{{ username }}"
     password: "{{ password }}"
 
@@ -161,6 +164,7 @@ EXAMPLES = '''
       - "{{ inventory_hostname }}"
     platform: cisco_nxos
     command: 'show version'
+    template_dir: '/home/ntc/ntc-templates/template'
     username: "{{ username }}"
     password: "{{ password }}"
 
@@ -172,6 +176,7 @@ EXAMPLES = '''
       - n9k2
     platform: cisco_nxos
     command: 'show version'
+    template_dir: '/home/ntc/ntc-templates/template'
     username: "{{ username }}"
     password: "{{ password }}"
   run_once: true
@@ -181,6 +186,7 @@ EXAMPLES = '''
     connection: netmiko_ssh
     platform: cisco_nxos
     command: 'show version'
+    template_dir: '/home/ntc/ntc-templates/template'
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
