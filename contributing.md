@@ -50,4 +50,4 @@ Note:
     * See "``platform`` Naming Conventions" in the [README](README.md)
 * device support in netmiko is required.
 
-Documentation on TextFSM:  http://code.google.com/p/textfsm/wiki/TextFSMHowto
+Documentation on TextFSM:  https://github.com/google/textfsm/wiki/TextFSM
