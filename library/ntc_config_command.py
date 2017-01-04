@@ -45,7 +45,7 @@ options:
     commands_file:
         description:
             - Command to execute on target device
-        required: flase
+        required: false
     host:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
