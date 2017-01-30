@@ -51,6 +51,14 @@ options:
             - Password used to login to the target device
         required: false
         default: null
+    provider:
+        description:
+          - Dictionary which acts as a collection of arguments used to define the characteristics
+            of how to connect to the device.
+            Note - host, username, password and platform must be defined in either provider
+            or local param
+            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
+        required: false
     secret:
         description:
             - Enable secret for devices connecting over SSH.
@@ -83,6 +91,19 @@ options:
 '''
 
 EXAMPLES = '''
+vars:
+  nxos_provider:
+    host: "{{ inventory_hostname }}"
+    username: "ntc-ansible"
+    password: "ntc-ansible"
+    platform: "cisco_nxos"
+    connection: ssh
+
+- ntc_get_facts:
+    provider: "{{ nxos_provider }}"
+    ntc_host: n9k1
+    ntc_conf_file: .ntc.conf
+
 - ntc_get_facts:
     platform: cisco_nxos_nxapi
     host: "{{ inventory_hostname }}"

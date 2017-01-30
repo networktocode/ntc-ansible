@@ -51,7 +51,7 @@ options:
             - IP Address or hostname (resolvable by Ansible control host)
         required: false
     provider:
-        description
+        description:
           - Dictionary which acts as a collection of arguments used to define the characteristics
             of how to connect to the device.
             Note - host, username, password and platform must be defined in either provider
@@ -172,7 +172,8 @@ def main():
 
     # allow local params to override provider
     for param, pvalue in provider.items():
-        module.params[param] = module.params.get(param, None) or pvalue
+        if module.params.get(param) != False:
+            module.params[param] = module.params.get(param) or pvalue
 
     host = module.params['host']
     connection = module.params['connection']
