@@ -33,7 +33,7 @@ options:
     platform:
         description:
             - Vendor and platform identifier.
-        required: true
+        required: false
         choices: ['cisco_nxos_nxapi', 'cisco_ios_ssh', 'arista_eos_eapi']
     remote_file:
         description:
@@ -49,15 +49,23 @@ options:
     host:
         description:
             - Hostame or IP address of switch.
-        required: true
+        required: false
     username:
         description:
             - Username used to login to the target device.
-        required: true
+        required: false
     password:
         description:
             - Password used to login to the target device.
-        required: true
+        required: false
+    provider:
+        description:
+          - Dictionary which acts as a collection of arguments used to define the characteristics
+            of how to connect to the device.
+            Note - host, username, password and platform must be defined in either provider
+            or local param
+            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
+        required: false
     secret:
         description:
             - Enable secret for devices connecting over SSH.
@@ -90,6 +98,15 @@ options:
 '''
 
 EXAMPLES = '''
+
+vars:
+  nxos_provider:
+    host: "{{ inventory_hostname }}"
+    username: "ntc-ansible"
+    password: "ntc-ansible"
+    platform: "cisco_nxos"
+    connection: ssh
+
 - ntc_save_config:
     platform: cisco_nxos_nxapi
     host: "{{ inventory_hostname }}"
@@ -110,10 +127,7 @@ EXAMPLES = '''
 # You can get the timestamp by setting get_facts to True, then you can append it to your filename.
 
 - ntc_save_config:
-    platform: cisco_ios
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    provider: "{{ nxos_provider }}"
     local_file: config_{{ inventory_hostname }}_{{ ansible_date_time.date | replace('-','_') }}.cfg
 '''
 
@@ -156,6 +170,7 @@ def main():
             host=dict(required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str'),
+            provider=dict(required=False, type='dict'),
             secret=dict(required=False),
             transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
@@ -179,6 +194,13 @@ def main():
 
     if not HAS_PYNTC:
         module.fail_json(msg='pyntc Python library not found.')
+
+    provider = module.params['provider'] or {}
+
+    # allow local params to override provider
+    for param, pvalue in provider.items():
+        if module.params.get(param) != False:
+            module.params[param] = module.params.get(param) or pvalue
 
     platform = module.params['platform']
     host = module.params['host']
@@ -208,6 +230,11 @@ def main():
 
     remote_file = module.params['remote_file']
     local_file = module.params['local_file']
+
+    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
 
     device.open()
 
