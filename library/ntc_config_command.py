@@ -52,6 +52,11 @@ options:
         required: false
         default: false
         choices: ['true', 'false']
+    global_delay_factor:
+        description:
+            - Specify the global_delay_factor for Netmiko.
+        required: false
+        default: 1
     host:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
@@ -141,6 +146,7 @@ vars:
 import os.path
 import socket
 from netmiko import ConnectHandler
+from netmiko.ssh_exception import NetMikoTimeoutException
 
 
 def error_params(platform, command_output):
@@ -170,7 +176,8 @@ def main():
             secret=dict(required=False, type='str'),
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None, type='str'),
-            expect_reboot=dict(default=None, type='bool')
+            expect_reboot=dict(default=None, type='bool'),
+            global_delay_factor=dict(default=1, type='int')
         ),
         supports_check_mode=False
     )
@@ -193,7 +200,7 @@ def main():
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
     expect_reboot = module.params['expect_reboot']
-
+    global_delay_factor = module.params['global_delay_factor']
 
     argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
     for key, val in argument_check.items():
@@ -226,7 +233,8 @@ def main():
                                 password=password,
                                 secret=secret,
                                 use_keys=use_keys,
-                                key_file=key_file
+                                key_file=key_file,
+                                global_delay_factor=global_delay_factor
                                 )
 
         if secret:
@@ -235,7 +243,7 @@ def main():
         try:
             if commands:
                 output = device.send_config_set(commands)
-        except:
+        except NetMikoTimeoutException:
             if expect_reboot:
                 output = ''
             else:
@@ -247,7 +255,7 @@ def main():
                         with open(commands_file, 'r') as f:
                             try:
                                 output = device.send_config_set(f.readlines())
-                            except:
+                            except NetMikoTimeoutException:
                                 if expect_reboot:
                                     output = ''
                                 else:
