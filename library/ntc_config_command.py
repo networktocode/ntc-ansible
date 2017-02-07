@@ -46,6 +46,12 @@ options:
         description:
             - Command to execute on target device
         required: false
+    expect_reboot:
+        description:
+            - Specify if a system reboot is expected or not.
+        required: false
+        default: false
+        choices: ['true', 'false']
     host:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
@@ -164,6 +170,7 @@ def main():
             secret=dict(required=False, type='str'),
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None, type='str'),
+            expect_reboot=dict(default=None, type='bool')
         ),
         supports_check_mode=False
     )
@@ -185,6 +192,7 @@ def main():
     secret = module.params['secret']
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
+    expect_reboot = module.params['expect_reboot']
 
 
     argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
@@ -224,14 +232,26 @@ def main():
         if secret:
             device.enable()
 
-        if commands:
-            output = device.send_config_set(commands)
+        try:
+            if commands:
+                output = device.send_config_set(commands)
+        except:
+            if expect_reboot:
+                output = ''
+            else:
+                module.fail_json(msg='Timeout while sending commands.')
         else:
             try:
                 if commands_file:
                     if os.path.isfile(commands_file):
                         with open(commands_file, 'r') as f:
-                            output = device.send_config_set(f.readlines())
+                            try:
+                                output = device.send_config_set(f.readlines())
+                            except:
+                                if expect_reboot:
+                                    output = ''
+                                else:
+                                    module.fail_json(msg='Timeout while sending commands.')
             except IOError:
                 module.fail_json(msg="Unable to locate: {}".format(commands_file))
 
@@ -242,7 +262,10 @@ def main():
     results = {}
     results['response'] = output
 
-    module.exit_json(changed=True, **results)
+    if expect_reboot:
+        module.exit_json(changed=True, reboot=True, **results)
+    else:
+        module.exit_json(changed=True, **results)
 
 
 from ansible.module_utils.basic import *
