@@ -206,6 +206,7 @@ import socket
 HAS_NETMIKO = True
 try:
     from netmiko import ConnectHandler
+    from netmiko.ssh_exception import NetMikoTimeoutException
 except:
     HAS_NETMIKO = False
 
@@ -303,6 +304,7 @@ def main():
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None),
             optional_args=dict(required=False, type='dict', default={}),
+            expect_reboot=dict(default=False, type='bool'),
         ),
         required_together=(
             ['password', 'username'],
@@ -335,6 +337,7 @@ def main():
     trigger_device_list = module.params['trigger_device_list']
     optional_args = module.params['optional_args']
     host = module.params['host']
+    expect_reboot = module.params['expect_reboot']
 
     if (connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet'] and
             not module.params['host']):
@@ -392,7 +395,13 @@ def main():
         if secret:
             device.enable()
 
-        rawtxt = device.send_command_timing(command, delay_factor=delay)
+        try:
+            rawtxt = device.send_command_timing(command, delay_factor=delay)
+        except NetMikoTimeoutException:
+            if expect_reboot:
+                rawtxt = ''
+            else:
+                module.fail_json(msg='Timeout while sending commands.')
 
     elif connection == 'trigger_ssh':
         if not HAS_TRIGGER:
@@ -435,7 +444,10 @@ def main():
     elif trigger_device_list:
         results['response'] = [commando.results]
 
-    module.exit_json(**results)
+    if expect_reboot:
+        module.exit_json(reboot=True, **results)
+    else:
+        module.exit_json(**results)
 
 
 from ansible.module_utils.basic import *

@@ -176,7 +176,7 @@ def main():
             secret=dict(required=False, type='str'),
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None, type='str'),
-            expect_reboot=dict(default=None, type='bool'),
+            expect_reboot=dict(default=False, type='bool'),
             global_delay_factor=dict(default=1, type='int')
         ),
         supports_check_mode=False
