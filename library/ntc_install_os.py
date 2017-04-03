@@ -38,7 +38,7 @@ options:
     platform:
         description:
             - Switch platform
-        required: true
+        required: false
         choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
     system_image_file:
         description:
@@ -52,15 +52,15 @@ options:
     host:
         description:
             - Hostame or IP address of switch.
-        required: true
+        required: false
     username:
         description:
             - Username used to login to the target device
-        required: true
+        required: false
     password:
         description:
             - Password used to login to the target device
-        required: true
+        required: false
     provider:
         description:
           - Dictionary which acts as a collection of arguments used to define the characteristics
