@@ -231,7 +231,6 @@ def main():
                             ['ntc_conf_file', 'port'],
                            ],
         required_one_of=[['host', 'ntc_host', 'provider']],
-        required_together=[['host', 'username', 'password', 'platform']],
         supports_check_mode=False
     )
 
@@ -256,6 +255,11 @@ def main():
     transport = module.params['transport']
     port = module.params['port']
     secret = module.params['secret']
+
+    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
 
     kwargs = {}
     if ntc_host is not None:

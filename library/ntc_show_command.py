@@ -298,7 +298,7 @@ def main():
         argument_spec=dict(
             connection=dict(choices=['ssh', 'offline', 'netmiko_ssh',
                             'trigger_ssh', 'netmiko_telnet', 'telnet'], default='netmiko_ssh'),
-            platform=dict(required=True),
+            platform=dict(required=False),
             file=dict(required=False),
             local_file=dict(required=False),
             index_file=dict(default='index'),

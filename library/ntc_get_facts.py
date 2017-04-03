@@ -221,6 +221,7 @@ def main():
             secret=dict(required=False),
             transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
+            provider=dict(type='dict', required=False),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
         ),
@@ -232,13 +233,19 @@ def main():
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
                            ],
-        required_one_of=[['host', 'ntc_host']],
-        required_together=[['host', 'username', 'password', 'platform']],
+        required_one_of=[['host', 'ntc_host', 'provider']],
         supports_check_mode=False
     )
 
     if not HAS_PYNTC:
         module.fail_json(msg='pyntc Python library not found.')
+
+    provider = module.params['provider'] or {}
+
+    # allow local params to override provider
+    for param, pvalue in provider.items():
+        if module.params.get(param) != False:
+            module.params[param] = module.params.get(param) or pvalue
 
     platform = module.params['platform']
     host = module.params['host']
@@ -251,6 +258,11 @@ def main():
     transport = module.params['transport']
     port = module.params['port']
     secret = module.params['secret']
+
+    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
 
     if ntc_host is not None:
         device = ntc_device_by_name(ntc_host, ntc_conf_file)

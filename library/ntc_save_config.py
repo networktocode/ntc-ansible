@@ -187,8 +187,7 @@ def main():
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
                            ],
-        required_one_of=[['host', 'ntc_host']],
-        required_together=[['host', 'username', 'password', 'platform']],
+        required_one_of=[['host', 'ntc_host', 'provider']],
         supports_check_mode=False
     )
 

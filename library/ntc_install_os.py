@@ -100,6 +100,14 @@ options:
 '''
 
 EXAMPLES = '''
+vars:
+  ios_provider:
+    host: "{{ inventory_hostname }}"
+    username: "ntc-ansible"
+    password: "ntc-ansible"
+    platform: "cisco_ios_ssh"
+    connection: ssh
+
 - ntc_install_os:
     ntc_host: n9k1
     system_image_file: n9000-dk9.6.1.2.I3.1.bin
@@ -111,6 +119,10 @@ EXAMPLES = '''
 
 - ntc_install_os:
     ntc_host: c2801
+    system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
+
+- ntc_install_os:
+    provider: "{{ ios_provider }}"
     system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
 '''
 
@@ -160,6 +172,7 @@ def main():
             secret=dict(required=False),
             transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
+            provider=dict(type='dict', required=False),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
             system_image_file=dict(required=True),
@@ -173,13 +186,19 @@ def main():
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
                            ],
-        required_one_of=[['host', 'ntc_host']],
-        required_together=[['host', 'username', 'password', 'platform']],
+        required_one_of=[['host', 'ntc_host', 'provider']],
         supports_check_mode=True
     )
 
     if not HAS_PYNTC:
         module.fail_json(msg='pyntc Python library not found.')
+
+    provider = module.params['provider'] or {}
+
+    # allow local params to override provider
+    for param, pvalue in provider.items():
+        if module.params.get(param) != False:
+            module.params[param] = module.params.get(param) or pvalue
 
     platform = module.params['platform']
     host = module.params['host']
@@ -192,6 +211,11 @@ def main():
     transport = module.params['transport']
     port = module.params['port']
     secret = module.params['secret']
+
+    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
 
     if ntc_host is not None:
         device = ntc_device_by_name(ntc_host, ntc_conf_file)
