@@ -59,7 +59,7 @@ options:
             - Hostame or IP address of switch.
         required: false
     provider:
-        description
+        description:
           - Dictionary which acts as a collection of arguments used to define the characteristics
             of how to connect to the device.
             Note - host, username, password, local_file, and platform must be defined in either
