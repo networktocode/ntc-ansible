@@ -138,6 +138,11 @@ options:
             - Path to private ssh key used for login when using netmiko
         required: false
         default: null
+    ssh_config_file:
+        description:
+            - Path to SSH configuration file for use by netmiko, required when using proxy
+        required: false
+        default: '~/.ssh/config'
 '''
 EXAMPLES = '''
 
@@ -316,6 +321,7 @@ def main():
             secret=dict(required=False, type='str', no_log=True),
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None),
+            ssh_config_file=dict(required=False, default='~/.ssh/config'),
             optional_args=dict(required=False, type='dict', default={}),
         ),
         mutually_exclusive=(
@@ -348,6 +354,7 @@ def main():
     use_templates = module.params['use_templates']
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
+    ssh_config_file = module.params['ssh_config_file']
     delay = int(module.params['delay'])
     global_delay_factor = int(module.params['global_delay_factor'])
     trigger_device_list = module.params['trigger_device_list']
@@ -414,7 +421,8 @@ def main():
             secret=secret,
             use_keys=use_keys,
             key_file=key_file,
-            global_delay_factor=global_delay_factor
+            global_delay_factor=global_delay_factor,
+            ssh_config_file=ssh_config_file
         )
         if secret:
             device.enable()
