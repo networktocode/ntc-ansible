@@ -124,14 +124,14 @@ rtr02              : ok=0    changed=0    unreachable=0    failed=1
 
 You can solve this by either changing the `gather_facts` to no, or removing the 3 `setup.XX` files.
 
-e.g. 
+Gather Facts Example: 
 ```
 - hosts: test
   connection: local
   gather_facts: yes
 ```
-e.g.
 
+Remove Files Example:
 ```
 rm ./setup.cfg
 rm ./setup.py
@@ -141,7 +141,7 @@ See https://github.com/ansible/ansible/issues/20702 and https://github.com/ansib
 
 #### This module requires TextFSM
 
-Most often seen in virtual enviroments as per ansible's interpretation which python you are is not as expected. You can tell that you have reached this issue if you correctly have textfsm installed, but receive the following warning:
+Most often seen in virtual enviroments as per ansible's interpretation of which python binary you are using is not as expected. You can tell that you have reached this issue if you correctly have textfsm installed, but receive the following warning:
 
 ```
 FAILED! => {"changed": false, "failed": true, "msg": "This module requires TextFSM"}
