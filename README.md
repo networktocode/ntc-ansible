@@ -128,7 +128,7 @@ Gather Facts Example:
 ```
 - hosts: test
   connection: local
-  gather_facts: yes
+  gather_facts: no
 ```
 
 Remove Files Example:
