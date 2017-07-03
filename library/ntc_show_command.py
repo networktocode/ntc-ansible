@@ -326,6 +326,11 @@ def main():
 
     provider = module.params['provider'] or {}
 
+    no_log = ['password', 'secret']
+    for param in no_log:
+        if provider.get(param):
+            module.no_log_values.update(return_values(provider[param]))
+
     # allow local params to override provider
     for param, pvalue in provider.items():
         if module.params.get(param) != False:
