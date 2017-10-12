@@ -317,6 +317,7 @@ def main():
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None),
             optional_args=dict(required=False, type='dict', default={}),
+            connection_args=dict(required=False, type='dict', default={}),
         ),
         mutually_exclusive=(
             ['host', 'trigger_device_list'],
@@ -357,6 +358,7 @@ def main():
     global_delay_factor = int(module.params['global_delay_factor'])
     trigger_device_list = module.params['trigger_device_list']
     optional_args = module.params['optional_args']
+    connection_args = module.params['connection_args']
     host = module.params['host']
 
     if (connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet'] and
@@ -410,7 +412,7 @@ def main():
         if not HAS_NETMIKO:
             module.fail_json(msg='This module requires netmiko.')
 
-        device = ConnectHandler(
+        device_args = dict(
             device_type=device_type,
             ip=host,
             port=port,
@@ -421,6 +423,9 @@ def main():
             key_file=key_file,
             global_delay_factor=global_delay_factor
         )
+        if connection_args:
+            device_args.update(connection_args)
+        device = ConnectHandler(**device_args)
         if secret:
             device.enable()
 
@@ -433,7 +438,12 @@ def main():
         kwargs['production_only'] = False
         kwargs['force_cli'] = True
         if optional_args:
+            module.deprecate(
+                msg="optional_args is deprecated in favor of connection_args."
+            )
             kwargs.update(optional_args)
+        if connection_args:
+            kwargs.update(connection_args)
 
         if host:
             commando = Commando(devices=[host], commands=[command],
