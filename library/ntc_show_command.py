@@ -44,6 +44,11 @@ options:
         required: false
         default: ssh
         choices: ['ssh', 'offline', 'netmiko_ssh', 'trigger_ssh', 'netmiko_telnet', 'telnet']
+    connection_args:
+        description:
+            - Transport parameters specific to netmiko, trigger, etc.
+        required: false
+        default: {}
     platform:
         description:
             - Platform FROM the index file
@@ -211,6 +216,17 @@ vars:
     username: "{{ username }}"
     password: "{{ password }}"
 
+# USING BASTION HOST WITH NETMIKO
+  - ntc_show_command:
+      connection: netmiko_ssh
+      platform: arista_eos
+      command: show ip interface brief
+      template_dir: '/home/ntc/ntc-templates/templates'
+      host: "{{inventory_hostname}}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      connection_args:
+        ssh_config_file: '/home/ntc/playbook/ssh_config'
 '''
 
 import os.path
