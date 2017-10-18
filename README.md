@@ -49,6 +49,8 @@ cd ntc-ansible
 git submodule update --init --recursive
 ```
 
+Note: if you want to use **ntc_show_command** for parsing with ntc-templates, you navigate to that directory after the clone and run the setup.py file, e.g. `sudo python setup.py install`.
+
 
 As a quick test and sanity use `ansible-doc` on one of the modules before trying to use them in a playbook.  For example, try this:
 
