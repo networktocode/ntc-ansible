@@ -232,6 +232,12 @@ vars:
 import os.path
 import socket
 
+HAS_NTC_TEMPLATES = True
+try:
+    from ntc_templates.parse import _get_template_dir as ntc_get_template_dir
+except:
+    HAS_NTC_TEMPLATES = False
+
 HAS_NETMIKO = True
 try:
     from netmiko import ConnectHandler
@@ -255,6 +261,10 @@ try:
 except:
     HAS_TRIGGER = False
 
+if HAS_NTC_TEMPLATES:
+    NTC_TEMPLATES_DIR = ntc_get_template_dir()
+else:
+    NTC_TEMPLATES_DIR = 'ntc_templates/templates'
 
 def clitable_to_dict(cli_table):
     """Converts TextFSM cli_table object to list of dictionaries
@@ -318,7 +328,7 @@ def main():
             file=dict(required=False),
             local_file=dict(required=False),
             index_file=dict(default='index'),
-            template_dir=dict(default='ntc-templates/templates'),
+            template_dir=dict(default=NTC_TEMPLATES_DIR),
             use_templates=dict(required=False, default=True, type='bool'),
             trigger_device_list=dict(type='list', required=False),
             command=dict(required=True),
