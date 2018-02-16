@@ -279,13 +279,16 @@ def clitable_to_dict(cli_table):
     return objs
 
 
-def get_structured_data(rawoutput, module):
+def get_structured_data(rawoutput, module, command=None):
     index_file = module.params['index_file']
     template_dir = module.params['template_dir']
     cli_table = clitable.CliTable(index_file, template_dir)
+    # for command_list command is explicitly specified. otherwise - get it from module
+    if not command:
+        command = module.params['command']
 
     attrs = dict(
-        Command=module.params['command'],
+        Command=command,
         Platform=module.params['platform']
     )
     try:
@@ -312,6 +315,12 @@ def parse_raw_output(rawoutput, module):
             sd = get_structured_data(raw_txt, module)
             temp = dict(device=device, response=sd)
             structured_data_response_list.append(temp)
+    # in case command_list is used
+    elif isinstance(rawoutput, list):
+        for raw_txt, command in zip(rawoutput, module.params["command_list"]):
+            sd = get_structured_data(raw_txt, module, command)
+            temp = dict(command=command, response=sd)
+            structured_data_response_list.append(temp)
     else:
         structured_data = get_structured_data(rawoutput, module)
 
@@ -331,7 +340,8 @@ def main():
             template_dir=dict(default=NTC_TEMPLATES_DIR),
             use_templates=dict(required=False, default=True, type='bool'),
             trigger_device_list=dict(type='list', required=False),
-            command=dict(required=True),
+            command=dict(type='str', required=False),
+            command_list=dict(type='list', required=False),
             host=dict(required=False),
             provider=dict(required=False, type='dict'),
             port=dict(required=False),
@@ -347,6 +357,7 @@ def main():
         ),
         mutually_exclusive=(
             ['host', 'trigger_device_list'],
+            ['command', 'command_list'],
         ),
         supports_check_mode=False
     )
@@ -374,6 +385,7 @@ def main():
     index_file = module.params['index_file']
     template_dir = module.params['template_dir']
     command = module.params['command']
+    command_list = module.params['command_list']
     username = module.params['username']
     password = module.params['password']
     secret = module.params['secret']
@@ -387,10 +399,9 @@ def main():
     connection_args = module.params['connection_args']
     host = module.params['host']
 
-    if (connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet'] and
-            not module.params['host']):
+    if connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet'] and not host:
         module.fail_json(msg='specify host when connection='
-                             'ssh/netmiko_ssh/netmiko_telnet')
+                             'ssh/telnet/netmiko_ssh/netmiko_telnet/')
 
     if connection in ['netmiko_telnet', 'telnet'] and platform != 'cisco_ios':
         module.fail_json(msg='only cisco_ios supports '
@@ -398,6 +409,9 @@ def main():
 
     if platform == 'cisco_ios' and connection in ['netmiko_telnet', 'telnet']:
         device_type = 'cisco_ios_telnet'
+
+    if connection in ['trigger_ssh', 'offline'] and command_list:
+        module.fail_json(msg='currently command_list is not supported by trigger_ssh/offline connections')
 
     if module.params['port']:
         port = int(module.params['port'])
@@ -434,6 +448,7 @@ def main():
 
 
     rawtxt = ''
+    rawtxt_list = []
     if connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet']:
         if not HAS_NETMIKO:
             module.fail_json(msg='This module requires netmiko.')
@@ -455,7 +470,11 @@ def main():
         if secret:
             device.enable()
 
-        rawtxt = device.send_command_timing(command, delay_factor=delay)
+        if command:
+            rawtxt = device.send_command_timing(command, delay_factor=delay)
+        elif command_list:
+            for cmd in command_list:
+                rawtxt_list.append(device.send_command_timing(cmd, delay_factor=delay))
 
     elif connection == 'trigger_ssh':
         if not HAS_TRIGGER:
@@ -494,10 +513,13 @@ def main():
     results['response_list'] = []
 
     if use_templates:
-        if rawtxt:
-            results['response'] = parse_raw_output(rawtxt, module)
-        elif trigger_device_list:
-            results['response_list'] = parse_raw_output(commando.results, module)
+        if command:
+            if rawtxt:
+                results['response'] = parse_raw_output(rawtxt, module)
+            elif trigger_device_list:
+                results['response_list'] = parse_raw_output(commando.results, module)
+        elif command_list:
+            results['response_list'] = parse_raw_output(rawtxt_list, module)
     elif rawtxt:
         results['response'] = [rawtxt]
     elif trigger_device_list:
