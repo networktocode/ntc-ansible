@@ -303,7 +303,7 @@ def get_structured_data(rawoutput, module, command=None):
     return structured_data
 
 
-def parse_raw_output(rawoutput, module):
+def parse_raw_output(rawoutput, module, timestamp_list=None):
     """Returns a dict if using netmiko and list of dicts if using trigger
     """
     structured_data_response_list = []
@@ -317,9 +317,9 @@ def parse_raw_output(rawoutput, module):
             structured_data_response_list.append(temp)
     # in case command_list is used
     elif isinstance(rawoutput, list):
-        for raw_txt, command in zip(rawoutput, module.params["command_list"]):
+        for raw_txt, command, timestamp in zip(rawoutput, module.params["command_list"], timestamp_list):
             sd = get_structured_data(raw_txt, module, command)
-            temp = dict(command=command, response=sd)
+            temp = dict(command=command, response=sd, response_timestamp=timestamp)
             structured_data_response_list.append(temp)
     else:
         structured_data = get_structured_data(rawoutput, module)
@@ -401,7 +401,7 @@ def main():
 
     if connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet'] and not host:
         module.fail_json(msg='specify host when connection='
-                             'ssh/telnet/netmiko_ssh/netmiko_telnet/')
+                             'ssh/telnet/netmiko_ssh/netmiko_telnet')
 
     if connection in ['netmiko_telnet', 'telnet'] and platform != 'cisco_ios':
         module.fail_json(msg='only cisco_ios supports '
@@ -449,6 +449,9 @@ def main():
 
     rawtxt = ''
     rawtxt_list = []
+    timestamp = ''
+    timestamp_list = []
+
     if connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet']:
         if not HAS_NETMIKO:
             module.fail_json(msg='This module requires netmiko.')
@@ -471,9 +474,11 @@ def main():
             device.enable()
 
         if command:
+            timestamp = datetime.datetime.now().replace(microsecond=0).isoformat()
             rawtxt = device.send_command_timing(command, delay_factor=delay)
         elif command_list:
             for cmd in command_list:
+                timestamp_list.append(datetime.datetime.now().replace(microsecond=0).isoformat())
                 rawtxt_list.append(device.send_command_timing(cmd, delay_factor=delay))
 
     elif connection == 'trigger_ssh':
@@ -516,12 +521,17 @@ def main():
         if command:
             if rawtxt:
                 results['response'] = parse_raw_output(rawtxt, module)
+                results['response_timestamp'] = timestamp
             elif trigger_device_list:
                 results['response_list'] = parse_raw_output(commando.results, module)
         elif command_list:
-            results['response_list'] = parse_raw_output(rawtxt_list, module)
+            results['response_list'] = parse_raw_output(rawtxt_list, module, timestamp_list)
     elif rawtxt:
         results['response'] = [rawtxt]
+        results['response_timestamp'] = timestamp
+    elif rawtxt_list:
+        results['response_list'] = [{'command': c, 'response': r, 'response_timestamp': t}
+                                    for c, r, t in zip(command_list, rawtxt_list, timestamp_list)]
     elif trigger_device_list:
         results['response'] = [commando.results]
 
