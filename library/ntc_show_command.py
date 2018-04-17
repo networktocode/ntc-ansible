@@ -84,6 +84,14 @@ options:
               be rendered with the the TextFSM template
         required: false
         default: null
+    in_string:
+        description:
+            - If using connection=offline, this is a string that contains the 
+              output from a command run previously within the playbook.  This is
+              most useful when using commands like ios_command to get output from
+              a device then sending it to ntc_show_command to parse it.
+        required: false
+        default: null
     command:
         description:
             - Command to execute on target device
@@ -326,6 +334,7 @@ def main():
                             'trigger_ssh', 'netmiko_telnet', 'telnet'], default='netmiko_ssh'),
             platform=dict(required=False),
             file=dict(required=False),
+            in_string=dict(required=False),
             local_file=dict(required=False),
             index_file=dict(default='index'),
             template_dir=dict(default=NTC_TEMPLATES_DIR),
@@ -370,6 +379,9 @@ def main():
     platform = module.params['platform']
     device_type = platform.split('-')[0]
     raw_file = module.params['file']
+# SH - not 100% sure this will work properly
+    in_string = module.params['in_string']
+#    raw_output = module.params['stdout']
     local_file = module.params['local_file']
     index_file = module.params['index_file']
     template_dir = module.params['template_dir']
@@ -419,8 +431,8 @@ def main():
         if val is None:
             module.fail_json(msg=str(key) + " is required")
 
-    if connection == 'offline' and not raw_file:
-        module.fail_json(msg='specifiy file if using connection=offline')
+    if connection == 'offline' and not raw_file and not in_string:
+        module.fail_json(msg='specifiy file or in_string if using connection=offline')
 
     if template_dir.endswith('/'):
         template_dir.rstrip('/')
@@ -482,8 +494,11 @@ def main():
             commando.run()
 
     elif connection == 'offline':
-        with open(raw_file, 'r') as data:
-            rawtxt = data.read()
+        if raw_file:
+            with open(raw_file, 'r') as data:
+                rawtxt = data.read()
+        else:
+            rawtxt = in_string
 
     if local_file:
         with open(local_file, 'w') as f:

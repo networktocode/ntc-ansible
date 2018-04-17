@@ -33,6 +33,11 @@ options:
         required: false
         default: ssh
         choices: ['ssh', 'telnet']
+    connection_args:
+        description:
+            - Path to SSH configuration file for use by netmike, required when using proxy
+        required: false
+        default: '~/.ssh/config'
     platform:
         description:
             - Platform FROM the index file
@@ -63,6 +68,18 @@ options:
             - SSH port to use to connect to the target device
         required: false
         default: 22 for SSH. 23 for Telnet
+    delay:
+        description:
+            - Wait for command output from target device when using netmiko
+        required: false
+        default: 1
+    global_delay_factor:
+        description:
+            - Sets delay between operations.
+        required: false
+        default: 1
+        choices: []
+        aliases: []
     username:
         description:
             - Username used to login to the target device
@@ -159,11 +176,14 @@ def main():
             host=dict(required=False),
             port=dict(required=False),
             provider=dict(type='dict', required=False),
+            delay=dict(default=1, required=False),
+            global_delay_factor=dict(default=1, required=False),
             username=dict(required=False, type='str'),
             password=dict(required=False, type='str', no_log=True),
             secret=dict(required=False, type='str', no_log=True),
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None, type='str'),
+            connection_args=dict(required=False, type='dict', default={}),
         ),
         supports_check_mode=False
     )
@@ -191,7 +211,10 @@ def main():
     secret = module.params['secret']
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
-
+    delay = int(module.params['delay'])
+    global_delay_factor = int(module.params['global_delay_factor'])
+    
+    connection_args = module.params['connection_args']
 
     argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
     for key, val in argument_check.items():
@@ -217,21 +240,29 @@ def main():
             port = 22
 
     if connection in ['ssh', 'telnet']:
-        device = ConnectHandler(device_type=device_type,
-                                ip=socket.gethostbyname(host),
-                                port=port,
-                                username=username,
-                                password=password,
-                                secret=secret,
-                                use_keys=use_keys,
-                                key_file=key_file
-                                )
+        device_args = dict(device_type=device_type,
+                           ip=socket.gethostbyname(host),
+                           port=port,
+                           username=username,
+                           password=password,
+                           secret=secret,
+                           use_keys=use_keys,
+                           key_file=key_file,
+                           global_delay_factor=global_delay_factor
+
+        )
+
+        if connection_args:
+            device_args.update(connection_args)
+
+        device = ConnectHandler(**device_args)
 
         if secret:
             device.enable()
 
         if commands:
             output = device.send_config_set(commands)
+#        rawtxt = device.send_command_timing(command, delay_factor=delay)
         else:
             try:
                 if commands_file:
@@ -254,3 +285,4 @@ def main():
 from ansible.module_utils.basic import *
 if __name__ == "__main__":
     main()
+
