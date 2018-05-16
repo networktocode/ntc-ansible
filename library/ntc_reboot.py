@@ -197,7 +197,7 @@ def main():
             port=dict(required=False, type='int'),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
-            confirm=dict(required=False, default=False, type='bool', choices=BOOLEANS),
+            confirm=dict(required=False, default=False, type='bool'),
             timer=dict(requred=False, type='int'),
             timeout=dict(required=False, type='int', default=240)
         ),
@@ -275,8 +275,4 @@ def main():
     module.exit_json(changed=changed, rebooted=rebooted, reachable=reachable, atomic=atomic)
 
 from ansible.module_utils.basic import *
-try:
-    from ansible.module_utils.basic import BOOLEANS
-except ImportError:
-    from ansible.module_utils.parsing.convert_bool import BOOLEANS
 main()
