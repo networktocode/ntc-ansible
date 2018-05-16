@@ -275,4 +275,8 @@ def main():
     module.exit_json(changed=changed, rebooted=rebooted, reachable=reachable, atomic=atomic)
 
 from ansible.module_utils.basic import *
+try:
+    from ansible.module_utils.basic import BOOLEANS
+except ImportError:
+    from ansible.module_utils.parsing.convert_bool import BOOLEANS
 main()
