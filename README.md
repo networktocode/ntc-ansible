@@ -49,6 +49,8 @@ cd ntc-ansible
 git submodule update --init --recursive
 ```
 
+Note: if you want to use **ntc_show_command** for parsing with ntc-templates, you navigate to that directory after the clone and run the setup.py file, e.g. `sudo python setup.py install`.
+
 
 As a quick test and sanity use `ansible-doc` on one of the modules before trying to use them in a playbook.  For example, try this:
 
@@ -102,6 +104,57 @@ pip install terminal
   * **ntc_rollback** - performs two major functions.  (1) Creates a checkpoint file or backup running config on box. (2) Rolls back to the previously created checkpoint/backup config.  Use case is to create the checkpoint/backup as the first task in a playbook and then rollback to it _if_ needed using block/rescue, i.e. try/except in Ansible. Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
   * **ntc_install_os** - installs a new operating system or just sets boot options.  Depends on platform.  Does not issue a "reload" command, but the device may perform an automatic reboot.  Common workflow is to use ntc_file_copy, ntc_install_os, and then ntc_reboot (if needed) for upgrades.  Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
 
+## Common Issues
+
+#### Gather Facts
+
+Starting in Ansible 2.1 there is a name space conflict when gathering facts. The below message will indicate the issues:
+
+```
+TASK [Gathering Facts] *************************************************************************
+*Using module file /home/bdowling/src/ansible-modules/ntc-ansible/setup.cfg*
+fatal: [rtr02]: FAILED! => {
+    "failed": true, 
+    "msg": "module (setup) is missing interpreter line"
+}
+
+msg: module (setup) is missing interpreter line
+
+PLAY RECAP *************************************************************************************
+rtr02              : ok=0    changed=0    unreachable=0    failed=1   
+```
+
+You can solve this by either changing the `gather_facts` to no, or removing the 3 `setup.XX` files.
+
+Gather Facts Example: 
+```
+- hosts: test
+  connection: local
+  gather_facts: no
+```
+
+Remove Files Example:
+```
+rm ./setup.cfg
+rm ./setup.py
+rm ./ntc-templates/setup.py
+```
+See https://github.com/ansible/ansible/issues/20702 and https://github.com/ansible/ansible/pull/20717 for further details.
+
+#### This module requires TextFSM
+
+Most often seen in virtual enviroments as per ansible's interpretation of which python binary you are using is not as expected. You can tell that you have reached this issue if you correctly have textfsm installed, but receive the following warning:
+
+```
+FAILED! => {"changed": false, "failed": true, "msg": "This module requires TextFSM"}
+```
+To fix this add the following to your inventory or similar to your `group_vars/all.yml`
+
+```
+[vars:all]
+ansible_python_interpreter="/usr/bin/env python"
+```
+see https://github.com/ansible/ansible/issues/6345#issuecomment-181999529 for further details. 
 
 ## Examples
 

@@ -32,7 +32,7 @@ options:
     platform:
         description:
             - Vendor and platform identifier.
-        required: true
+        required: false
         choices: ['cisco_nxos_nxapi', 'cisco_ios_ssh', 'arista_eos_eapi']
     checkpoint_file:
         description:
@@ -47,15 +47,23 @@ options:
     host:
         description:
             - Hostame or IP address of switch.
-        required: true
+        required: false
     username:
         description:
             - Username used to login to the target device.
-        required: true
+        required: false
     password:
         description:
             - Password used to login to the target device.
-        required: true
+        required: false
+    provider:
+        description:
+          - Dictionary which acts as a collection of arguments used to define the characteristics
+            of how to connect to the device.
+            Note - host, username, password and platform must be defined in either provider
+            or local param
+            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
+        required: false
     secret:
         description:
             - Enable secret for devices connecting over SSH.
@@ -88,6 +96,18 @@ options:
 '''
 
 EXAMPLES = '''
+vars:
+  nxos_provider:
+    host: "{{ inventory_hostname }}"
+    username: "ntc-ansible"
+    password: "ntc-ansible"
+    platform: "cisco_nxos"
+    connection: ssh
+
+- ntc_rollback:
+    provider: "{{ nxos_provider }}"
+    rollback_to: backup.cfg
+
 - ntc_rollback:
     ntc_host: eos1
     checkpoint_file: backup.cfg
@@ -128,8 +148,9 @@ def main():
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
-            password=dict(required=False, type='str'),
-            secret=dict(required=False),
+            provider=dict(required=False, type='dict'),
+            password=dict(required=False, type='str', no_log=True),
+            secret=dict(required=False, no_log=True),
             transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
             ntc_host=dict(required=False),
@@ -146,13 +167,25 @@ def main():
                             ['ntc_conf_file', 'port'],
                             ['checkpoint_file', 'rollback_to'],
                            ],
-        required_one_of=[['host', 'ntc_host']],
+        required_one_of=[['host', 'ntc_host', 'provider']],
         required_together=[['host', 'username', 'password', 'platform']],
         supports_check_mode=False
     )
 
     if not HAS_PYNTC:
         module.fail_json(msg='pyntc Python library not found.')
+
+    provider = module.params['provider'] or {}
+
+    no_log = ['password', 'secret']
+    for param in no_log:
+        if provider.get(param):
+            module.no_log_values.update(return_values(provider[param]))
+
+    # allow local params to override provider
+    for param, pvalue in provider.items():
+        if module.params.get(param) != False:
+            module.params[param] = module.params.get(param) or pvalue
 
     platform = module.params['platform']
     host = module.params['host']
@@ -182,6 +215,11 @@ def main():
 
     checkpoint_file = module.params['checkpoint_file']
     rollback_to = module.params['rollback_to']
+
+    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
 
     device.open()
 

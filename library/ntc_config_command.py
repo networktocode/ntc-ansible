@@ -62,7 +62,7 @@ options:
             - IP Address or hostname (resolvable by Ansible control host)
         required: false
     provider:
-        description
+        description:
           - Dictionary which acts as a collection of arguments used to define the characteristics
             of how to connect to the device.
             Note - host, username, password and platform must be defined in either provider
@@ -172,8 +172,8 @@ def main():
             port=dict(required=False),
             provider=dict(type='dict', required=False),
             username=dict(required=False, type='str'),
-            password=dict(required=False, type='str'),
-            secret=dict(required=False, type='str'),
+            password=dict(required=False, type='str', no_log=True),
+            secret=dict(required=False, type='str', no_log=True),
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None, type='str'),
             expect_reboot=dict(default=False, type='bool'),
@@ -184,9 +184,15 @@ def main():
 
     provider = module.params['provider'] or {}
 
+    no_log = ['password', 'secret']
+    for param in no_log:
+        if provider.get(param):
+            module.no_log_values.update(return_values(provider[param]))
+    
     # allow local params to override provider
     for param, pvalue in provider.items():
-        module.params[param] = module.params.get(param, None) or pvalue
+        if module.params.get(param) != False:
+            module.params[param] = module.params.get(param) or pvalue
 
     host = module.params['host']
     connection = module.params['connection']

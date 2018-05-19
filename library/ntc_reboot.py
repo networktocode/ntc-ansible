@@ -32,7 +32,7 @@ options:
     platform:
         description:
             - Switch platform
-        required: true
+        required: false
         choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
     timer:
         description:
@@ -53,15 +53,23 @@ options:
     host:
         description:
             - Hostame or IP address of switch.
-        required: true
+        required: false
     username:
         description:
             - Username used to login to the target device
-        required: true
+        required: false
     password:
         description:
             - Password used to login to the target device
-        required: true
+        required: false
+    provider:
+        description:
+          - Dictionary which acts as a collection of arguments used to define the characteristics
+            of how to connect to the device.
+            Note - host, username, password and platform must be defined in either provider
+            or local param
+            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
+        required: false
     secret:
         description:
             - Enable secret for devices connecting over SSH.
@@ -93,6 +101,18 @@ options:
 '''
 
 EXAMPLES = '''
+vars:
+  nxos_provider:
+    host: "{{ inventory_hostname }}"
+    username: "ntc-ansible"
+    password: "ntc-ansible"
+    platform: cisco_nxos_nxapi
+    connection: http
+
+- ntc_reboot:
+    provider: "{{ nxos_provider }}"
+    confirm: true
+
 - ntc_reboot:
     platform: cisco_nxos_nxapi
     confirm: true
@@ -191,13 +211,14 @@ def main():
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
-            password=dict(required=False, type='str'),
-            secret=dict(required=False),
+            provider=dict(required=False, type='dict'),
+            password=dict(required=False, type='str', no_log=True),
+            secret=dict(required=False, no_log=True),
             transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
-            confirm=dict(required=False, default=False, type='bool', choices=BOOLEANS),
+            confirm=dict(required=False, default=False, type='bool'),
             timer=dict(requred=False, type='int'),
             timeout=dict(required=False, type='int', default=240)
         ),
@@ -209,13 +230,24 @@ def main():
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
                            ],
-        required_one_of=[['host', 'ntc_host']],
-        required_together=[['host', 'username', 'password', 'platform']],
+        required_one_of=[['host', 'ntc_host', 'provider']],
         supports_check_mode=False
     )
 
     if not HAS_PYNTC:
         module.fail_json(msg='pyntc Python library not found.')
+
+    provider = module.params['provider'] or {}
+
+    no_log = ['password', 'secret']
+    for param in no_log:
+        if provider.get(param):
+            module.no_log_values.update(return_values(provider[param]))
+
+    # allow local params to override provider
+    for param, pvalue in provider.items():
+        if module.params.get(param) != False:
+            module.params[param] = module.params.get(param) or pvalue
 
     platform = module.params['platform']
     host = module.params['host']
@@ -228,6 +260,11 @@ def main():
     transport = module.params['transport']
     port = module.params['port']
     secret = module.params['secret']
+
+    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
 
     kwargs = {}
     if ntc_host is not None:
@@ -256,6 +293,10 @@ def main():
             and device.device_type not in supported_timer_platforms:
         module.fail_json(msg='Timer parameter not supported on platform %s.' % platform)
 
+    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
     device.open()
 
     changed = False

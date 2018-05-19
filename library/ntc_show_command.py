@@ -44,10 +44,15 @@ options:
         required: false
         default: ssh
         choices: ['ssh', 'offline', 'netmiko_ssh', 'trigger_ssh', 'netmiko_telnet', 'telnet']
+    connection_args:
+        description:
+            - Transport parameters specific to netmiko, trigger, etc.
+        required: false
+        default: {}
     platform:
         description:
             - Platform FROM the index file
-        required: true
+        required: false
     template_dir:
         description:
             - path where TextFSM templates are stored. Default path is ntc
@@ -88,6 +93,14 @@ options:
             - IP Address or hostname (resolvable by Ansible control host)
         required: false
         default: null
+    provider:
+        description:
+          - Dictionary which acts as a collection of arguments used to define the characteristics
+            of how to connect to the device.
+            Note - host, username, password and platform must be defined in either provider
+            or local param
+            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
+        required: false
     port:
         description:
             - Port to use to connect to the target device
@@ -133,15 +146,20 @@ options:
 '''
 EXAMPLES = '''
 
-# get vlan data using netmiko
+vars:
+  nxos_provider:
+    host: "{{ inventory_hostname }}"
+    username: "ntc-ansible"
+    password: "ntc-ansible"
+    platform: "cisco_nxos"
+    connection: ssh
+
+# get vlan data using netmiko and provider
 - ntc_show_command:
     connection=ssh
-    platform=cisco_nxos
     command='show vlan'
     template_dir: '/home/ntc/ntc-templates/template'
-    host={{ inventory_hostname }}
-    username={{ username }}
-    password={{ password }}
+    provider: "{{ nxos_provider }}"
 
 # get snmp community using netmiko
 - ntc_show_command:
@@ -198,10 +216,27 @@ EXAMPLES = '''
     username: "{{ username }}"
     password: "{{ password }}"
 
+# USING BASTION HOST WITH NETMIKO
+  - ntc_show_command:
+      connection: netmiko_ssh
+      platform: arista_eos
+      command: show ip interface brief
+      template_dir: '/home/ntc/ntc-templates/templates'
+      host: "{{inventory_hostname}}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      connection_args:
+        ssh_config_file: '/home/ntc/playbook/ssh_config'
 '''
 
 import os.path
 import socket
+
+HAS_NTC_TEMPLATES = True
+try:
+    from ntc_templates.parse import _get_template_dir as ntc_get_template_dir
+except:
+    HAS_NTC_TEMPLATES = False
 
 HAS_NETMIKO = True
 try:
@@ -227,6 +262,10 @@ try:
 except:
     HAS_TRIGGER = False
 
+if HAS_NTC_TEMPLATES:
+    NTC_TEMPLATES_DIR = ntc_get_template_dir()
+else:
+    NTC_TEMPLATES_DIR = 'ntc_templates/templates'
 
 def clitable_to_dict(cli_table):
     """Converts TextFSM cli_table object to list of dictionaries
@@ -286,24 +325,26 @@ def main():
         argument_spec=dict(
             connection=dict(choices=['ssh', 'offline', 'netmiko_ssh',
                             'trigger_ssh', 'netmiko_telnet', 'telnet'], default='netmiko_ssh'),
-            platform=dict(required=True),
+            platform=dict(required=False),
             file=dict(required=False),
             local_file=dict(required=False),
             index_file=dict(default='index'),
-            template_dir=dict(default='ntc-templates/templates'),
+            template_dir=dict(default=NTC_TEMPLATES_DIR),
             use_templates=dict(required=False, default=True, type='bool'),
             trigger_device_list=dict(type='list', required=False),
             command=dict(required=True),
             host=dict(required=False),
+            provider=dict(required=False, type='dict'),
             port=dict(required=False),
             delay=dict(default=1, required=False),
             global_delay_factor=dict(default=1, required=False),
             username=dict(required=False, type='str'),
-            password=dict(required=False, type='str'),
-            secret=dict(required=False, type='str'),
+            password=dict(required=False, type='str', no_log=True),
+            secret=dict(required=False, type='str', no_log=True),
             use_keys=dict(required=False, default=False, type='bool'),
             key_file=dict(required=False, default=None),
             optional_args=dict(required=False, type='dict', default={}),
+            connection_args=dict(required=False, type='dict', default={}),
             expect_reboot=dict(default=False, type='bool'),
         ),
         required_together=(
@@ -314,6 +355,18 @@ def main():
         ),
         supports_check_mode=False
     )
+
+    provider = module.params['provider'] or {}
+
+    no_log = ['password', 'secret']
+    for param in no_log:
+        if provider.get(param):
+            module.no_log_values.update(return_values(provider[param]))
+
+    # allow local params to override provider
+    for param, pvalue in provider.items():
+        if module.params.get(param) != False:
+            module.params[param] = module.params.get(param) or pvalue
 
     if not HAS_TEXTFSM:
         module.fail_json(msg='This module requires TextFSM')
@@ -336,6 +389,7 @@ def main():
     global_delay_factor = int(module.params['global_delay_factor'])
     trigger_device_list = module.params['trigger_device_list']
     optional_args = module.params['optional_args']
+    connection_args = module.params['connection_args']
     host = module.params['host']
     expect_reboot = module.params['expect_reboot']
 
@@ -359,9 +413,17 @@ def main():
         else:
             port = 22
 
+    argument_check = { 'platform': platform }
     if connection != 'offline':
+        argument_check['username'] = username
+        argument_check['password'] = password
+        argument_check['host'] = host
         if not host and not trigger_device_list:
             module.fail_json(msg='specify host or trigger_device_list based on connection')
+
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
 
     if connection == 'offline' and not raw_file:
         module.fail_json(msg='specifiy file if using connection=offline')
@@ -376,12 +438,13 @@ def main():
         if raw_file and not os.path.isfile(raw_file):
             module.fail_json(msg='could not read raw text file')
 
+
     rawtxt = ''
     if connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet']:
         if not HAS_NETMIKO:
             module.fail_json(msg='This module requires netmiko.')
 
-        device = ConnectHandler(
+        device_args = dict(
             device_type=device_type,
             ip=host,
             port=port,
@@ -392,6 +455,9 @@ def main():
             key_file=key_file,
             global_delay_factor=global_delay_factor
         )
+        if connection_args:
+            device_args.update(connection_args)
+        device = ConnectHandler(**device_args)
         if secret:
             device.enable()
 
@@ -410,7 +476,12 @@ def main():
         kwargs['production_only'] = False
         kwargs['force_cli'] = True
         if optional_args:
+            module.deprecate(
+                msg="optional_args is deprecated in favor of connection_args."
+            )
             kwargs.update(optional_args)
+        if connection_args:
+            kwargs.update(connection_args)
 
         if host:
             commando = Commando(devices=[host], commands=[command],

@@ -51,6 +51,14 @@ options:
             - Password used to login to the target device
         required: false
         default: null
+    provider:
+        description:
+          - Dictionary which acts as a collection of arguments used to define the characteristics
+            of how to connect to the device.
+            Note - host, username, password and platform must be defined in either provider
+            or local param
+            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
+        required: false
     secret:
         description:
             - Enable secret for devices connecting over SSH.
@@ -83,6 +91,19 @@ options:
 '''
 
 EXAMPLES = '''
+vars:
+  nxos_provider:
+    host: "{{ inventory_hostname }}"
+    username: "ntc-ansible"
+    password: "ntc-ansible"
+    platform: "cisco_nxos"
+    connection: ssh
+
+- ntc_get_facts:
+    provider: "{{ nxos_provider }}"
+    ntc_host: n9k1
+    ntc_conf_file: .ntc.conf
+
 - ntc_get_facts:
     platform: cisco_nxos_nxapi
     host: "{{ inventory_hostname }}"
@@ -196,10 +217,11 @@ def main():
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
-            password=dict(required=False, type='str'),
-            secret=dict(required=False),
+            password=dict(required=False, type='str', no_log=True),
+            secret=dict(required=False, no_log=True),
             transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
+            provider=dict(type='dict', required=False),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
         ),
@@ -211,13 +233,24 @@ def main():
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
                            ],
-        required_one_of=[['host', 'ntc_host']],
-        required_together=[['host', 'username', 'password', 'platform']],
+        required_one_of=[['host', 'ntc_host', 'provider']],
         supports_check_mode=False
     )
 
     if not HAS_PYNTC:
         module.fail_json(msg='pyntc Python library not found.')
+
+    provider = module.params['provider'] or {}
+
+    no_log = ['password', 'secret']
+    for param in no_log:
+        if provider.get(param):
+            module.no_log_values.update(return_values(provider[param]))
+
+    # allow local params to override provider
+    for param, pvalue in provider.items():
+        if module.params.get(param) != False:
+            module.params[param] = module.params.get(param) or pvalue
 
     platform = module.params['platform']
     host = module.params['host']
@@ -230,6 +263,11 @@ def main():
     transport = module.params['transport']
     port = module.params['port']
     secret = module.params['secret']
+
+    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
 
     if ntc_host is not None:
         device = ntc_device_by_name(ntc_host, ntc_conf_file)
