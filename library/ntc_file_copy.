@@ -248,7 +248,6 @@ def main():
         device = ntc_device_by_name(ntc_host, ntc_conf_file)
     else:
         kwargs = {}
-        kwargs['global_delay_factor'] = global_delay_factor
         if transport is not None:
             kwargs['transport'] = transport
         if port is not None:
@@ -257,7 +256,7 @@ def main():
             kwargs['secret'] = secret
 
         device_type = platform
-        device = ntc_device(device_type, host, username, password, **kwargs)
+        device = ntc_device(device_type, host, username, password, global_delay_factor,**kwargs)
 
     local_file = module.params['local_file']
     remote_file = module.params['remote_file']
