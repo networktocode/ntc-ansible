@@ -95,8 +95,6 @@ options:
 		- Sets delay between operations.
 	required: false
 	default: 1
-	choices: []
-	aliases: []
     ntc_host:
         description:
             - The name of a host as specified in an NTC configuration file.
@@ -248,13 +246,14 @@ def main():
         device = ntc_device_by_name(ntc_host, ntc_conf_file)
     else:
         kwargs = {}
-        kwargs['global_delay_factor'] = global_delay_factor
         if transport is not None:
             kwargs['transport'] = transport
         if port is not None:
             kwargs['port'] = port
         if secret is not None:
             kwargs['secret'] = secret
+        if global_delay_factor is not None:
+            kwargs['global_delay_factor'] = global_delay_factor
 
         device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)
