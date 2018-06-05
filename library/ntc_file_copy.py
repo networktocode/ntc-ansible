@@ -194,7 +194,7 @@ def main():
             secret=dict(required=False, no_log=True),
             transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
-	    global_delay_factor=dict(default=1, required=False),
+            global_delay_factor=dict(default=1, required=False),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
             local_file=dict(required=False),
