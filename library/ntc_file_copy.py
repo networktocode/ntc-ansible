@@ -91,10 +91,10 @@ options:
         required: false
         default: null
     global_delay_factor:
-	description:
-		- Sets delay between operations.
-	required: false
-	default: 1
+        description:
+            - Sets delay between operations.
+        required: false
+        default: 1
     ntc_host:
         description:
             - The name of a host as specified in an NTC configuration file.
