@@ -90,6 +90,16 @@ options:
               80 for HTTP; 443 for HTTPS; 22 for SSH.
         required: false
         default: null
+    global_delay_factor:
+        description:
+            - Sets delay between operations.
+        required: false
+        default: 1
+    delay_factor:
+        description:
+            - Multiplication factor for timing delays
+        required: false
+        default: 1
     ntc_host:
         description:
             - The name of a host as specified in an NTC configuration file.
@@ -112,8 +122,6 @@ vars:
     password: "ntc-ansible"
     platform: "cisco_nxos"
     connection: ssh
-
-
 - ntc_file_copy:
     platform: cisco_nxos_nxapi
     local_file: /path/to/file
@@ -191,6 +199,8 @@ def main():
             secret=dict(required=False, no_log=True),
             transport=dict(required=False, choices=['http', 'https']),
             port=dict(required=False, type='int'),
+            global_delay_factor=dict(default=1, required=False, type='int'),
+            delay_factor=dict(default=1, required=False, type='int'),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
             local_file=dict(required=False),
@@ -235,6 +245,8 @@ def main():
 
     transport = module.params['transport']
     port = module.params['port']
+    global_delay_factor = int(module.params['global_delay_factor'])
+    delay_factor = int(module.params['delay_factor'])
     secret = module.params['secret']
 
     if ntc_host is not None:
@@ -247,6 +259,10 @@ def main():
             kwargs['port'] = port
         if secret is not None:
             kwargs['secret'] = secret
+        if global_delay_factor is not None:
+            kwargs['global_delay_factor'] = global_delay_factor
+        if delay_factor is not None:
+            kwargs['delay_factor'] = delay_factor
 
         device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)
