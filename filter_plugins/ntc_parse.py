@@ -36,7 +36,7 @@ def clitable_to_dict(cli_table):
     return objs
 
 
-def get_structured_data(output, command, platform, index_file, template_dir):
+def get_structured_data(output, command, platform, index_file, template_dir, data_model):
     cli_table = clitable.CliTable(index_file, template_dir)
 
     attrs = dict(
@@ -45,7 +45,11 @@ def get_structured_data(output, command, platform, index_file, template_dir):
     )
     try:
         cli_table.ParseCmd(output, attrs)
-        structured_data = clitable_to_dict(cli_table)
+        if data_model == "textfsm":
+            structured_data = clitable_to_dict(cli_table)
+        else:
+            # Only textfsm is supported right now.
+            structured_data = [output]
     except CliTableError:
         # Invalid or Missing template
         # rather than fail, fallback to return raw text
@@ -54,17 +58,19 @@ def get_structured_data(output, command, platform, index_file, template_dir):
     return structured_data
 
 
-def ntc_parse(output, command, platform, template_dir="./ntc-templates/templates", index_file="index"):
+def ntc_parse(output, command, platform, template_dir="./ntc-templates/templates",
+              index_file="index", data_model="textfsm"):
     structured_data_response_list = []
     structured_data = {}
     if isinstance(output, dict):
         for device, command_output in output.items():
             raw_txt = command_output[command]
-            sd = get_structured_data(raw_txt)
+            sd = get_structured_data(raw_txt, data_model)
             temp = dict(device=device, response=sd)
             structured_data_response_list.append(temp)
     else:
-        structured_data = get_structured_data(output, command, platform, index_file, template_dir)
+        structured_data = get_structured_data(output, command, platform, index_file,
+                                              template_dir, data_model)
     return structured_data or structured_data_response_list
 
 
