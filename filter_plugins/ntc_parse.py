@@ -58,7 +58,7 @@ def get_structured_data(output, command, platform, index_file, template_dir, dat
     return structured_data
 
 
-def ntc_parse(output, command, platform, template_dir="./ntc-templates/templates",
+def ntc_parse(output, command, platform, template_dir=NTC_TEMPLATES_DIR,
               index_file="index", data_model="textfsm"):
     structured_data_response_list = []
     structured_data = {}
