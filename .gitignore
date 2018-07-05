@@ -2,3 +2,6 @@ myhosts
 *.pyc
 .tox/
 .tmp/
+ntc_ansible.egg-info/
+dist/
+*.retry
