@@ -155,16 +155,19 @@ PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
+PLATFORM_F5 = 'f5_tmos_rest'
 
 
 def already_set(current_boot_options, system_image_file, kickstart_image_file):
     return current_boot_options.get('sys') == system_image_file \
-        and current_boot_options.get('kick') == kickstart_image_file
+           and current_boot_options.get('kick') == kickstart_image_file
+
 
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS],
+            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
+                                   PLATFORM_JUNOS, PLATFORM_F5],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
@@ -177,6 +180,7 @@ def main():
             ntc_conf_file=dict(required=False),
             system_image_file=dict(required=True),
             kickstart_image_file=dict(required=False),
+            volume=dict(type='str', required=False),
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -185,7 +189,7 @@ def main():
                             ['ntc_conf_file', 'secret'],
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
-                           ],
+                            ],
         required_one_of=[['host', 'ntc_host', 'provider']],
         supports_check_mode=True
     )
@@ -217,7 +221,8 @@ def main():
     port = module.params['port']
     secret = module.params['secret']
 
-    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    argument_check = {'host': host, 'username': username, 'platform': platform,
+                      'password': password}
     for key, val in argument_check.items():
         if val is None:
             module.fail_json(msg=str(key) + " is required")
@@ -241,6 +246,7 @@ def main():
 
     system_image_file = module.params['system_image_file']
     kickstart_image_file = module.params['kickstart_image_file']
+    volume = module.params['volume']
 
     if kickstart_image_file == 'null':
         kickstart_image_file = None
@@ -248,8 +254,15 @@ def main():
     device.open()
     current_boot_options = device.get_boot_options()
     changed = False
-    if not already_set(current_boot_options, system_image_file, kickstart_image_file):
-        changed = True
+
+    if device.device_type == PLATFORM_F5:
+        if not device._image_installed(image_name=system_image_file,
+                                       volume=volume):
+            changed = True
+    else:
+        if not already_set(current_boot_options, system_image_file,
+                           kickstart_image_file):
+            changed = True
 
     if not module.check_mode and changed == True:
         if device.device_type == 'nxos':
@@ -257,7 +270,8 @@ def main():
             device.set_timeout(timeout)
             try:
                 start_time = time.time()
-                device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
+                device.set_boot_options(system_image_file,
+                                        kickstart=kickstart_image_file)
             except:
                 pass
             elapsed_time = time.time() - start_time
@@ -274,17 +288,31 @@ def main():
                 except:
                     time.sleep(10)
                     elapsed_time += 10
+        elif device.device_type == 'f5_tmos_rest':
+            device.set_boot_options(image_name=system_image_file, volume=volume)
+            install_state = device.get_boot_options()
         else:
-            device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
+            device.set_boot_options(system_image_file,
+                                    kickstart=kickstart_image_file)
             install_state = device.get_boot_options()
 
-        if not already_set(install_state, system_image_file, kickstart_image_file):
-            module.fail_json(msg='Install not successful', install_state=install_state)
+        if device.device_type == PLATFORM_F5:
+            if not device._image_installed(image_name=system_image_file,
+                                           volume=volume):
+                module.fail_json(msg='Install not successful',
+                                 install_state=install_state)
+        else:
+            if not already_set(install_state, system_image_file,
+                               kickstart_image_file):
+                module.fail_json(msg='Install not successful',
+                                 install_state=install_state)
     else:
         install_state = current_boot_options
 
     device.close()
     module.exit_json(changed=changed, install_state=install_state)
 
+
 from ansible.module_utils.basic import *
+
 main()
