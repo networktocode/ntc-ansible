@@ -33,7 +33,7 @@ options:
         description:
             - Switch platform
         required: false
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_rest']
     timer:
         description:
             - Time in minutes after which the device will be rebooted.
@@ -50,6 +50,10 @@ options:
             - Safeguard boolean. Set to true if you're sure you want to reboot.
         required: false
         default: false
+    volume:
+        description:
+            - Name of F5 Volume (installation target)
+        required: false
     host:
         description:
             - Hostame or IP address of switch.
@@ -176,6 +180,7 @@ PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
+PLATFORM_F5 = 'f5_tmos_rest'
 
 
 def check_device(module, username, password, host, timeout, kwargs):
@@ -207,7 +212,7 @@ def check_device(module, username, password, host, timeout, kwargs):
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS],
+            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS, PLATFORM_F5],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
@@ -220,7 +225,8 @@ def main():
             ntc_conf_file=dict(required=False),
             confirm=dict(required=False, default=False, type='bool'),
             timer=dict(requred=False, type='int'),
-            timeout=dict(required=False, type='int', default=240)
+            timeout=dict(required=False, type='int', default=240),
+            volume=dict(required=False, type='str')
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -253,6 +259,7 @@ def main():
     host = module.params['host']
     username = module.params['username']
     password = module.params['password']
+    volume = module.params['volume']
 
     ntc_host = module.params['ntc_host']
     ntc_conf_file = module.params['ntc_conf_file']

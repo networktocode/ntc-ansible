@@ -39,7 +39,7 @@ options:
         description:
             - Switch platform
         required: false
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_rest']
     system_image_file:
         description:
             - Name of the system (or combined) image file on flash.
@@ -49,6 +49,10 @@ options:
             - Name of the kickstart image file on flash.
         required: false
         default: null
+    volume:
+        description:
+            - Name of F5 Volume (installation target)
+        required: false
     host:
         description:
             - Hostame or IP address of switch.
