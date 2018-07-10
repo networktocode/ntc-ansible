@@ -311,6 +311,8 @@ def main():
 
     if timer is not None:
         device.reboot(confirm=True, timer=timer)
+    elif volume is not None and device.device_type == 'f5_tmos_rest':
+        device.reboot(confirm=True, volume=volume)
     else:
         device.reboot(confirm=True)
 
