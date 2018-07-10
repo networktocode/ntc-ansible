@@ -292,7 +292,7 @@ def main():
                 except:
                     time.sleep(10)
                     elapsed_time += 10
-        elif device.device_type == 'f5_tmos_rest':
+        elif device.device_type == PLATFORM_F5:
             device.set_boot_options(image_name=system_image_file, volume=volume)
             install_state = device.get_boot_options()
         else:
