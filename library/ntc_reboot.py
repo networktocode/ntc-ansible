@@ -50,9 +50,10 @@ options:
             - Safeguard boolean. Set to true if you're sure you want to reboot.
         required: false
         default: false
-    volume:
+    vendor_args:
         description:
-            - Name of F5 Volume (installation target)
+            - Dictionary with vendor specific information.
+              Currently supported options: "volume" as a target boot destination for F5.
         required: false
     host:
         description:

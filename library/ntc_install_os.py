@@ -49,9 +49,10 @@ options:
             - Name of the kickstart image file on flash.
         required: false
         default: null
-    volume:
+    vendor_args:
         description:
-            - Name of F5 Volume (installation target)
+            - Dictionary with vendor specific information.
+              Currently supported options: "volume" as a target boot destination for F5.
         required: false
     host:
         description:
