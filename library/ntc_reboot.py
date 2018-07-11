@@ -226,7 +226,7 @@ def main():
             confirm=dict(required=False, default=False, type='bool'),
             timer=dict(requred=False, type='int'),
             timeout=dict(required=False, type='int', default=240),
-            volume=dict(required=False, type='str')
+            vendor_args=dict(required=False, type='dict', default={}),
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -259,7 +259,6 @@ def main():
     host = module.params['host']
     username = module.params['username']
     password = module.params['password']
-    volume = module.params['volume']
 
     ntc_host = module.params['ntc_host']
     ntc_conf_file = module.params['ntc_conf_file']
@@ -290,6 +289,7 @@ def main():
     confirm = module.params['confirm']
     timer = module.params['timer']
     timeout = module.params['timeout']
+    vendor_args = module.params['vendor_args']
 
     if not confirm:
         module.fail_json(msg='confirm must be set to true for this module to work.')
@@ -306,13 +306,12 @@ def main():
             module.fail_json(msg=str(key) + " is required")
     device.open()
 
-    changed = False
-    rebooted = False
+    volume = vendor_args.get('volume', '')
 
-    if timer is not None:
-        device.reboot(confirm=True, timer=timer)
-    elif volume is not None and device.device_type == 'f5_tmos_rest':
+    if volume:
         device.reboot(confirm=True, volume=volume)
+    elif timer is not None:
+        device.reboot(confirm=True, timer=timer)
     else:
         device.reboot(confirm=True)
 

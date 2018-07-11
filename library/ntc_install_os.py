@@ -162,9 +162,16 @@ PLATFORM_JUNOS = 'juniper_junos_netconf'
 PLATFORM_F5 = 'f5_tmos_rest'
 
 
-def already_set(current_boot_options, system_image_file, kickstart_image_file):
-    return current_boot_options.get('sys') == system_image_file \
-           and current_boot_options.get('kick') == kickstart_image_file
+def already_set(boot_options, system_image_file, kickstart_image_file,
+                **vendor_options):
+    volume = vendor_options.get('vendor_args', {}).get('volume', "")
+    device = vendor_options.get('device')
+    if device and volume:
+        return device.image_installed(image_name=system_image_file,
+                                      volume=volume)
+
+    return boot_options.get('sys') == system_image_file \
+           and boot_options.get('kick') == kickstart_image_file
 
 
 def main():
@@ -184,7 +191,7 @@ def main():
             ntc_conf_file=dict(required=False),
             system_image_file=dict(required=True),
             kickstart_image_file=dict(required=False),
-            volume=dict(type='str', required=False),
+            vendor_args=dict(required=False, type='dict', default={}),
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -250,23 +257,21 @@ def main():
 
     system_image_file = module.params['system_image_file']
     kickstart_image_file = module.params['kickstart_image_file']
-    volume = module.params['volume']
+    vendor_args = module.params['vendor_args']
 
     if kickstart_image_file == 'null':
         kickstart_image_file = None
 
     device.open()
-    current_boot_options = device.get_boot_options()
+    pre_install_boot_options = device.get_boot_options()
     changed = False
 
-    if device.device_type == PLATFORM_F5:
-        if not device._image_installed(image_name=system_image_file,
-                                       volume=volume):
-            changed = True
-    else:
-        if not already_set(current_boot_options, system_image_file,
-                           kickstart_image_file):
-            changed = True
+    if not already_set(boot_options=pre_install_boot_options,
+                       system_image_file=system_image_file,
+                       kickstart_image_file=kickstart_image_file,
+                       vendor_args=vendor_args,
+                       device=device):
+        changed = True
 
     if not module.check_mode and changed == True:
         if device.device_type == 'nxos':
@@ -292,26 +297,21 @@ def main():
                 except:
                     time.sleep(10)
                     elapsed_time += 10
-        elif device.device_type == PLATFORM_F5:
-            device.set_boot_options(image_name=system_image_file, volume=volume)
-            install_state = device.get_boot_options()
         else:
             device.set_boot_options(system_image_file,
-                                    kickstart=kickstart_image_file)
+                                    kickstart=kickstart_image_file,
+                                    volume=vendor_args.get('volume'))
             install_state = device.get_boot_options()
 
-        if device.device_type == PLATFORM_F5:
-            if not device._image_installed(image_name=system_image_file,
-                                           volume=volume):
-                module.fail_json(msg='Install not successful',
-                                 install_state=install_state)
-        else:
-            if not already_set(install_state, system_image_file,
-                               kickstart_image_file):
-                module.fail_json(msg='Install not successful',
-                                 install_state=install_state)
+        if not already_set(boot_options=install_state,
+                           system_image_file=system_image_file,
+                           kickstart_image_file=kickstart_image_file,
+                           vendor_args=vendor_args,
+                           device=device):
+            module.fail_json(msg='Install not successful',
+                             install_state=install_state)
     else:
-        install_state = current_boot_options
+        install_state = pre_install_boot_options
 
     device.close()
     module.exit_json(changed=changed, install_state=install_state)
