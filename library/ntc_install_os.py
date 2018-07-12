@@ -49,10 +49,9 @@ options:
             - Name of the kickstart image file on flash.
         required: false
         default: null
-    vendor_args:
+    volume:
         description:
-            - Dictionary with vendor specific information.
-              Currently supported options: "volume" as a target boot destination for F5.
+            - Volume name - required argument for F5 platform.
         required: false
     host:
         description:
@@ -164,9 +163,9 @@ PLATFORM_F5 = 'f5_tmos_rest'
 
 
 def already_set(boot_options, system_image_file, kickstart_image_file,
-                **vendor_options):
-    volume = vendor_options.get('vendor_args', {}).get('volume', "")
-    device = vendor_options.get('device')
+                **kwargs):
+    volume = kwargs.get('volume', "")
+    device = kwargs.get('device')
     if device and volume:
         return device.image_installed(image_name=system_image_file,
                                       volume=volume)
@@ -192,7 +191,7 @@ def main():
             ntc_conf_file=dict(required=False),
             system_image_file=dict(required=True),
             kickstart_image_file=dict(required=False),
-            vendor_args=dict(required=False, type='dict', default={}),
+            volume=dict(required=False, type='str'),
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -203,6 +202,7 @@ def main():
                             ['ntc_conf_file', 'port'],
                             ],
         required_one_of=[['host', 'ntc_host', 'provider']],
+        required_if=[["platform", PLATFORM_F5, ["volume"]]],
         supports_check_mode=True
     )
 
@@ -258,7 +258,7 @@ def main():
 
     system_image_file = module.params['system_image_file']
     kickstart_image_file = module.params['kickstart_image_file']
-    vendor_args = module.params['vendor_args']
+    volume = module.params['volume']
 
     if kickstart_image_file == 'null':
         kickstart_image_file = None
@@ -270,7 +270,7 @@ def main():
     if not already_set(boot_options=pre_install_boot_options,
                        system_image_file=system_image_file,
                        kickstart_image_file=kickstart_image_file,
-                       vendor_args=vendor_args,
+                       volume=volume,
                        device=device):
         changed = True
 
@@ -301,13 +301,13 @@ def main():
         else:
             device.set_boot_options(system_image_file,
                                     kickstart=kickstart_image_file,
-                                    volume=vendor_args.get('volume'))
+                                    volume=volume)
             install_state = device.get_boot_options()
 
         if not already_set(boot_options=install_state,
                            system_image_file=system_image_file,
                            kickstart_image_file=kickstart_image_file,
-                           vendor_args=vendor_args,
+                           volume=volume,
                            device=device):
             module.fail_json(msg='Install not successful',
                              install_state=install_state)
