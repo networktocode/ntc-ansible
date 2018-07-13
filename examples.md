@@ -339,7 +339,7 @@ Get structured data back using TextFSM along with `ios_command` and `ntc_parse` 
 ```
 Requirements:
 
-This requires the filter_plugins to be set in ansible.cfg to the directory that ntc_parse filter lives in, ex. `/ntc-ansible/filter_plugins/'
+This requires the filter_plugins to be set in ansible.cfg to the directory that ntc_parse filter lives in, ex. `/ntc-ansible/filter_plugins/`
 
 ntc_parse takes the following arguments:
 
