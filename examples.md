@@ -321,11 +321,11 @@ Does an equivalent of a `copy run start` **AND** saves a local copy to the local
     password={{ password }}
 ```
 
-## Filter Plugins
+# Filter Plugins
 
-### NTC_PARSE
+##### NTC_PARSE
 
-Get structured data back using TextFSM along with ios_command and ntc_parse filter plugin within Ansible.
+Get structured data back using TextFSM along with `ios_command` and `ntc_parse` filter plugin within Ansible.
 ```
   tasks:
     - name: "Gather data via show version command"
@@ -337,14 +337,19 @@ Get structured data back using TextFSM along with ios_command and ntc_parse filt
       set_fact:
         ver_struct: "{{ ver.stdout.0 | ntc_parse('show version', 'cisco_ios', '/appl/ntc-templates/templates/') }}"
 ```
+Requirements:
+
+This requires the filter_plugins to be set in ansible.cfg to the directory that ntc_parse filter lives in, ex. `/ntc-ansible/filter_plugins/'
+
 ntc_parse takes the following arguments:
+
 `command` This is the command that was ran to collect the variable
 
 `platform` This is modeled after the name of the template being used, ex. cisco_ios_show_version.template
 
 `template_dir` By default, this will attempt to dynamically learn the location, but may be set manually as well
 
-Structured data:
+Structured data output:
 ```
 TASK [Debug ver_struct] *******************************************************************************************************************
 ok: [switch] => {
