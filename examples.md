@@ -321,5 +321,52 @@ Does an equivalent of a `copy run start` **AND** saves a local copy to the local
     password={{ password }}
 ```
 
+## Filter Plugins
+
+### NTC_PARSE
+
+Get structured data back using TextFSM along with ios_command and ntc_parse filter plugin within Ansible.
+```
+  tasks:
+    - name: "Gather data via show version command"
+      ios_command:
+        commands: show version
+      register: ver
+
+    - name: "Test NTC template filters"
+      set_fact:
+        ver_struct: "{{ ver.stdout.0 | ntc_parse('show version', 'cisco_ios', '/appl/ntc-templates/templates/') }}"
+```
+ntc_parse takes the following arguments:
+`command` This is the command that was ran to collect the variable
+
+`platform` This is modeled after the name of the template being used, ex. cisco_ios_show_version.template
+
+`template_dir` By default, this will attempt to dynamically learn the location, but may be set manually as well
+
+Structured data:
+```
+TASK [Debug ver_struct] *******************************************************************************************************************
+ok: [switch] => {
+    "ver_struct": [
+        {
+            "config_register": "0x2102", 
+            "hardware": [
+                "WS-C6513"
+            ], 
+            "hostname": "switch", 
+            "rommon": "System", 
+            "running_image": "s3223-ipservicesk9_wan-mz.122-33.SXH5.bin", 
+            "serial": [
+                "SAL1431PXLM"
+            ], 
+            "uptime": "7 years, 21 weeks, 19 hours, 41 minutes", 
+            "version": "12.2(33)SXH5"
+        }
+    ]
+}
+```
+
+
 For more details on all of the modules, please be sure to check out the [Docs](http://docs.networktocode.com)
 
