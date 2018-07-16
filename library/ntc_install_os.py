@@ -39,7 +39,7 @@ options:
         description:
             - Switch platform
         required: false
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_rest']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_icontrol']
     system_image_file:
         description:
             - Name of the system (or combined) image file on flash.
@@ -159,7 +159,7 @@ PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
-PLATFORM_F5 = 'f5_tmos_rest'
+PLATFORM_F5 = 'f5_tmos_icontrol'
 
 
 def already_set(boot_options, system_image_file, kickstart_image_file,

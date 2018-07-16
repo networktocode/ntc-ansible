@@ -37,7 +37,7 @@ options:
         description:
             - Switch platform
         required: false
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_rest']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_icontrol']
     local_file:
         description:
             - Path to local file. Local directory must exist.
@@ -185,7 +185,7 @@ PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
-PLATFORM_f5 = 'f5_tmos_rest'
+PLATFORM_f5 = 'f5_tmos_icontrol'
 
 def main():
     module = AnsibleModule(
