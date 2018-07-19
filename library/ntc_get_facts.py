@@ -208,14 +208,14 @@ PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
-PLATFORM_f5 = 'f5_tmos_icontrol'
+PLATFORM_F5 = 'f5_tmos_icontrol'
 
 
 def main():
     module = AnsibleModule(
         argument_spec=dict(
             platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
-                                   PLATFORM_JUNOS, PLATFORM_f5],
+                                   PLATFORM_JUNOS, PLATFORM_F5],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),

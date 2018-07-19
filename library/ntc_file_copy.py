@@ -185,12 +185,14 @@ PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
-PLATFORM_f5 = 'f5_tmos_icontrol'
+PLATFORM_F5 = 'f5_tmos_icontrol'
+
 
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS, PLATFORM_f5],
+            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
+                                   PLATFORM_JUNOS, PLATFORM_F5],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
@@ -214,7 +216,7 @@ def main():
                             ['ntc_conf_file', 'secret'],
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
-                           ],
+                            ],
         required_one_of=[['host', 'ntc_host', 'provider']],
         supports_check_mode=True
     )
@@ -230,7 +232,6 @@ def main():
     for param, pvalue in provider.items():
         if module.params.get(param) != False:
             module.params[param] = module.params.get(param) or pvalue
-
 
     if not HAS_PYNTC:
         module.fail_json(msg='pyntc Python library not found.')
@@ -271,8 +272,8 @@ def main():
     remote_file = module.params['remote_file']
     file_system = module.params['file_system']
 
-
-    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password, 'local_file': local_file }
+    argument_check = {'host': host, 'username': username, 'platform': platform,
+                      'password': password, 'local_file': local_file}
     for key, val in argument_check.items():
         if val is None:
             module.fail_json(msg=str(key) + " is required")
@@ -287,7 +288,8 @@ def main():
         module.fail_json(msg="Local file {} not found".format(local_file))
 
     if file_system:
-        remote_exists = device.file_copy_remote_exists(local_file, remote_file, file_system=file_system)
+        remote_exists = device.file_copy_remote_exists(local_file, remote_file,
+                                                       file_system=file_system)
     else:
         remote_exists = device.file_copy_remote_exists(local_file, remote_file)
 
@@ -298,7 +300,8 @@ def main():
     if not module.check_mode and not file_exists:
         try:
             if file_system:
-                device.file_copy(local_file, remote_file, file_system=file_system)
+                device.file_copy(local_file, remote_file,
+                                 file_system=file_system)
             else:
                 device.file_copy(local_file, remote_file)
 
@@ -319,5 +322,7 @@ def main():
                      local_file=local_file, remote_file=remote_file,
                      file_system=file_system, atomic=atomic)
 
+
 from ansible.module_utils.basic import *
+
 main()
