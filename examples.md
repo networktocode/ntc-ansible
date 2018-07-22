@@ -343,35 +343,61 @@ This requires the filter_plugins to be set in ansible.cfg to the directory that 
 
 ntc_parse takes the following arguments:
 
-`command` This is the command that was ran to collect the variable
+`command` This is the command that was ran to collect the output to be parsed
 
 `platform` This is modeled after the name of the template being used, ex. cisco_ios_show_version.template
 
 `template_dir` By default, this will attempt to dynamically learn the location, but may be set manually as well
 
+Ansible playbook:
+```
+---
+
+- name: "Testing ntc_parse filter plugin"
+  hosts: switch
+  connection: network_cli
+  become: yes
+  become_method: enable
+  gather_facts: no
+  vars:
+    command: show ip interface
+
+  tasks:
+    - name: "Gather data via show ip interface command"
+      ios_command:
+        commands: "{{ command }}"
+      register: interfaces
+
+    - name: "Test NTC template filters"
+      set_fact:
+        interfaces_struct: "{{ interfaces.stdout.0 | ntc_parse(command, 'cisco_ios', '/home/ntc-templates/templates/') }}"
+
+    - name: "Debug interfaces_struct"
+      debug:
+        var: interfaces_struct
+```
+
 Structured data output:
 ```
-TASK [Debug ver_struct] *******************************************************************************************************************
+TASK [Debug interfaces_struct] *******************************************************************************************************************
 ok: [switch] => {
-    "ver_struct": [
+    "interfaces_struct": [
         {
-            "config_register": "0x2102", 
-            "hardware": [
-                "WS-C6513"
-            ], 
-            "hostname": "switch", 
-            "rommon": "System", 
-            "running_image": "s3223-ipservicesk9_wan-mz.122-33.SXH5.bin", 
-            "serial": [
-                "SAL1431PXLM"
-            ], 
-            "uptime": "7 years, 21 weeks, 19 hours, 41 minutes", 
-            "version": "12.2(33)SXH5"
+          "inbound_acl": "",
+          "interface": "Vlan1",
+          "ip_address": "192.168.1.1",
+          "ip_helper": [
+              "192.168.255.3"
+            ],
+          "link_status": "down",
+          "mask": "26",
+          "mtu": "",
+          "outgoing_acl": "",
+          "protocol_status": "down"
         }
     ]
 }
 ```
-
 
 For more details on all of the modules, please be sure to check out the [Docs](http://docs.networktocode.com)
 
