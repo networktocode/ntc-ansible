@@ -323,33 +323,9 @@ Does an equivalent of a `copy run start` **AND** saves a local copy to the local
 
 # Filter Plugins
 
-##### NTC_PARSE
+##### ntc_parse
 
 Get structured data back using TextFSM along with `ios_command` and `ntc_parse` filter plugin within Ansible.
-```
-  tasks:
-    - name: "Gather data via show version command"
-      ios_command:
-        commands: show version
-      register: ver
-
-    - name: "Test NTC template filters"
-      set_fact:
-        ver_struct: "{{ ver.stdout.0 | ntc_parse('show version', 'cisco_ios', '/appl/ntc-templates/templates/') }}"
-```
-Requirements:
-
-This requires the filter_plugins to be set in ansible.cfg to the directory that ntc_parse filter lives in, ex. `/ntc-ansible/filter_plugins/`
-
-ntc_parse takes the following arguments:
-
-`command` This is the command that was ran to collect the output to be parsed
-
-`platform` This is modeled after the name of the template being used, ex. cisco_ios_show_version.template
-
-`template_dir` By default, this will attempt to dynamically learn the location, but may be set manually as well
-
-Ansible playbook:
 ```
 ---
 
@@ -376,6 +352,17 @@ Ansible playbook:
       debug:
         var: interfaces_struct
 ```
+Requirements:
+
+This requires the filter_plugins to be set in ansible.cfg to the directory that ntc_parse filter lives in, ex. `/ntc-ansible/filter_plugins/`. This can be obtained by cloning this repository to a location on the Ansible host or installing ntc-ansible via Pip.
+
+ntc_parse takes the following arguments:
+
+`command` This is the command that was ran to collect the output to be parsed
+
+`platform` This is modeled after the name of the template being used, ex. cisco_ios_show_version.template
+
+`template_dir` By default, this will attempt to dynamically learn the location, but may be set manually as well
 
 Structured data output:
 ```
