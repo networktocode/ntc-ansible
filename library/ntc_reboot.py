@@ -284,9 +284,6 @@ def main():
     timer = module.params['timer']
     timeout = module.params['timeout']
 
-    if not confirm:
-        module.fail_json(msg='confirm must be set to true for this module to work.')
-
     supported_timer_platforms = [PLATFORM_IOS, PLATFORM_JUNOS]
 
     if timer is not None \
@@ -303,9 +300,9 @@ def main():
     rebooted = False
 
     if timer is not None:
-        device.reboot(confirm=True, timer=timer)
+        device.reboot(timer=timer)
     else:
-        device.reboot(confirm=True)
+        device.reboot()
 
     time.sleep(10)
     reachable, atomic = check_device(module, username, password, host, timeout, kwargs)

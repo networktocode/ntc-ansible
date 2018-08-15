@@ -274,14 +274,15 @@ def main():
                 except:
                     time.sleep(10)
                     elapsed_time += 10
+            if not already_set(install_state, system_image_file, kickstart_image_file):
+                module.fail_json(msg='Install not successful install_state:{} {}'.format(current_boot_options.get('sys'), system_image_file), install_state=install_state)
         else:
-            device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
-            install_state = device.get_boot_options()
-
-        if not already_set(install_state, system_image_file, kickstart_image_file):
-            module.fail_json(msg='Install not successful', install_state=install_state)
+            install_state = device.install_os(system_image_file)
+            if install_state:
+                module.exit_json(changed=changed, install_state=install_state)
     else:
         install_state = current_boot_options
+        module.fail_json(msg='Install not successful install_state:{} {}'.format(current_boot_options.get('sys'), system_image_file), install_state=install_state)
 
     device.close()
     module.exit_json(changed=changed, install_state=install_state)
