@@ -276,7 +276,7 @@ def main():
         else:
             install_state = device.install_os(system_image_file)
             if install_state:
-                module.exit_json(changed=install_state['upgraded'], install_state=install_state['Install_state'])
+                module.exit_json(changed=install_state['upgraded'], install_state=install_state['system_state'])
     else:
         install_state = current_boot_options
         module.fail_json(msg='Install not successful. Install and request state are the same.\ninstall_state:   {}\nrequested_state: {}'.format(current_boot_options.get('sys'), system_image_file), install_state=install_state)
