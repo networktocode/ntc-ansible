@@ -282,7 +282,7 @@ def main():
                 module.exit_json(changed=changed, install_state=install_state)
     else:
         install_state = current_boot_options
-        module.fail_json(msg='Install not successful install_state:{} {}'.format(current_boot_options.get('sys'), system_image_file), install_state=install_state)
+        module.fail_json(msg='Install not successful. Install and request state are the same.\ninstall_state:   {}\nrequested_state: {}'.format(current_boot_options.get('sys'), system_image_file), install_state=install_state)
 
     device.close()
     module.exit_json(changed=changed, install_state=install_state)
