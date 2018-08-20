@@ -246,12 +246,8 @@ def main():
         kickstart_image_file = None
 
     device.open()
-    current_boot_options = device.get_boot_options()
-    changed = False
-    if not already_set(current_boot_options, system_image_file, kickstart_image_file):
-        changed = True
 
-    if not module.check_mode and changed == True:
+    if not module.check_mode:
         if device.device_type == 'nxos':
             timeout = 600
             device.set_timeout(timeout)
