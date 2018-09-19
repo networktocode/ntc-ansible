@@ -33,7 +33,7 @@ options:
         description:
             - Switch platform
         required: false
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_icontrol']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'cisco_asa_ssh', 'f5_tmos_icontrol']
     timer:
         description:
             - Time in minutes after which the device will be rebooted.
@@ -181,7 +181,7 @@ PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
 PLATFORM_F5 = 'f5_tmos_icontrol'
-
+PLATFORM_ASA = 'cisco_asa_ssh'
 
 def check_device(module, username, password, host, timeout, kwargs):
     success = False
@@ -214,7 +214,7 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
-                                   PLATFORM_JUNOS, PLATFORM_F5],
+                                   PLATFORM_JUNOS, PLATFORM_F5, PLATFORM_ASA],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),

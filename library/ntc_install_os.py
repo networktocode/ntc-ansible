@@ -26,6 +26,7 @@ notes:
     - Do not include full file paths, just the name of the file(s) stored on the top level flash directory.
     - You must know if your platform supports taking a kickstart image as a parameter. If supplied but not supported, errors may occur.
     - It may be useful to use this module in conjuction with ntc_file_copy and ntc_reboot.
+    - With F5, volume parameter is required.
     - With NXOS devices, this module attempts to install the software immediately, wich may trigger a reboot.
     - With NXOS devices, install process may take up to 10 minutes, especially if the device reboots.
     - Tested on Nexus 3000, 5000, 9000.
@@ -39,7 +40,7 @@ options:
         description:
             - Switch platform
         required: false
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_icontrol']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'cisco_asa_ssh', 'f5_tmos_icontrol']
     system_image_file:
         description:
             - Name of the system (or combined) image file on flash.
@@ -160,6 +161,7 @@ PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
 PLATFORM_F5 = 'f5_tmos_icontrol'
+PLATFORM_ASA = 'cisco_asa_ssh'
 
 
 def already_set(boot_options, system_image_file, kickstart_image_file,
@@ -178,7 +180,7 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
-                                   PLATFORM_JUNOS, PLATFORM_F5],
+                                   PLATFORM_JUNOS, PLATFORM_F5, PLATFORM_ASA],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
