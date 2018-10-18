@@ -166,7 +166,7 @@ PLATFORM_ASA = 'cisco_asa_ssh'
 
 def already_set(boot_options, system_image_file, kickstart_image_file,
                 **kwargs):
-    volume = kwargs.get('volume', "")
+    volume = kwargs.get('volume')
     device = kwargs.get('device')
     if device and volume:
         return device.image_installed(image_name=system_image_file,
