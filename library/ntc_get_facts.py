@@ -35,7 +35,7 @@ options:
             - Switch platform
         required: false
         default: null
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_icontrol']
     host:
         description:
             - Hostame or IP address of switch.
@@ -208,12 +208,14 @@ PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
+PLATFORM_F5 = 'f5_tmos_icontrol'
 
 
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS],
+            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
+                                   PLATFORM_JUNOS, PLATFORM_F5],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
@@ -232,7 +234,7 @@ def main():
                             ['ntc_conf_file', 'secret'],
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
-                           ],
+                            ],
         required_one_of=[['host', 'ntc_host', 'provider']],
         supports_check_mode=False
     )
@@ -264,7 +266,8 @@ def main():
     port = module.params['port']
     secret = module.params['secret']
 
-    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    argument_check = {'host': host, 'username': username, 'platform': platform,
+                      'password': password}
     for key, val in argument_check.items():
         if val is None:
             module.fail_json(msg=str(key) + " is required")
@@ -289,5 +292,7 @@ def main():
 
     module.exit_json(ansible_facts=facts)
 
+
 from ansible.module_utils.basic import *
+
 main()

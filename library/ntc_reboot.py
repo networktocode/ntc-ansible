@@ -33,7 +33,7 @@ options:
         description:
             - Switch platform
         required: false
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh']
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'cisco_asa_ssh', 'f5_tmos_icontrol']
     timer:
         description:
             - Time in minutes after which the device will be rebooted.
@@ -50,6 +50,10 @@ options:
             - Safeguard boolean. Set to true if you're sure you want to reboot.
         required: false
         default: false
+    volume:
+        description:
+            - Volume name - required argument for F5 platform.
+        required: false
     host:
         description:
             - Hostame or IP address of switch.
@@ -176,7 +180,8 @@ PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
 PLATFORM_JUNOS = 'juniper_junos_netconf'
-
+PLATFORM_F5 = 'f5_tmos_icontrol'
+PLATFORM_ASA = 'cisco_asa_ssh'
 
 def check_device(module, username, password, host, timeout, kwargs):
     success = False
@@ -190,7 +195,8 @@ def check_device(module, username, password, host, timeout, kwargs):
                                             module.params['ntc_conf_file'])
             else:
                 device_type = module.params['platform']
-                device = ntc_device(device_type, host, username, password, **kwargs)
+                device = ntc_device(device_type, host, username, password,
+                                    **kwargs)
             success = True
             atomic = True
             try:
@@ -207,7 +213,8 @@ def check_device(module, username, password, host, timeout, kwargs):
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS],
+            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
+                                   PLATFORM_JUNOS, PLATFORM_F5, PLATFORM_ASA],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
@@ -220,7 +227,8 @@ def main():
             ntc_conf_file=dict(required=False),
             confirm=dict(required=False, default=False, type='bool'),
             timer=dict(requred=False, type='int'),
-            timeout=dict(required=False, type='int', default=240)
+            timeout=dict(required=False, type='int', default=240),
+            volume=dict(required=False, type='str'),
         ),
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
@@ -229,8 +237,9 @@ def main():
                             ['ntc_conf_file', 'secret'],
                             ['ntc_conf_file', 'transport'],
                             ['ntc_conf_file', 'port'],
-                           ],
+                            ],
         required_one_of=[['host', 'ntc_host', 'provider']],
+        required_if=[["platform", PLATFORM_F5, ["volume"]]],
         supports_check_mode=False
     )
 
@@ -261,7 +270,8 @@ def main():
     port = module.params['port']
     secret = module.params['secret']
 
-    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    argument_check = {'host': host, 'username': username, 'platform': platform,
+                      'password': password}
     for key, val in argument_check.items():
         if val is None:
             module.fail_json(msg=str(key) + " is required")
@@ -283,37 +293,45 @@ def main():
     confirm = module.params['confirm']
     timer = module.params['timer']
     timeout = module.params['timeout']
+    volume = module.params['volume']
 
     if not confirm:
-        module.fail_json(msg='confirm must be set to true for this module to work.')
+        module.fail_json(
+            msg='confirm must be set to true for this module to work.')
 
     supported_timer_platforms = [PLATFORM_IOS, PLATFORM_JUNOS]
 
-    if timer is not None \
-            and device.device_type not in supported_timer_platforms:
-        module.fail_json(msg='Timer parameter not supported on platform %s.' % platform)
+    if timer is not None and device.device_type not in supported_timer_platforms:
+        module.fail_json(
+            msg='Timer parameter not supported on platform %s.' % platform)
 
-    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    argument_check = {'host': host, 'username': username, 'platform': platform,
+                      'password': password}
+
     for key, val in argument_check.items():
         if val is None:
             module.fail_json(msg=str(key) + " is required")
+
     device.open()
 
-    changed = False
-    rebooted = False
-
-    if timer is not None:
+    if volume:
+        device.reboot(confirm=True, volume=volume)
+    elif timer is not None:
         device.reboot(confirm=True, timer=timer)
     else:
         device.reboot(confirm=True)
 
     time.sleep(10)
-    reachable, atomic = check_device(module, username, password, host, timeout, kwargs)
+    reachable, atomic = check_device(module, username, password, host, timeout,
+                                     kwargs)
 
     changed = True
     rebooted = True
 
-    module.exit_json(changed=changed, rebooted=rebooted, reachable=reachable, atomic=atomic)
+    module.exit_json(changed=changed, rebooted=rebooted, reachable=reachable,
+                     atomic=atomic)
+
 
 from ansible.module_utils.basic import *
+
 main()
