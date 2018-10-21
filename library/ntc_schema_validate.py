@@ -85,47 +85,54 @@ def validate_schema(schema, data):
     try:
         validate(data, schema, format_checker=FormatChecker())
     except ValidationError as e:
-        return (False, "ValidationError: {0}".format(e.message))
+        return False, "ValidationError: {0}".format(e.message)
     except SchemaError as e:
-        return (False, "SchemaError: {0}".format(e.message))
+        return False, "SchemaError: {0}".format(e.message)
     except Exception as e:
-        return (False, "UnknownError: {0}".format(e.message))
-    return (True, '')
+        return False, "UnknownError: {0}".format(e.message)
+    return True, ''
+
 
 def main():
     argument_spec = dict(
-        schema=dict(required=True, type='dict'),
-        data=dict(required=True, type='dict'),
-        scope=dict(required=True, type='list')
+        schema=dict(required=True, type="dict"),
+        data=dict(required=True, type="dict"),
+        scope=dict(required=True, type="list"),
     )
 
     module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=False)
 
     if not HAS_LIB:
-        module.fail_json(msg='jsonschema is required for this module.')
+        module.fail_json(msg="jsonschema is required for this module.")
 
-    schema = module.params['schema']
-    data = module.params['data']
-    scope = module.params['scope']
+    schema = module.params["schema"]
+    data = module.params["data"]
+    scope = module.params["scope"]
 
     for item in scope:
-        feature = item.get('name')
-        required = item.get('required')
+        feature = item.get("name")
+        required = item.get("required")
         if not feature:
-            status, msg = (False, 'Malformed list item {}, should be in format similar to {"name": "feature", "required": True}'.format(item))
+            status = False
+            msg = 'Malformed list item {0}, should be in format similar to ' \
+                  '{1}'.format(item, '{"name": "feature", "required": True}')
         elif not schema.get(feature):
-            status, msg = (False, 'Schema was not defined for feature {}. Schema key must match data key'.format(feature))
+            status = False
+            msg = "Schema was not defined for feature {0}. Schema key must match data key".format(feature)
         elif required and not data.get(feature):
-            status, msg = (False, 'Feature {} required, but not found'.format(feature))
+            status = False
+            msg = "Feature {0} required, but not found".format(feature)
         elif not data.get(feature):
             status = True
         else:
             status, msg = validate_schema(schema.get(feature), data.get(feature))
 
         if not status:
-            resp = {"data": data.get(feature),
-                    "feature": feature,
-                    "message": msg}
+            resp = {
+                "data": data.get(feature),
+                "feature": feature,
+                "message": msg,
+            }
 
             module.fail_json(msg=resp)
     module.exit_json(changed=False)
