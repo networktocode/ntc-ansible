@@ -112,11 +112,17 @@ def main():
         feature = item.get('name')
         required = item.get('required')
         if not feature:
-            status, msg = (False, 'Malformed list item {}, should be in format similar to {"name": "feature", "required": True}'.format(item))
+            status = False
+            msg = 'Malformed list item {0}; all scope entries require a "name" key: \n' \
+                  '{1}'.format(item, '{"name": "feature", "required": True}')
         elif not schema.get(feature):
-            status, msg = (False, 'Schema was not defined for feature {}. Schema key must match data key'.format(feature))
+            status = False
+            msg = "Schema was not defined for feature {0}. \n" \
+                  "The scope's name value must match the schema key and the data key".format(feature)
         elif required and not data.get(feature):
-            status, msg = (False, 'Feature {} required, but not found'.format(feature))
+            status = False
+            msg = "Data was not defined for feature {0}. \n" \
+                  "The scope entry must match the schema key and the data key".format(feature)
         elif not data.get(feature):
             status = True
         else:
@@ -125,9 +131,9 @@ def main():
         if not status:
             resp = {"data": data.get(feature),
                     "feature": feature,
-                    "message": msg}
+                    "msg": msg}
 
-            module.fail_json(msg=resp)
+            module.fail_json(**resp)
     module.exit_json(changed=False)
 
 
