@@ -23,34 +23,41 @@ DOCUMENTATION = '''
 module: ntc_validate_schema
 short_description: Validate schema with json schema
 description:
-    - Validate schema with json schema.
+  - Validate C(data) against required C(schema) using json schema.
 author: "Ken Celenza (@itdependsnetworks)"
 version_added: "2.6"
 requirements:
-    - jsonschema
+  - jsonschema
 options:
-    schema:
-        description:
-            - A dictionary where each key is the name of the value to compare, and value is the schema in which to compare against.
-        required: true
-    data:
-        description:
-            - The data in which to verify, where each key is the name of the value to compare, generally hostvars[inventory_hostname].
-        required: true
-    scope:
-        description:
-            - The features in data which to use, which defines the scope of what keys to look for in schema and data.
-        required: true
+  data:
+    description:
+      - The data to validate against the C(schema).
+      - Each key that requires validation must also be a key in the C(schema) dictionary.
+    required: true
+    type: dict
+  schema:
+    description:
+      - The schema that the C(data) must adhere to.
+      - Each key should have another dictionary as its value.
+      - The dictionary defined for each schema requires a 'type' key defining the expected data type.
+      - Valid data types are defined by jsonschema L($Find link for data types)
+    required: true
+    type: dict
+  scope:
+    description:
+      - The features in C(data) which should be validated against the defined C(schema).
+      - The "name" key should have a value that is a dictionary key in both C(data) and C(schema).
+    required: true
+    type: dict
 '''
 
 EXAMPLES = '''
-- name: 'VALIDATE THE SCHEMA'
+- name: "VALIDATE THE SCHEMA"
   ntc_validate_schema:
-    schema: '{{ my_schema }}'
-    data: '{{ hostvars[inventory_hostname] }}'
-    scope: '{{ scope }}'
-
-- name: 'VALIDATE THE SCHEMA MANUAL'
+    schema: "{{ my_schema }}"
+    data: "{{ hostvars[inventory_hostname] }}"
+    scope: "{{ scope }}"
+- name: "VALIDATE THE SCHEMA EXPLICIT"
   ntc_validate_schema:
     schema:
       vlans:
@@ -63,7 +70,6 @@ EXAMPLES = '''
         - 20
       hostname: "nyc-rs01"
     scope:
-      - name: "vlans"
       - name: "hostname"
         required: true
 '''
