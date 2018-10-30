@@ -90,11 +90,6 @@ options:
             - The name of a host as specified in an NTC configuration file.
         required: false
         default: null
-    config_register:
-        description:
-            - Configure device configuration register
-        required: false
-        default: 0x2102
     ntc_conf_file:
         description:
             - The path to a local NTC configuration file. If omitted, and ntc_host is specified,
@@ -129,11 +124,6 @@ vars:
 - ntc_install_os:
     provider: "{{ ios_provider }}"
     system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
-
-- ntc_install_os:
-    provider: "{{ ios_provider }}"
-    system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
-    config_register: 0x2102
 '''
 
 RETURN = '''
@@ -184,7 +174,6 @@ def main():
             port=dict(required=False, type='int'),
             provider=dict(type='dict', required=False),
             ntc_host=dict(required=False),
-            config_register=dict(required=False),
             ntc_conf_file=dict(required=False),
             system_image_file=dict(required=True),
             kickstart_image_file=dict(required=False),
@@ -228,8 +217,6 @@ def main():
     port = module.params['port']
     secret = module.params['secret']
 
-    register = module.params['config_register']
-
     argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
     for key, val in argument_check.items():
         if val is None:
@@ -257,9 +244,6 @@ def main():
 
     if kickstart_image_file == 'null':
         kickstart_image_file = None
-
-    if register is None:
-        register = '0x2102'
 
     device.open()
     changed = False
@@ -290,7 +274,6 @@ def main():
             if not already_set(install_state, system_image_file, kickstart_image_file):
                 module.fail_json(msg='Install not successful install_state:{} {}'.format(current_boot_options.get('sys'), system_image_file), install_state=install_state)
         else:
-            device.change_config_register(register)
             install_state = device.install_os(system_image_file)
             if install_state:
                 module.exit_json(changed=True)
