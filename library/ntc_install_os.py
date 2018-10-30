@@ -246,7 +246,6 @@ def main():
         kickstart_image_file = None
 
     device.open()
-    changed = False
 
     if not module.check_mode:
         if device.device_type == 'nxos':
