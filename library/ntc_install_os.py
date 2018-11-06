@@ -266,17 +266,8 @@ def main():
         kickstart_image_file = None
 
     device.open()
-    pre_install_boot_options = device.get_boot_options()
-    changed = False
 
-    if not already_set(boot_options=pre_install_boot_options,
-                       system_image_file=system_image_file,
-                       kickstart_image_file=kickstart_image_file,
-                       volume=volume,
-                       device=device):
-        changed = True
-
-    if not module.check_mode and changed == True:
+    if not module.check_mode:
         if device.device_type == 'nxos':
             timeout = 600
             device.set_timeout(timeout)
@@ -285,6 +276,7 @@ def main():
                 device.set_boot_options(system_image_file,
                                         kickstart=kickstart_image_file)
             except:
+
                 pass
             elapsed_time = time.time() - start_time
 
@@ -301,20 +293,14 @@ def main():
                     time.sleep(10)
                     elapsed_time += 10
         else:
-            device.set_boot_options(system_image_file,
-                                    kickstart=kickstart_image_file,
-                                    volume=volume)
-            install_state = device.get_boot_options()
-
-        if not already_set(boot_options=install_state,
-                           system_image_file=system_image_file,
-                           kickstart_image_file=kickstart_image_file,
-                           volume=volume,
-                           device=device):
-            module.fail_json(msg='Install not successful',
-                             install_state=install_state)
+            install_state = device.install_os(system_image_file)
+            if install_state:
+                module.exit_json(changed=True)
+            else:
+                module.exit_json(changed=False)
     else:
-        install_state = pre_install_boot_options
+        install_state = current_boot_options
+        module.fail_json(msg='Install not successful. Install and request state are the same.\ninstall_state:   {}\nrequested_state: {}'.format(current_boot_options.get('sys'), system_image_file), install_state=install_state)
 
     device.close()
     module.exit_json(changed=changed, install_state=install_state)
