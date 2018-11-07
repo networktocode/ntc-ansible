@@ -159,7 +159,6 @@ except ImportError:
 PLATFORM_NXAPI = 'cisco_nxos_nxapi'
 PLATFORM_IOS = 'cisco_ios_ssh'
 PLATFORM_EAPI = 'arista_eos_eapi'
-PLATFORM_JUNOS = 'juniper_junos_netconf'
 PLATFORM_F5 = 'f5_tmos_icontrol'
 PLATFORM_ASA = 'cisco_asa_ssh'
 
@@ -180,7 +179,7 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
-                                   PLATFORM_JUNOS, PLATFORM_F5, PLATFORM_ASA],
+                                   PLATFORM_F5, PLATFORM_ASA],
                           required=False),
             host=dict(required=False),
             username=dict(required=False, type='str'),
@@ -254,9 +253,6 @@ def main():
 
         device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)
-
-    if device.device_type == PLATFORM_JUNOS:
-        module.fail_json(msg='Install OS for Juniper not supported.')
 
     system_image_file = module.params['system_image_file']
     kickstart_image_file = module.params['kickstart_image_file']
