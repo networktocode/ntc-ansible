@@ -178,6 +178,13 @@ try:
     HAS_PYNTC = True
 except ImportError:
     HAS_PYNTC = False
+
+try:
+    # TODO: Ensure pyntc adds __version__
+    from pyntc import __version__ as pyntc_version
+    HAS_PYNTC_VERSION = True
+except ImportError:
+    HAS_PYNTC_VERSION = False
 # fmt: on
 
 PLATFORM_NXAPI = "cisco_nxos_nxapi"
@@ -187,6 +194,7 @@ PLATFORM_F5 = "f5_tmos_icontrol"
 PLATFORM_ASA = "cisco_asa_ssh"
 
 
+# TODO: Remove when deprecating older pyntc
 def already_set(boot_options, system_image_file, kickstart_image_file, **kwargs):
     volume = kwargs.get("volume")
     device = kwargs.get("device")
@@ -236,6 +244,12 @@ def main():
 
     if not HAS_PYNTC:
         module.fail_json(msg="pyntc Python library not found.")
+    # TODO: Change to fail_json when deprecating older pyntc
+    if not HAS_PYNTC_VERSION:
+        module.warn("Support for pyntc version < 0.0.9 is being deprecated; please upgrade pyntc")
+
+    # TODO: Remove warning when deprecating reboot option on non-F5 devices
+    module.warn("Support for installing the OS without rebooting may be deprecated in the future")
 
     provider = module.params["provider"] or {}
 
@@ -246,6 +260,7 @@ def main():
 
     # allow local params to override provider
     for param, pvalue in provider.items():
+        # TODO: Figure out exactly the purpose of this and correct truthiness or noneness
         if module.params.get(param) != False:
             module.params[param] = module.params.get(param) or pvalue
 
@@ -261,6 +276,12 @@ def main():
     port = module.params["port"]
     secret = module.params["secret"]
     reboot = module.params["reboot"]
+
+    # TODO: Remove checks if we require reboot for non-F5 devices
+    if platform == "cisco_nxos_nxapi" and not reboot:
+        module.fail_json(msg="NXOS requires setting the \"reboot\" parameter to True")
+    if platform != "cisco_nxos_nxapi" and reboot and not HAS_PYNTC_VERSION:
+        module.fail_json(msg="Using the \"reboot\" parameter requires pyntc version > 0.0.8")
 
     argument_check = {
         "host": host,
@@ -295,55 +316,81 @@ def main():
 
     device.open()
     pre_install_boot_options = device.get_boot_options()
-    changed = False
 
-    if not already_set(
-        boot_options=pre_install_boot_options,
-        system_image_file=system_image_file,
-        kickstart_image_file=kickstart_image_file,
-        volume=volume,
-        device=device,
-    ):
-        changed = True
-
-    if not module.check_mode and changed == True:
-        if device.device_type == "nxos":
-            timeout = 600
-            device.set_timeout(timeout)
-            try:
-                start_time = time.time()
-                device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
-            except:
-                pass
-            elapsed_time = time.time() - start_time
-
-            device.set_timeout(30)
-            try:
-                install_state = device.get_boot_options()
-            except:
-                install_state = {}
-
-            while elapsed_time < timeout and not install_state:
-                try:
-                    install_state = device.get_boot_options()
-                except:
-                    time.sleep(10)
-                    elapsed_time += 10
+    if not module.check_mode:
+        # TODO: Remove conditional when deprecating older pyntc
+        if HAS_PYNTC_VERSION:
+            pass
+        # TODO: Remove contents of else when deprecating older pyntc
         else:
-            device.set_boot_options(
-                system_image_file, kickstart=kickstart_image_file, volume=volume
-            )
-            install_state = device.get_boot_options()
+            changed = False
+            install_state = pre_install_boot_options
 
-        if not already_set(
-            boot_options=install_state,
-            system_image_file=system_image_file,
-            kickstart_image_file=kickstart_image_file,
-            volume=volume,
-            device=device,
-        ):
-            module.fail_json(msg="Install not successful", install_state=install_state)
+            if not already_set(
+                boot_options=pre_install_boot_options,
+                system_image_file=system_image_file,
+                kickstart_image_file=kickstart_image_file,
+                volume=volume,
+                device=device,
+            ):
+                changed = True
+
+                if device.device_type == "nxos":
+                    timeout = 600
+                    device.set_timeout(timeout)
+                    try:
+                        start_time = time.time()
+                        device.set_boot_options(
+                            system_image_file,
+                            kickstart=kickstart_image_file,
+                        )
+                    except:
+                        pass
+                    elapsed_time = time.time() - start_time
+
+                    device.set_timeout(30)
+                    try:
+                        install_state = device.get_boot_options()
+                    except:
+                        install_state = {}
+
+                    while elapsed_time < timeout and not install_state:
+                        try:
+                            install_state = device.get_boot_options()
+                        except:
+                            time.sleep(10)
+                            elapsed_time += 10
+                else:
+                    device.set_boot_options(
+                        system_image_file,
+                        kickstart=kickstart_image_file,
+                        volume=volume,
+                    )
+                    install_state = device.get_boot_options()
+
+                    if not already_set(
+                        boot_options=pre_install_boot_options,
+                        system_image_file=system_image_file,
+                        kickstart_image_file=kickstart_image_file,
+                        volume=volume,
+                        device=device,
+                    ):
+                        module.fail_json(msg="Install not successful", install_state=install_state)
+
     else:
+        if HAS_PYNTC_VERSION:
+            # TODO: Ensure all devices support private method
+            changed = device._image_booted(system_image_file, kickstart=kickstart_image_file, volume=volume)
+        # TODO: Remove contents of else when deprecating older pyntc
+        else:
+            changed = already_set(
+                boot_options=pre_install_boot_options,
+                system_image_file=system_image_file,
+                kickstart_image_file=kickstart_image_file,
+                volume=volume,
+                device=device,
+            )
+
         install_state = pre_install_boot_options
 
     device.close()
