@@ -304,7 +304,8 @@ def main():
                 # TODO: Remove support if we require reboot for non-F5 devices
                 changed = device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
 
-            if reboot and device.device_type == 'f5_tmos_icontrol':
+            if reboot and device.device_type == 'f5_tmos_icontrol' and \
+                    pre_install_boot_options['active_volume'] != volume:
                 try:
                     changed = True
                     device.reboot(confirm=True, volume=volume)
