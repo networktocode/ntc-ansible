@@ -15,20 +15,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# fmt: off
 DOCUMENTATION = '''
 ---
 module: ntc_install_os
-short_description: Install an operating system by setting the boot options like boot image and kickstart image.
+short_description: Install an operating system by setting the boot options
+                   like boot image and kickstart image.
 description:
     - Set boot options like boot image and kickstart image.
-    - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
+    - Supported platforms include Cisco Nexus switches with NX-API,
+      Cisco IOS switches or routers, Arista switches with eAPI.
 notes:
-    - Do not include full file paths, just the name of the file(s) stored on the top level flash directory.
-    - You must know if your platform supports taking a kickstart image as a parameter. If supplied but not supported, errors may occur.
+    - Do not include full file paths, just the name
+      of the file(s) stored on the top level flash directory.
+    - You must know if your platform supports taking a kickstart image as a parameter.
+      If supplied but not supported, errors may occur.
     - It may be useful to use this module in conjuction with ntc_file_copy and ntc_reboot.
     - With F5, volume parameter is required.
-    - With NXOS devices, this module attempts to install the software immediately, wich may trigger a reboot.
-    - With NXOS devices, install process may take up to 10 minutes, especially if the device reboots.
+    - With NXOS devices, this module attempts to install the software immediately,
+      wich may trigger a reboot.
+    - With NXOS devices, install process may take up to 10 minutes,
+      especially if the device reboots.
     - Tested on Nexus 3000, 5000, 9000.
     - In check mode, the module tells you if the current boot images are set to the desired images.
 author: Jason Edelman (@jedelman8)
@@ -40,7 +47,8 @@ options:
         description:
             - Switch platform
         required: false
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'cisco_asa_ssh', 'f5_tmos_icontrol']
+        choices: ["cisco_nxos_nxapi", "arista_eos_eapi", "cisco_ios_ssh",
+                  "cisco_asa_ssh", "f5_tmos_icontrol"]
     system_image_file:
         description:
             - Name of the system (or combined) image file on flash.
@@ -83,11 +91,11 @@ options:
             - Transport protocol for API-based devices.
         required: false
         default: null
-        choices: ['http', 'https']
+        choices: ["http", "https"]
     port:
         description:
-            - TCP/UDP port to connect to target device. If omitted standard port numbers will be used.
-              80 for HTTP; 443 for HTTPS; 22 for SSH.
+            - TCP/UDP port to connect to target device.
+            - If omitted standard port numbers will be used. 80 for HTTP; 443 for HTTPS; 22 for SSH.
         required: false
         default: null
     ntc_host:
@@ -97,9 +105,10 @@ options:
         default: null
     ntc_conf_file:
         description:
-            - The path to a local NTC configuration file. If omitted, and ntc_host is specified,
-              the system will look for a file given by the path in the environment variable PYNTC_CONF,
-              and then in the users home directory for a file called .ntc.conf.
+            - The path to a local NTC configuration file.
+            - If omitted, and ntc_host is specified, the system will look for a file given
+              by the path in the environment variable PYNTC_CONF, and then in the users
+              home directory for a file called .ntc.conf.
         required: false
         default: null
 '''
@@ -148,73 +157,76 @@ install_state:
     }
 '''
 
-import time
+import time  # noqa E402
 
-from ansible.module_utils.basic import AnsibleModule, return_values
+from ansible.module_utils.basic import AnsibleModule, return_values  # noqa E402
 
 try:
-    from pyntc import ntc_device, ntc_device_by_name
+    from pyntc import ntc_device, ntc_device_by_name  # noqa E402
     HAS_PYNTC = True
 except ImportError:
     HAS_PYNTC = False
+# fmt: on
 
-PLATFORM_NXAPI = 'cisco_nxos_nxapi'
-PLATFORM_IOS = 'cisco_ios_ssh'
-PLATFORM_EAPI = 'arista_eos_eapi'
-PLATFORM_F5 = 'f5_tmos_icontrol'
-PLATFORM_ASA = 'cisco_asa_ssh'
+PLATFORM_NXAPI = "cisco_nxos_nxapi"
+PLATFORM_IOS = "cisco_ios_ssh"
+PLATFORM_EAPI = "arista_eos_eapi"
+PLATFORM_F5 = "f5_tmos_icontrol"
+PLATFORM_ASA = "cisco_asa_ssh"
 
 
-def already_set(boot_options, system_image_file, kickstart_image_file,
-                **kwargs):
-    volume = kwargs.get('volume')
-    device = kwargs.get('device')
+def already_set(boot_options, system_image_file, kickstart_image_file, **kwargs):
+    volume = kwargs.get("volume")
+    device = kwargs.get("device")
     if device and volume:
-        return device.image_installed(image_name=system_image_file,
-                                      volume=volume)
+        return device.image_installed(image_name=system_image_file, volume=volume)
 
-    return boot_options.get('sys') == system_image_file \
-           and boot_options.get('kick') == kickstart_image_file
+    return (
+        boot_options.get("sys") == system_image_file
+        and boot_options.get("kick") == kickstart_image_file
+    )
 
 
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
-                                   PLATFORM_F5, PLATFORM_ASA],
-                          required=False),
+            platform=dict(
+                choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_F5, PLATFORM_ASA],
+                required=False,
+            ),
             host=dict(required=False),
-            username=dict(required=False, type='str'),
-            password=dict(required=False, type='str', no_log=True),
+            username=dict(required=False, type="str"),
+            password=dict(required=False, type="str", no_log=True),
             secret=dict(required=False, no_log=True),
-            transport=dict(required=False, choices=['http', 'https']),
-            port=dict(required=False, type='int'),
-            provider=dict(type='dict', required=False),
+            transport=dict(required=False, choices=["http", "https"]),
+            port=dict(required=False, type="int"),
+            provider=dict(type="dict", required=False),
             ntc_host=dict(required=False),
             ntc_conf_file=dict(required=False),
             system_image_file=dict(required=True),
             kickstart_image_file=dict(required=False),
-            volume=dict(required=False, type='str'),
+            volume=dict(required=False, type="str"),
         ),
-        mutually_exclusive=[['host', 'ntc_host'],
-                            ['ntc_host', 'secret'],
-                            ['ntc_host', 'transport'],
-                            ['ntc_host', 'port'],
-                            ['ntc_conf_file', 'secret'],
-                            ['ntc_conf_file', 'transport'],
-                            ['ntc_conf_file', 'port'],
-                            ],
-        required_one_of=[['host', 'ntc_host', 'provider']],
+        mutually_exclusive=[
+            ["host", "ntc_host"],
+            ["ntc_host", "secret"],
+            ["ntc_host", "transport"],
+            ["ntc_host", "port"],
+            ["ntc_conf_file", "secret"],
+            ["ntc_conf_file", "transport"],
+            ["ntc_conf_file", "port"],
+        ],
+        required_one_of=[["host", "ntc_host", "provider"]],
         required_if=[["platform", PLATFORM_F5, ["volume"]]],
-        supports_check_mode=True
+        supports_check_mode=True,
     )
 
     if not HAS_PYNTC:
-        module.fail_json(msg='pyntc Python library not found.')
+        module.fail_json(msg="pyntc Python library not found.")
 
-    provider = module.params['provider'] or {}
+    provider = module.params["provider"] or {}
 
-    no_log = ['password', 'secret']
+    no_log = ["password", "secret"]
     for param in no_log:
         if provider.get(param):
             module.no_log_values.update(return_values(provider[param]))
@@ -224,20 +236,24 @@ def main():
         if module.params.get(param) != False:
             module.params[param] = module.params.get(param) or pvalue
 
-    platform = module.params['platform']
-    host = module.params['host']
-    username = module.params['username']
-    password = module.params['password']
+    platform = module.params["platform"]
+    host = module.params["host"]
+    username = module.params["username"]
+    password = module.params["password"]
 
-    ntc_host = module.params['ntc_host']
-    ntc_conf_file = module.params['ntc_conf_file']
+    ntc_host = module.params["ntc_host"]
+    ntc_conf_file = module.params["ntc_conf_file"]
 
-    transport = module.params['transport']
-    port = module.params['port']
-    secret = module.params['secret']
+    transport = module.params["transport"]
+    port = module.params["port"]
+    secret = module.params["secret"]
 
-    argument_check = {'host': host, 'username': username, 'platform': platform,
-                      'password': password}
+    argument_check = {
+        "host": host,
+        "username": username,
+        "platform": platform,
+        "password": password,
+    }
     for key, val in argument_check.items():
         if val is None:
             module.fail_json(msg=str(key) + " is required")
@@ -247,41 +263,42 @@ def main():
     else:
         kwargs = {}
         if transport is not None:
-            kwargs['transport'] = transport
+            kwargs["transport"] = transport
         if port is not None:
-            kwargs['port'] = port
+            kwargs["port"] = port
         if secret is not None:
-            kwargs['secret'] = secret
+            kwargs["secret"] = secret
 
         device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)
 
-    system_image_file = module.params['system_image_file']
-    kickstart_image_file = module.params['kickstart_image_file']
-    volume = module.params['volume']
+    system_image_file = module.params["system_image_file"]
+    kickstart_image_file = module.params["kickstart_image_file"]
+    volume = module.params["volume"]
 
-    if kickstart_image_file == 'null':
+    if kickstart_image_file == "null":
         kickstart_image_file = None
 
     device.open()
     pre_install_boot_options = device.get_boot_options()
     changed = False
 
-    if not already_set(boot_options=pre_install_boot_options,
-                       system_image_file=system_image_file,
-                       kickstart_image_file=kickstart_image_file,
-                       volume=volume,
-                       device=device):
+    if not already_set(
+        boot_options=pre_install_boot_options,
+        system_image_file=system_image_file,
+        kickstart_image_file=kickstart_image_file,
+        volume=volume,
+        device=device,
+    ):
         changed = True
 
     if not module.check_mode and changed == True:
-        if device.device_type == 'nxos':
+        if device.device_type == "nxos":
             timeout = 600
             device.set_timeout(timeout)
             try:
                 start_time = time.time()
-                device.set_boot_options(system_image_file,
-                                        kickstart=kickstart_image_file)
+                device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
             except:
                 pass
             elapsed_time = time.time() - start_time
@@ -299,18 +316,19 @@ def main():
                     time.sleep(10)
                     elapsed_time += 10
         else:
-            device.set_boot_options(system_image_file,
-                                    kickstart=kickstart_image_file,
-                                    volume=volume)
+            device.set_boot_options(
+                system_image_file, kickstart=kickstart_image_file, volume=volume
+            )
             install_state = device.get_boot_options()
 
-        if not already_set(boot_options=install_state,
-                           system_image_file=system_image_file,
-                           kickstart_image_file=kickstart_image_file,
-                           volume=volume,
-                           device=device):
-            module.fail_json(msg='Install not successful',
-                             install_state=install_state)
+        if not already_set(
+            boot_options=install_state,
+            system_image_file=system_image_file,
+            kickstart_image_file=kickstart_image_file,
+            volume=volume,
+            device=device,
+        ):
+            module.fail_json(msg="Install not successful", install_state=install_state)
     else:
         install_state = pre_install_boot_options
 
