@@ -157,14 +157,14 @@ import time
 
 from ansible.module_utils.basic import AnsibleModule, return_values
 try:
-    HAS_PYNTC = True
     from pyntc import ntc_device, ntc_device_by_name
+    HAS_PYNTC = True
 except ImportError:
     HAS_PYNTC = False
 try:
     # TODO: Ensure pyntc adds __version__
-    HAS_PYNTC_VERSION = True
     from pyntc import __version__
+    HAS_PYNTC_VERSION = True
 except ImportError:
     HAS_PYNTC_VERSION = False
 
@@ -303,11 +303,8 @@ def main():
                 # TODO: Remove support if we require reboot for non-F5 devices
                 changed = device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
 
-            if reboot and device.device_type == 'f5_tmos_icontrol' and changed:
-                # TODO: Change F5 to raise exception if device does not come back
+            if reboot and device.device_type == 'f5_tmos_icontrol':
                 changed = device.reboot(confirm=True, volume=volume)
-                if not changed:
-                    raise TimeoutError("Unable to connect to device after waiting for it to boot back up")
 
             # TODO: Move validation to pyntc and raise exception there
             install_state = device.get_boot_options()
@@ -315,15 +312,10 @@ def main():
                 if device.device_type != 'f5_tmos_icontrol' and system_image_file != install_state['sys']:
                     module.fail_json(
                         msg="Attempted upgrade but did not boot to desired image",
-                        original_image=pre_install_boot_options,
+                        original_image=pre_install_boot_options['sys'],
                         current_image=install_state['sys']
                     )
-                elif device.device_type == 'f5_tmos_icontrol' and volume != install_state['active_volume']:
-                    module.fail_json(
-                        msg="Attempted upgrade but did not boot to desired image",
-                        original_volume=pre_install_boot_options,
-                        current_volume=install_state['sys']
-                    )
+
         # TODO: Remove contents of else when deprecating older pyntc
         else:
             changed = False
