@@ -111,6 +111,11 @@ options:
               home directory for a file called .ntc.conf.
         required: false
         default: null
+    reboot:
+        description:
+            - Determines whether or not the device should be rebooted to complete OS installation.
+        required: false
+        default: false
 '''
 
 EXAMPLES = '''
@@ -122,22 +127,29 @@ vars:
     platform: "cisco_ios_ssh"
     connection: ssh
 
-- ntc_install_os:
+- name: "INSTALL OS ON NEXUS 9K"
+  ntc_install_os:
     ntc_host: n9k1
     system_image_file: n9000-dk9.6.1.2.I3.1.bin
+    reboot: yes
 
-- ntc_install_os:
+- name: "INSTALL OS ON NEXUS 3K WITH KICKSTART"
+  ntc_install_os:
     ntc_host: n3k1
     system_image_file: n3000-uk9.6.0.2.U6.5.bin
     kickstart_image_file: n3000-uk9-kickstart.6.0.2.U6.5.bin
+    reboot: yes
 
-- ntc_install_os:
+- name: "CONFIGURE BOOT OPTIONS ON CISCO 2800"
+  ntc_install_os:
     ntc_host: c2801
     system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
 
-- ntc_install_os:
+- name: "INSTALL OS ON CISCO 2800"
+  ntc_install_os:
     provider: "{{ ios_provider }}"
     system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
+    reboot: yes
 '''
 
 RETURN = '''
@@ -206,6 +218,7 @@ def main():
             system_image_file=dict(required=True),
             kickstart_image_file=dict(required=False),
             volume=dict(required=False, type="str"),
+            reboot=dict(required=False, type="bool", default=False),
         ),
         mutually_exclusive=[
             ["host", "ntc_host"],
@@ -247,6 +260,7 @@ def main():
     transport = module.params["transport"]
     port = module.params["port"]
     secret = module.params["secret"]
+    reboot = module.params["reboot"]
 
     argument_check = {
         "host": host,
