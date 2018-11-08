@@ -150,6 +150,8 @@ install_state:
 
 import time
 
+from ansible.module_utils.basic import AnsibleModule, return_values
+
 try:
     HAS_PYNTC = True
     from pyntc import ntc_device, ntc_device_by_name
@@ -315,7 +317,5 @@ def main():
     device.close()
     module.exit_json(changed=changed, install_state=install_state)
 
-
-from ansible.module_utils.basic import *
 
 main()
