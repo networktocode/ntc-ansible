@@ -156,6 +156,7 @@ install_state:
 import time
 
 from ansible.module_utils.basic import AnsibleModule, return_values
+
 try:
     from pyntc import ntc_device, ntc_device_by_name
     HAS_PYNTC = True
@@ -304,7 +305,16 @@ def main():
                 changed = device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
 
             if reboot and device.device_type == 'f5_tmos_icontrol':
-                changed = device.reboot(confirm=True, volume=volume)
+                try:
+                    changed = True
+                    device.reboot(confirm=True, volume=volume)
+                except RuntimeError:
+                    module.fail_json(
+                        msg="Attempted reboot but did not boot to desired volume",
+                        original_volume=pre_install_boot_options[
+                            'active_volume'],
+                        expected_volume=volume
+                    )
 
             # TODO: Move validation to pyntc and raise exception there
             install_state = device.get_boot_options()
