@@ -5,3 +5,4 @@ myhosts
 ntc_ansible.egg-info/
 dist/
 *.retry
+.idea/
