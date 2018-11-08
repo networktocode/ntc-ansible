@@ -153,8 +153,8 @@ import time
 from ansible.module_utils.basic import AnsibleModule, return_values
 
 try:
-    HAS_PYNTC = True
     from pyntc import ntc_device, ntc_device_by_name
+    HAS_PYNTC = True
 except ImportError:
     HAS_PYNTC = False
 
