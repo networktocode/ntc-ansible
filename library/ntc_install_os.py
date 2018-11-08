@@ -328,12 +328,19 @@ def main():
                 # TODO: Remove support if we require reboot for non-F5 devices
                 changed = device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
 
-            if reboot and device.device_type == "f5_tmos_icontrol" and changed:
-                # TODO: Change F5 to raise exception if device does not come back
-                changed = device.reboot(confirm=True, volume=volume)
-                if not changed:
-                    raise TimeoutError("Unable to connect to device after waiting for it to boot back up")
+            if reboot and device.device_type == "f5_tmos_icontrol" and \
+                pre_install_boot_options["active_volume"] != volume:
+                try:
+                    changed = True
+                    device.reboot(confirm=True, volume=volume)
+                except RuntimeError:
+                    module.fail_json(
+                        msg="Attempted reboot but did not boot to desired volume",
+                        original_volume=pre_install_boot_options["active_volume"],
+                        expected_volume=volume,
+                    )
 
+            # TODO: Move validation to pyntc and raise exception there
             install_state = device.get_boot_options()
             if changed:
                 if device.device_type != "f5_tmos_icontrol" and system_image_file != install_state["sys"]:
@@ -342,12 +349,7 @@ def main():
                         original_image=pre_install_boot_options["sys"],
                         current_image=install_state["sys"],
                     )
-                elif device.device_type == "f5_tmos_icontrol" and volume != install_state["active_volume"]:
-                    module.fail_json(
-                        msg="Attempted upgrade but did not boot to desired image",
-                        original_volume=pre_install_boot_options["active_volume"],
-                        current_volume=install_state["active_volume"],
-                    )
+
         # TODO: Remove contents of else when deprecating older pyntc
         else:
             changed = False
