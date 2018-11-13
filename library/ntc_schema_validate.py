@@ -33,6 +33,9 @@ options:
     description:
       - The data to validate against the C(schema).
       - Each key that requires validation must also be a key in the C(schema) dictionary.
+      - Each key that requires validation mush also be the value for the "name" key in one of the
+        C(scope) dictionaries.
+      - A good strategy would be to use hostvars[inventory_hostname] to get all vars for the host
     required: true
     type: dict
   schema:
@@ -47,6 +50,7 @@ options:
     description:
       - The features in C(data) which should be validated against the defined C(schema).
       - The "name" key should have a value that is a dictionary key in both C(data) and C(schema).
+      - The "required" key is used to validate whether the C(data) must be present.
     required: true
     type: dict
 '''
@@ -57,6 +61,7 @@ EXAMPLES = '''
     schema: "{{ my_schema }}"
     data: "{{ hostvars[inventory_hostname] }}"
     scope: "{{ scope }}"
+
 - name: "VALIDATE THE SCHEMA EXPLICIT"
   ntc_validate_schema:
     schema:
@@ -72,6 +77,7 @@ EXAMPLES = '''
     scope:
       - name: "hostname"
         required: true
+      - name: "vlans"
 '''
 
 RETURN = '''
@@ -116,33 +122,45 @@ def main():
     scope = module.params["scope"]
 
     for item in scope:
-        feature = item.get("name")
+        # Make sure scope had a "name" key
+        try:
+            feature = item["name"]
+        except KeyError:
+            module.fail_json(
+                msg="Malformed list item {0}, "
+                "should be in format similar to {\"name\": \"feature\", \"required\": True}".format(item)
+            )
         required = item.get("required")
-        if not feature:
-            status = False
-            msg = 'Malformed list item {0}; all scope entries require a "name" key: \n' \
-                  '{1}'.format(item, '{"name": "feature", "required": True}')
-        elif not schema.get(feature):
-            status = False
-            msg = "Schema was not defined for feature {0}. \n" \
-                  "The scope's name value must match the schema key and the data key".format(feature)
-        elif required and not data.get(feature):
-            status = False
-            msg = "Data was not defined for feature {0}. \n" \
-                  "The scope entry must match the schema key and the data key".format(feature)
+        entry_data = data.get(feature)
 
-        elif not data.get(feature):
-            status = True
+        # Provide schema validation against data when data is present
+        if entry_data is not None:
+            entry_schema = schema.get(feature)
+            # Validate the data against the schema when data is propely defined
+            if entry_schema is not None:
+                status, msg = validate_schema(entry_schema, entry_data)
+            # Provide module.fail_json data when there is no schema defined for current required feature
+            else:
+                status = False
+                msg = "Schema was not defined for feature {0}. Schema key must match data key".format(feature)
+        # Provide module.fail_json data when there is no data defined for current required feature
+        elif required:
+            status = False
+            msg = "Feature {0} required, but not found".format(feature)
+        # Default to proper validation when scope is not required and data was not defined
         else:
-            status, msg = validate_schema(schema.get(feature), data.get(feature))
+            status = True
 
+        # Fail the module when it did not pass validation or data/schema data was invalid
         if not status:
-            resp = {"data": data.get(feature),
-                    "feature": feature,
-                    "msg": msg}
-
-
+            resp = {
+                "data": entry_data,
+                "schema": entry_schema,
+                "feature": feature,
+                "msg": msg,
+            }
             module.fail_json(**resp)
+
     module.exit_json(changed=False)
 
 
