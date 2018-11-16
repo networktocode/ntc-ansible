@@ -176,16 +176,6 @@ import time  # noqa E402
 
 from ansible.module_utils.basic import AnsibleModule, return_values  # noqa E402
 
-from pyntc.errors import (
-    CommandError,
-    CommandListError,
-    FileSystemNotFoundError,
-    NotEnoughFreeSpaceError,
-    NTCFileNotFoundError,
-    OSInstallError,
-    RebootTimeoutError,
-)
-
 try:
     from pyntc import ntc_device, ntc_device_by_name  # noqa E402
     HAS_PYNTC = True
@@ -194,7 +184,16 @@ except ImportError:
 
 try:
     # TODO: Ensure pyntc adds __version__
-    from pyntc import __version__ as pyntc_version
+    from pyntc import __version__ as pyntc_version # noqa F401
+    from pyntc.errors import (
+        CommandError,
+        CommandListError,
+        FileSystemNotFoundError,
+        NotEnoughFreeSpaceError,
+        NTCFileNotFoundError,
+        OSInstallError,
+        RebootTimeoutError,
+    )
     HAS_PYNTC_VERSION = True
 except ImportError:
     HAS_PYNTC_VERSION = False
@@ -338,14 +337,12 @@ def main():
             try:
                 # TODO: Remove conditional if we require reboot for non-F5 devices
                 if reboot or device.device_type == "f5_tmos_icontrol":
-                    # TODO: Ensure all devices support install_os method and return the same values and raise exceptions
                     changed = device.install_os(
                         image_name=system_image_file, kickstart=kickstart_image_file, volume=volume
                     )
                 else:
                     # TODO: Remove support if we require reboot for non-F5 devices
                     changed = device.set_boot_options(system_image_file)
-            # TODO: Enhance failures once proper exceptions are raised in pyntc
             except (
                 CommandError,
                 CommandListError,
@@ -429,7 +426,6 @@ def main():
 
     else:
         if HAS_PYNTC_VERSION:
-            # TODO: Ensure all devices support private method
             changed = device._image_booted(
                 image_name=system_image_file, kickstart=kickstart_image_file, volume=volume
             )
