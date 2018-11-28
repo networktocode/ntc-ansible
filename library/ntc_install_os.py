@@ -23,21 +23,24 @@ short_description: Install an operating system by setting the boot options
                    like boot image and kickstart image.
 description:
     - Set boot options like boot image and kickstart image.
+    - Reboot option for device to perform install.
     - Supported platforms include Cisco Nexus switches with NX-API,
-      Cisco IOS switches or routers, Arista switches with eAPI.
+      Cisco IOS switches or routers, Arista switches with eAPI,
+      Cisco ASA firewalls, and F5 LTMs with iControl API.
 notes:
     - Do not include full file paths, just the name
       of the file(s) stored on the top level flash directory.
     - You must know if your platform supports taking a kickstart image as a parameter.
       If supplied but not supported, errors may occur.
-    - It may be useful to use this module in conjuction with ntc_file_copy and ntc_reboot.
+    - It may be useful to use this module in conjunction with ntc_file_copy and ntc_reboot.
     - With F5, volume parameter is required.
     - With NXOS devices, this module attempts to install the software immediately,
-      wich may trigger a reboot.
+      which may trigger a reboot.
     - With NXOS devices, install process may take up to 10 minutes,
       especially if the device reboots.
     - Tested on Nexus 3000, 5000, 9000.
-    - In check mode, the module tells you if the current boot images are set to the desired images.
+    - In check mode, the module tells you if the image currently
+      booted matches C(system_image_file).
 author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
 requirements:
@@ -64,7 +67,7 @@ options:
         required: false
     host:
         description:
-            - Hostame or IP address of switch.
+            - Hostname or IP address of switch.
         required: false
     username:
         description:
@@ -111,6 +114,11 @@ options:
               home directory for a file called .ntc.conf.
         required: false
         default: null
+    reboot:
+        description:
+            - Determines whether or not the device should be rebooted to complete OS installation.
+        required: false
+        default: false
 '''
 
 EXAMPLES = '''
@@ -122,22 +130,29 @@ vars:
     platform: "cisco_ios_ssh"
     connection: ssh
 
-- ntc_install_os:
+- name: "INSTALL OS ON NEXUS 9K"
+  ntc_install_os:
     ntc_host: n9k1
     system_image_file: n9000-dk9.6.1.2.I3.1.bin
+    reboot: yes
 
-- ntc_install_os:
+- name: "INSTALL OS ON NEXUS 3K WITH KICKSTART"
+  ntc_install_os:
     ntc_host: n3k1
     system_image_file: n3000-uk9.6.0.2.U6.5.bin
     kickstart_image_file: n3000-uk9-kickstart.6.0.2.U6.5.bin
+    reboot: yes
 
-- ntc_install_os:
+- name: "CONFIGURE BOOT OPTIONS ON CISCO 2800"
+  ntc_install_os:
     ntc_host: c2801
     system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
 
-- ntc_install_os:
+- name: "INSTALL OS ON CISCO 2800"
+  ntc_install_os:
     provider: "{{ ios_provider }}"
     system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
+    reboot: yes
 '''
 
 RETURN = '''
@@ -166,6 +181,22 @@ try:
     HAS_PYNTC = True
 except ImportError:
     HAS_PYNTC = False
+
+try:
+    # TODO: Ensure pyntc adds __version__
+    from pyntc import __version__ as pyntc_version # noqa F401
+    from pyntc.errors import (
+        CommandError,
+        CommandListError,
+        FileSystemNotFoundError,
+        NotEnoughFreeSpaceError,
+        NTCFileNotFoundError,
+        OSInstallError,
+        RebootTimeoutError,
+    )
+    HAS_PYNTC_VERSION = True
+except ImportError:
+    HAS_PYNTC_VERSION = False
 # fmt: on
 
 PLATFORM_NXAPI = "cisco_nxos_nxapi"
@@ -175,6 +206,7 @@ PLATFORM_F5 = "f5_tmos_icontrol"
 PLATFORM_ASA = "cisco_asa_ssh"
 
 
+# TODO: Remove when deprecating older pyntc
 def already_set(boot_options, system_image_file, kickstart_image_file, **kwargs):
     volume = kwargs.get("volume")
     device = kwargs.get("device")
@@ -206,6 +238,7 @@ def main():
             system_image_file=dict(required=True),
             kickstart_image_file=dict(required=False),
             volume=dict(required=False, type="str"),
+            reboot=dict(required=False, type="bool", default=False),
         ),
         mutually_exclusive=[
             ["host", "ntc_host"],
@@ -223,6 +256,12 @@ def main():
 
     if not HAS_PYNTC:
         module.fail_json(msg="pyntc Python library not found.")
+    # TODO: Change to fail_json when deprecating older pyntc
+    if not HAS_PYNTC_VERSION:
+        module.warn("Support for pyntc version < 0.0.9 is being deprecated; please upgrade pyntc")
+
+    # TODO: Remove warning when deprecating reboot option on non-F5 devices
+    module.warn("Support for installing the OS without rebooting may be deprecated in the future")
 
     provider = module.params["provider"] or {}
 
@@ -233,6 +272,7 @@ def main():
 
     # allow local params to override provider
     for param, pvalue in provider.items():
+        # TODO: Figure out exactly the purpose of this and correct truthiness or noneness
         if module.params.get(param) != False:
             module.params[param] = module.params.get(param) or pvalue
 
@@ -247,6 +287,15 @@ def main():
     transport = module.params["transport"]
     port = module.params["port"]
     secret = module.params["secret"]
+    reboot = module.params["reboot"]
+
+    # TODO: Remove checks if we require reboot for non-F5 devices
+    if platform == "cisco_nxos_nxapi" and not reboot:
+        module.fail_json(msg='NXOS requires setting the "reboot" parameter to True')
+    if platform != "cisco_nxos_nxapi" and reboot and not HAS_PYNTC_VERSION:
+        module.fail_json(
+            msg='Using the "reboot" parameter for non-NXOS devices' "requires pyntc version > 0.0.8"
+        )
 
     argument_check = {
         "host": host,
@@ -281,55 +330,115 @@ def main():
 
     device.open()
     pre_install_boot_options = device.get_boot_options()
-    changed = False
 
-    if not already_set(
-        boot_options=pre_install_boot_options,
-        system_image_file=system_image_file,
-        kickstart_image_file=kickstart_image_file,
-        volume=volume,
-        device=device,
-    ):
-        changed = True
-
-    if not module.check_mode and changed == True:
-        if device.device_type == "nxos":
-            timeout = 600
-            device.set_timeout(timeout)
+    if not module.check_mode:
+        # TODO: Remove conditional when deprecating older pyntc
+        if HAS_PYNTC_VERSION:
             try:
-                start_time = time.time()
-                device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
-            except:
-                pass
-            elapsed_time = time.time() - start_time
+                # TODO: Remove conditional if we require reboot for non-F5 devices
+                if reboot or device.device_type == "f5_tmos_icontrol":
+                    changed = device.install_os(
+                        image_name=system_image_file, kickstart=kickstart_image_file, volume=volume
+                    )
+                else:
+                    # TODO: Remove support if we require reboot for non-F5 devices
+                    changed = device.set_boot_options(system_image_file)
+            except (
+                CommandError,
+                CommandListError,
+                FileSystemNotFoundError,
+                NotEnoughFreeSpaceError,
+                NTCFileNotFoundError,
+                OSInstallError,
+                RebootTimeoutError,
+            ) as e:
+                module.fail_json(msg=e.message)
+            except Exception as e:
+                module.fail_json(msg=str(e))
 
-            device.set_timeout(30)
-            try:
-                install_state = device.get_boot_options()
-            except:
-                install_state = {}
-
-            while elapsed_time < timeout and not install_state:
+            if (
+                reboot
+                and device.device_type == "f5_tmos_icontrol"
+                and pre_install_boot_options["active_volume"] != volume
+            ):
                 try:
-                    install_state = device.get_boot_options()
-                except:
-                    time.sleep(10)
-                    elapsed_time += 10
-        else:
-            device.set_boot_options(
-                system_image_file, kickstart=kickstart_image_file, volume=volume
-            )
+                    changed = True
+                    device.reboot(confirm=True, volume=volume)
+                except RuntimeError:
+                    module.fail_json(
+                        msg="Attempted reboot but did not boot to desired volume",
+                        original_volume=pre_install_boot_options["active_volume"],
+                        expected_volume=volume,
+                    )
+
             install_state = device.get_boot_options()
 
-        if not already_set(
-            boot_options=install_state,
-            system_image_file=system_image_file,
-            kickstart_image_file=kickstart_image_file,
-            volume=volume,
-            device=device,
-        ):
-            module.fail_json(msg="Install not successful", install_state=install_state)
+        # TODO: Remove contents of else when deprecating older pyntc
+        else:
+            changed = False
+            install_state = pre_install_boot_options
+
+            if not already_set(
+                boot_options=pre_install_boot_options,
+                system_image_file=system_image_file,
+                kickstart_image_file=kickstart_image_file,
+                volume=volume,
+                device=device,
+            ):
+                changed = True
+
+                if device.device_type == "nxos":
+                    timeout = 600
+                    device.set_timeout(timeout)
+                    try:
+                        start_time = time.time()
+                        device.set_boot_options(system_image_file, kickstart=kickstart_image_file)
+                    except:
+                        pass
+                    elapsed_time = time.time() - start_time
+
+                    device.set_timeout(30)
+                    try:
+                        install_state = device.get_boot_options()
+                    except:
+                        install_state = {}
+
+                    while elapsed_time < timeout and not install_state:
+                        try:
+                            install_state = device.get_boot_options()
+                        except:
+                            time.sleep(10)
+                            elapsed_time += 10
+                else:
+                    device.set_boot_options(
+                        system_image_file, kickstart=kickstart_image_file, volume=volume
+                    )
+                    install_state = device.get_boot_options()
+
+                    if not already_set(
+                        boot_options=pre_install_boot_options,
+                        system_image_file=system_image_file,
+                        kickstart_image_file=kickstart_image_file,
+                        volume=volume,
+                        device=device,
+                    ):
+                        module.fail_json(msg="Install not successful", install_state=install_state)
+
     else:
+        if HAS_PYNTC_VERSION:
+            changed = device._image_booted(
+                image_name=system_image_file, kickstart=kickstart_image_file, volume=volume
+            )
+        # TODO: Remove contents of else when deprecating older pyntc
+        else:
+            changed = already_set(
+                boot_options=pre_install_boot_options,
+                system_image_file=system_image_file,
+                kickstart_image_file=kickstart_image_file,
+                volume=volume,
+                device=device,
+            )
+
         install_state = pre_install_boot_options
 
     device.close()
