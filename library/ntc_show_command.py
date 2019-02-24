@@ -392,10 +392,6 @@ def main():
         module.fail_json(msg='specify host when connection='
                              'ssh/netmiko_ssh/netmiko_telnet')
 
-    if connection in ['netmiko_telnet', 'telnet'] and platform != 'cisco_ios':
-        module.fail_json(msg='only cisco_ios supports '
-                             'telnet/netmiko_telnet connection')
-
     if platform == 'cisco_ios' and connection in ['netmiko_telnet', 'telnet']:
         device_type = 'cisco_ios_telnet'
 
