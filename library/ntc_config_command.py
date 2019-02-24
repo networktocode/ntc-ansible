@@ -201,10 +201,6 @@ def main():
     if module.params['host']:
         host = socket.gethostbyname(module.params['host'])
 
-    if connection == 'telnet' and platform != 'cisco_ios':
-        module.fail_json(msg='only cisco_ios supports '
-                             'telnet connection')
-
     if platform == 'cisco_ios' and connection == 'telnet':
         device_type = 'cisco_ios_telnet'
 
