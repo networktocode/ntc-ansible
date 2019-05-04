@@ -3,7 +3,7 @@
 
 
 ### Inventory File
-```
+```yaml
 [cisco_nxos:vars]
 username=cisco
 password=cisco123
@@ -20,7 +20,7 @@ hp1
 ```
 
 ### hp_comware group vars file
-```
+```yaml
 ---
 
 platform: hp_comware
@@ -30,7 +30,7 @@ vlan_command: display vlan brief
 
 
 ### cisco_nxos group vars file
-```
+```yaml
 ---
 
 platform: cisco_nxos
@@ -40,7 +40,7 @@ vlan_command: show vlan
 
 
 ### Playbook
-```
+```yaml
 ---
 
 - name: GET STRUCTURED DATA BACK FROM CLI DEVICES
@@ -64,7 +64,7 @@ vlan_command: show vlan
     - debug: var=result
 ```
 
-```
+```yaml
 ansible-playbook site.yml -i hosts
 
 PLAY [GET STRUCTURED DATA BACK FROM CLI DEVICES] ******************************
@@ -230,7 +230,7 @@ n9k1                       : ok=2    changed=0    unreachable=0    failed=0
 
 Get structured data (JSON) back using SSH to communicate to device.
 
-```
+```yaml
 - ntc_show_command:
     connection=ssh
     platform=cisco_ios_ssh
@@ -246,7 +246,7 @@ Get structured data (JSON) back using SSH to communicate to device.
 
 Send commands list.
 
-```
+```yaml
 - ntc_config_command:
     connection: ssh
     platform: cisco_ios_ssh
@@ -284,14 +284,13 @@ Copies file to remote device:
     username={{ un }}
     password={{ pwd }}
     host={{ inventory_hostname }}
-
 ```
 
 ##### ntc_save_config
 
 Does an equivalent of a `copy run start`
 
-```
+```yaml
 - ntc_save_config:
     platform=cisco_ios_ssh
     host={{ inventory_hostname }}
@@ -301,7 +300,7 @@ Does an equivalent of a `copy run start`
 
 Does an equivalent of a `copy run filename.cfg`
 
-```
+```yaml
 - ntc_save_config:
     platform=cisco_ios_ssh
     remote_file=filename.cfg
@@ -312,7 +311,7 @@ Does an equivalent of a `copy run filename.cfg`
 
 Does an equivalent of a `copy run start` **AND** saves a local copy to the local Ansible control host.
 
-```
+```yaml
 - ntc_save_config:
     platform=cisco_ios_ssh
     local_file=backups/{{ inventory_hostname }}.cfg
@@ -325,36 +324,41 @@ Does an equivalent of a `copy run start` **AND** saves a local copy to the local
 
 ##### ntc_parse
 
-Get structured data back using TextFSM along with `ios_command` and `ntc_parse` filter plugin within Ansible.
-```
+Get structured data back using TextFSM along with `*_command` and `ntc_parse` filter plugin within Ansible.
+```yaml
 ---
 
-- name: "Testing ntc_parse filter plugin"
-  hosts: switch
+- name: "TESTING NTC_PARSE FILTER PLUGIN"
+  hosts: csr1000v 
   connection: network_cli
-  become: yes
-  become_method: enable
   gather_facts: no
   vars:
-    command: show ip interface
+    ios_commands:
+      - show ip interface
+      - show lldp neighbors detail
 
   tasks:
-    - name: "Gather data via show ip interface command"
+    - name: "GATHER DATA VIA SHOW COMMANDS"
       ios_command:
-        commands: "{{ command }}"
-      register: interfaces
+        commands: "{{ ios_commands }}"
+      register: command_output
 
-    - name: "Test NTC template filters"
+    - name: "TEST NTC TEMPLATE FILTERS"
       set_fact:
-        interfaces_struct: "{{ interfaces.stdout.0 | ntc_parse(command, 'cisco_ios', '/home/ntc-templates/templates/') }}"
+        ip_interfaces: "{{ command_output.stdout.0 | ntc_parse(ios_commands[0], 'cisco_ios', '/home/ntc-templates/templates/') }}"
+        lldp_neighbors: "{{ command_output.stdout.1 | ntc_parse(ios_commands[1], 'cisco_ios', '/home/ntc-templates/templates/') }}"
 
-    - name: "Debug interfaces_struct"
+    - name: "DEBUG IP_INTERFACES"
       debug:
-        var: interfaces_struct
+        var: ip_interfaces
+
+    - name: "DEBUG LLDP_NEIGHBORS"
+      debug:
+        var: lldp_neighbors
 ```
 Requirements:
 
-This requires the filter_plugins to be set in ansible.cfg to the directory that ntc_parse filter lives in, ex. `/ntc-ansible/filter_plugins/`. This can be obtained by cloning this repository to a location on the Ansible host or installing ntc-ansible via Pip.
+This requires the filter_plugins to be set in ansible.cfg to the directory that ntc_parse filter lives in, ex. `/path/to/ntc-ansible/filter_plugins/`. This can be obtained by cloning this repository to a location on the Ansible host.
 
 ntc_parse takes the following arguments:
 
@@ -362,25 +366,117 @@ ntc_parse takes the following arguments:
 
 `platform` This is modeled after the name of the template being used, ex. cisco_ios_show_version.template
 
-`template_dir` By default, this will attempt to dynamically learn the location, but may be set manually as well
+`index` The index file is located within the `template_dir` and includes a list of available platform specific commands such as the example above. This can be modified to allow you to use custom templates that aren't in the upstream `ntc-templates` repo by simply adding them into the index file following the guidelines set within `ntc-templates`
+
+`template_dir` By default, this will attempt to dynamically learn the location, and if this fails, it sets it to `ntc_templates/templates` or it can also be manually set as an argument passed into the filter.
 
 Structured data output:
-```
-TASK [Debug interfaces_struct] *******************************************************************************************************************
-ok: [switch] => {
-    "interfaces_struct": [
+```yaml
+TASK [DEBUG IP_INTERFACES] ******************************************************************************************************************************
+ok: [csr1000v] => {
+    "ip_interfaces": [
         {
-          "inbound_acl": "",
-          "interface": "Vlan1",
-          "ip_address": "192.168.1.1",
-          "ip_helper": [
-              "192.168.255.3"
+            "inbound_acl": "",
+            "intf": "GigabitEthernet1",
+            "ip_helper": [],
+            "ipaddr": [
+                "172.16.1.232"
             ],
-          "link_status": "down",
-          "mask": "26",
-          "mtu": "",
-          "outgoing_acl": "",
-          "protocol_status": "down"
+            "link_status": "up",
+            "mask": [
+                "24"
+            ],
+            "mtu": "1500",
+            "outgoing_acl": "",
+            "protocol_status": "up",
+            "vrf": "Mgmt-intf"
+        },
+        {
+            "inbound_acl": "",
+            "intf": "GigabitEthernet2",
+            "ip_helper": [],
+            "ipaddr": [
+                "10.0.0.17"
+            ],
+            "link_status": "up",
+            "mask": [
+                "30"
+            ],
+            "mtu": "1500",
+            "outgoing_acl": "",
+            "protocol_status": "up",
+            "vrf": ""
+        },
+        {
+            "inbound_acl": "",
+            "intf": "GigabitEthernet3",
+            "ip_helper": [],
+            "ipaddr": [
+                "10.0.0.13"
+            ],
+            "link_status": "up",
+            "mask": [
+                "30"
+            ],
+            "mtu": "1500",
+            "outgoing_acl": "",
+            "protocol_status": "up",
+            "vrf": ""
+        },
+        {
+            "inbound_acl": "",
+            "intf": "Loopback0",
+            "ip_helper": [],
+            "ipaddr": [
+                "192.168.0.4"
+            ],
+            "link_status": "up",
+            "mask": [
+                "32"
+            ],
+            "mtu": "1514",
+            "outgoing_acl": "",
+            "protocol_status": "up",
+            "vrf": ""
+        }
+    ]
+}
+
+TASK [DEBUG LLDP_NEIGHBORS] *****************************************************************************************************************************
+ok: [csr1000v] => {
+    "lldp_neighbors": [
+        {
+            "capabilities": "B,R",
+            "chassis_id": "fa16.3e99.72bd",
+            "local_interface": "Gi2",
+            "management_ip": "172.16.1.235",
+            "neighbor": "nx-osv-1",
+            "neighbor_interface": "to csr1000v-1",
+            "neighbor_port_id": "Eth2/1",
+            "system_description": "Cisco NX-OS(tm) titanium, Software (titanium-d1), Version 7.3(0)D1(1), RELEASE SOFTWARE Copyright (c) 2002-2013, 2015 by Cisco Systems, Inc. Compiled 1/11/2016 16:00:00",
+            "vlan": ""
+        },
+        {
+            "capabilities": "R",
+            "chassis_id": "02dd.d868.a406",
+            "local_interface": "Gi3",
+            "management_ip": "10.0.0.14",
+            "neighbor": "ios_xrv-1.virl.info",
+            "neighbor_interface": "to csr1000v-1",
+            "neighbor_port_id": "Gi0/0/0/0",
+            "system_description": "Cisco IOS XR Software, Version 6.1.3[Default]",
+            "vlan": ""
+        },
+        {
+            "capabilities": "R",
+            "chassis_id": "5e00.0002.0000",
+            "local_interface": "Gi1",
+            "management_ip": "172.16.1.234",
+            "neighbor": "iosv-1.virl.info",
+            "neighbor_interface": "OOB Management",
+            "neighbor_port_id": "Gi0/0",
+            "system_description": "Cisco IOS Software, IOSv Software (VIOS-ADVENTERPRISEK9-M), Version 15.6(3)M2, RELEASE SOFTWARE (fc2)",
+            "vlan": ""
         }
     ]
 }
