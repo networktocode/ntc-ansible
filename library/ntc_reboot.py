@@ -211,25 +211,31 @@ def check_device(module, username, password, host, timeout, kwargs):
 
 
 def main():
+    connection_argument_spec = dict(
+        platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
+                               PLATFORM_JUNOS, PLATFORM_F5, PLATFORM_ASA],
+                      required=False),
+        host=dict(required=False),
+        port=dict(required=False),
+        username=dict(required=False, type='str'),
+        password=dict(required=False, type='str', no_log=True),
+        secret=dict(required=False, type='str', no_log=True),
+        transport=dict(required=False, choices=['http', 'https']),
+        ntc_host=dict(required=False),
+        ntc_conf_file=dict(required=False),
+    )
+    base_argument_spec = dict(
+        confirm=dict(required=False, default=True, type='bool'),
+        timer=dict(requred=False, type='int'),
+        timeout=dict(required=False, type='int', default=240),
+        volume=dict(required=False, type='str'),
+    )
+    argument_spec = base_argument_spec
+    argument_spec.update(connection_argument_spec)
+    argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
+
     module = AnsibleModule(
-        argument_spec=dict(
-            platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
-                                   PLATFORM_JUNOS, PLATFORM_F5, PLATFORM_ASA],
-                          required=False),
-            host=dict(required=False),
-            username=dict(required=False, type='str'),
-            provider=dict(required=False, type='dict'),
-            password=dict(required=False, type='str', no_log=True),
-            secret=dict(required=False, no_log=True),
-            transport=dict(required=False, choices=['http', 'https']),
-            port=dict(required=False, type='int'),
-            ntc_host=dict(required=False),
-            ntc_conf_file=dict(required=False),
-            confirm=dict(required=False, default=False, type='bool'),
-            timer=dict(requred=False, type='int'),
-            timeout=dict(required=False, type='int', default=240),
-            volume=dict(required=False, type='str'),
-        ),
+        argument_spec=argument_spec,
         mutually_exclusive=[['host', 'ntc_host'],
                             ['ntc_host', 'secret'],
                             ['ntc_host', 'transport'],
@@ -247,11 +253,6 @@ def main():
         module.fail_json(msg='pyntc Python library not found.')
 
     provider = module.params['provider'] or {}
-
-    no_log = ['password', 'secret']
-    for param in no_log:
-        if provider.get(param):
-            module.no_log_values.update(return_values(provider[param]))
 
     # allow local params to override provider
     for param, pvalue in provider.items():
