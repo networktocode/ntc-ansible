@@ -232,6 +232,10 @@ vars:
 import os.path
 import socket
 
+from ansible import __version__ as ansible_version
+if float(ansible_version[:3]) < 2.4:
+    raise ImportError("Ansible versions < 2.4 are not supported")
+
 HAS_NTC_TEMPLATES = True
 try:
     from ntc_templates.parse import _get_template_dir as ntc_get_template_dir
@@ -319,44 +323,52 @@ def parse_raw_output(rawoutput, module):
 
 
 def main():
+    connection_argument_spec = dict(
+        connection=dict(
+            choices=[
+                'ssh',
+                'offline',
+                'netmiko_ssh',
+                'trigger_ssh',
+                'netmiko_telnet',
+                'telnet'
+            ],
+            default='netmiko_ssh',
+        ),
+        platform=dict(required=False),
+        host=dict(required=False),
+        port=dict(required=False),
+        username=dict(required=False, type='str'),
+        password=dict(required=False, type='str', no_log=True),
+        secret=dict(required=False, type='str', no_log=True),
+        use_keys=dict(required=False, default=False, type='bool'),
+        trigger_device_list=dict(type='list', required=False),
+        delay=dict(default=1, required=False),
+        global_delay_factor=dict(default=1, required=False),
+        key_file=dict(required=False, default=None),
+        optional_args=dict(required=False, type='dict', default={}),
+        connection_args=dict(required=False, type='dict', default={}),
+    )
+    base_argument_spec = dict(
+        file=dict(required=False),
+        local_file=dict(required=False),
+        index_file=dict(default='index'),
+        template_dir=dict(default=NTC_TEMPLATES_DIR),
+        use_templates=dict(required=False, default=True, type='bool'),
+        command=dict(required=True),
+    )
+    argument_spec = base_argument_spec
+    argument_spec.update(connection_argument_spec)
+    argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
 
     module = AnsibleModule(
-        argument_spec=dict(
-            connection=dict(choices=['ssh', 'offline', 'netmiko_ssh',
-                            'trigger_ssh', 'netmiko_telnet', 'telnet'], default='netmiko_ssh'),
-            platform=dict(required=False),
-            file=dict(required=False),
-            local_file=dict(required=False),
-            index_file=dict(default='index'),
-            template_dir=dict(default=NTC_TEMPLATES_DIR),
-            use_templates=dict(required=False, default=True, type='bool'),
-            trigger_device_list=dict(type='list', required=False),
-            command=dict(required=True),
-            host=dict(required=False),
-            provider=dict(required=False, type='dict'),
-            port=dict(required=False),
-            delay=dict(default=1, required=False),
-            global_delay_factor=dict(default=1, required=False),
-            username=dict(required=False, type='str'),
-            password=dict(required=False, type='str', no_log=True),
-            secret=dict(required=False, type='str', no_log=True),
-            use_keys=dict(required=False, default=False, type='bool'),
-            key_file=dict(required=False, default=None),
-            optional_args=dict(required=False, type='dict', default={}),
-            connection_args=dict(required=False, type='dict', default={}),
-        ),
+        argument_spec=argument_spec,
         mutually_exclusive=(
             ['host', 'trigger_device_list'],
         ),
         supports_check_mode=False
     )
-
     provider = module.params['provider'] or {}
-
-    no_log = ['password', 'secret']
-    for param in no_log:
-        if provider.get(param):
-            module.no_log_values.update(return_values(provider[param]))
 
     # allow local params to override provider
     for param, pvalue in provider.items():
