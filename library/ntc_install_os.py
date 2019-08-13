@@ -174,7 +174,7 @@ install_state:
 
 import time  # noqa E402
 
-from ansible.module_utils.basic import AnsibleModule, return_values  # noqa E402
+from ansible.module_utils.basic import AnsibleModule # noqa E402
 
 try:
     from pyntc import ntc_device, ntc_device_by_name  # noqa E402
@@ -220,38 +220,42 @@ def already_set(boot_options, system_image_file, kickstart_image_file, **kwargs)
 
 
 def main():
+    connection_argument_spec = dict(
+        platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
+                               PLATFORM_F5, PLATFORM_ASA],
+                      required=False),
+        host=dict(required=False),
+        port=dict(required=False),
+        username=dict(required=False, type='str'),
+        password=dict(required=False, type='str', no_log=True),
+        secret=dict(required=False, type='str', no_log=True),
+        transport=dict(required=False, choices=['http', 'https']),
+        ntc_host=dict(required=False),
+        ntc_conf_file=dict(required=False),
+    )
+    base_argument_spec = dict(
+        system_image_file=dict(required=True),
+        kickstart_image_file=dict(required=False),
+        volume=dict(required=False, type="str"),
+        reboot=dict(required=False, type="bool", default=False),
+    )
+    argument_spec = base_argument_spec
+    argument_spec.update(connection_argument_spec)
+    argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
+
     module = AnsibleModule(
-        argument_spec=dict(
-            platform=dict(
-                choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_F5, PLATFORM_ASA],
-                required=False,
-            ),
-            host=dict(required=False),
-            username=dict(required=False, type="str"),
-            password=dict(required=False, type="str", no_log=True),
-            secret=dict(required=False, no_log=True),
-            transport=dict(required=False, choices=["http", "https"]),
-            port=dict(required=False, type="int"),
-            provider=dict(type="dict", required=False),
-            ntc_host=dict(required=False),
-            ntc_conf_file=dict(required=False),
-            system_image_file=dict(required=True),
-            kickstart_image_file=dict(required=False),
-            volume=dict(required=False, type="str"),
-            reboot=dict(required=False, type="bool", default=False),
-        ),
-        mutually_exclusive=[
-            ["host", "ntc_host"],
-            ["ntc_host", "secret"],
-            ["ntc_host", "transport"],
-            ["ntc_host", "port"],
-            ["ntc_conf_file", "secret"],
-            ["ntc_conf_file", "transport"],
-            ["ntc_conf_file", "port"],
-        ],
-        required_one_of=[["host", "ntc_host", "provider"]],
+        argument_spec=argument_spec,
+        mutually_exclusive=[['host', 'ntc_host'],
+                            ['ntc_host', 'secret'],
+                            ['ntc_host', 'transport'],
+                            ['ntc_host', 'port'],
+                            ['ntc_conf_file', 'secret'],
+                            ['ntc_conf_file', 'transport'],
+                            ['ntc_conf_file', 'port'],
+                            ],
+        required_one_of=[['host', 'ntc_host', 'provider']],
         required_if=[["platform", PLATFORM_F5, ["volume"]]],
-        supports_check_mode=True,
+        supports_check_mode=True
     )
 
     if not HAS_PYNTC:
@@ -264,11 +268,6 @@ def main():
     module.warn("Support for installing the OS without rebooting may be deprecated in the future")
 
     provider = module.params["provider"] or {}
-
-    no_log = ["password", "secret"]
-    for param in no_log:
-        if provider.get(param):
-            module.no_log_values.update(return_values(provider[param]))
 
     # allow local params to override provider
     for param, pvalue in provider.items():

@@ -134,7 +134,16 @@ vars:
 
 import os.path
 import socket
-from netmiko import ConnectHandler
+try:
+    from netmiko import ConnectHandler
+    HAS_NETMIKO=True
+except ImportError:
+    HAS_NETMIKO=False
+
+
+from ansible import __version__ as ansible_version
+if float(ansible_version[:3]) < 2.4:
+    raise ImportError("Ansible versions < 2.4 are not supported")
 
 
 def error_params(platform, command_output):
@@ -148,37 +157,45 @@ def error_params(platform, command_output):
 
 
 def main():
+    connection_argument_spec = dict(
+        connection=dict(
+            choices=[
+                'ssh',
+                'telnet'
+            ],
+            default='ssh',
+        ),
+        platform=dict(required=False, default="cisco_ios"),
+        host=dict(required=False),
+        port=dict(required=False),
+        username=dict(required=False, type='str'),
+        password=dict(required=False, type='str', no_log=True),
+        secret=dict(required=False, type='str', no_log=True),
+        use_keys=dict(required=False, default=False, type='bool'),
+        key_file=dict(required=False, default=None),
+    )
+    base_argument_spec = dict(
+        commands=dict(required=False, type='list'),
+        commands_file=dict(required=False),
+    )
+    argument_spec = base_argument_spec
+    argument_spec.update(connection_argument_spec)
+    argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
 
     module = AnsibleModule(
-        argument_spec=dict(
-            connection=dict(choices=['ssh', 'telnet'],
-                            default='ssh'),
-            platform=dict(required=False),
-            commands=dict(required=False, type='list'),
-            commands_file=dict(required=False),
-            host=dict(required=False),
-            port=dict(required=False),
-            provider=dict(type='dict', required=False),
-            username=dict(required=False, type='str'),
-            password=dict(required=False, type='str', no_log=True),
-            secret=dict(required=False, type='str', no_log=True),
-            use_keys=dict(required=False, default=False, type='bool'),
-            key_file=dict(required=False, default=None, type='str'),
-        ),
+        argument_spec=argument_spec,
         supports_check_mode=False
     )
 
     provider = module.params['provider'] or {}
 
-    no_log = ['password', 'secret']
-    for param in no_log:
-        if provider.get(param):
-            module.no_log_values.update(return_values(provider[param]))
-    
     # allow local params to override provider
     for param, pvalue in provider.items():
         if module.params.get(param) != False:
             module.params[param] = module.params.get(param) or pvalue
+
+    if not HAS_NETMIKO:
+        module.fail_json(msg="This module requires netmiko")
 
     host = module.params['host']
     connection = module.params['connection']
