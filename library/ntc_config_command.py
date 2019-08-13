@@ -134,14 +134,10 @@ vars:
 
 import os.path
 import socket
-import traceback
-
-from ansible.module_utils.basic import missing_required_lib
 try:
     from netmiko import ConnectHandler
     HAS_NETMIKO=True
 except ImportError:
-    NETMIKO_IMP_ERR = traceback.format_exc()
     HAS_NETMIKO=False
 
 
@@ -191,17 +187,15 @@ def main():
         supports_check_mode=False
     )
 
-    if not HAS_NETMIKO:
-        module.fail_json(
-            msg=missing_required_lib("netmiko"), exception=NETMIKO_IMP_ERR
-        )
-
     provider = module.params['provider'] or {}
 
     # allow local params to override provider
     for param, pvalue in provider.items():
         if module.params.get(param) != False:
             module.params[param] = module.params.get(param) or pvalue
+
+    if not HAS_NETMIKO:
+        module.fail_json(msg="This module requires netmiko")
 
     host = module.params['host']
     connection = module.params['connection']
