@@ -44,38 +44,45 @@ options:
         required: false
         default: ssh
         choices: ['ssh', 'offline', 'netmiko_ssh', 'trigger_ssh', 'netmiko_telnet', 'telnet']
+        type: choice
     connection_args:
         description:
             - Transport parameters specific to netmiko, trigger, etc.
         required: false
         default: {}
+        type: dict
     platform:
         description:
             - Platform FROM the index file
-        required: false
+        required: true
+        type: str
     template_dir:
         description:
             - path where TextFSM templates are stored. Default path is ntc
               with ntc in the same working dir as the playbook being run
         required: false
         default: "./ntc-templates/templates"
+        type: str
     index_file:
         description:
             - name of index file.  file location must be relative to
               the template_dir
         required: false
         default: index
+        type: str
     use_templates:
         description:
             - Boolean true/false to enable/disable use of TextFSM templates for parsing
         required: false
         default: true
         choices: ['true', 'false', 'yes', 'no']
+        type: choice
     local_file:
         description:
             - Specify local file to save raw output to
         required: false
         default: null
+        type: str
     file:
         description:
             - If using connection=offline, this is the file (with path)
@@ -84,15 +91,18 @@ options:
               be rendered with the the TextFSM template
         required: false
         default: null
+        type: str
     command:
         description:
             - Command to execute on target device
         required: true
+        type: str
     host:
         description:
             - IP Address or hostname (resolvable by Ansible control host)
         required: false
         default: null
+        type: str
     provider:
         description:
           - Dictionary which acts as a collection of arguments used to define the characteristics
@@ -101,48 +111,55 @@ options:
             or local param
             Note - local param takes precedence, e.g. hostname is preferred to provider['host']
         required: false
+        type: dict
     port:
         description:
             - Port to use to connect to the target device
         required: false
         default: 22 for SSH. 23 for Telnet
+        type: int
     delay:
         description:
             - Wait for command output from target device when using netmiko
         required: false
         default: 1
+        type: int
     global_delay_factor:
         description:
             - Sets delay between operations.
         required: false
         default: 1
-        choices: []
-        aliases: []
+        type: int
     username:
         description:
             - Username used to login to the target device
         required: false
         default: null
+        type: str
     password:
         description:
             - Password used to login to the target device
         required: false
         default: null
+        type: str
     secret:
         description:
             - Password used to enter a privileged mode on the target device when using netmiko
         required: false
         default: null
+        type: str
     use_keys:
         description:
             - Boolean true/false if ssh key login should be attempted when nsing netmiko
         required: false
         default: false
+        type: bool
     key_file:
         description:
             - Path to private ssh key used for login when using netmiko
         required: false
         default: null
+        type: str
 '''
 EXAMPLES = '''
 
@@ -270,6 +287,7 @@ if HAS_NTC_TEMPLATES:
 else:
     NTC_TEMPLATES_DIR = 'ntc_templates/templates'
 
+
 def clitable_to_dict(cli_table):
     """Converts TextFSM cli_table object to list of dictionaries
     """
@@ -335,16 +353,16 @@ def main():
             ],
             default='netmiko_ssh',
         ),
-        platform=dict(required=False),
-        host=dict(required=False),
-        port=dict(required=False),
+        platform=dict(required=True, type='str'),
+        host=dict(required=False, type='str'),
+        port=dict(required=False, type='int'),
         username=dict(required=False, type='str'),
         password=dict(required=False, type='str', no_log=True),
         secret=dict(required=False, type='str', no_log=True),
         use_keys=dict(required=False, default=False, type='bool'),
-        trigger_device_list=dict(type='list', required=False),
-        delay=dict(default=1, required=False),
-        global_delay_factor=dict(default=1, required=False),
+        trigger_device_list=dict(required=False, type='list'),
+        delay=dict(required=False, type='int', default=1),
+        global_delay_factor=dict(required=False, type='int', default=1),
         key_file=dict(required=False, default=None),
         optional_args=dict(required=False, type='dict', default={}),
         connection_args=dict(required=False, type='dict', default={}),
@@ -357,6 +375,7 @@ def main():
         use_templates=dict(required=False, default=True, type='bool'),
         command=dict(required=True),
     )
+
     argument_spec = base_argument_spec
     argument_spec.update(connection_argument_spec)
     argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
@@ -393,7 +412,7 @@ def main():
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
     delay = int(module.params['delay'])
-    global_delay_factor = int(module.params['global_delay_factor'])
+    global_delay_factor = module.params['global_delay_factor']
     trigger_device_list = module.params['trigger_device_list']
     optional_args = module.params['optional_args']
     connection_args = module.params['connection_args']
@@ -419,7 +438,7 @@ def main():
         else:
             port = 22
 
-    argument_check = { 'platform': platform }
+    argument_check = {}
     if connection != 'offline':
         argument_check['username'] = username
         argument_check['password'] = password
@@ -444,7 +463,6 @@ def main():
         if raw_file and not os.path.isfile(raw_file):
             module.fail_json(msg='could not read raw text file')
 
-
     rawtxt = ''
     if connection in ['ssh', 'netmiko_ssh', 'netmiko_telnet', 'telnet']:
         if not HAS_NETMIKO:
@@ -461,6 +479,7 @@ def main():
             key_file=key_file,
             global_delay_factor=global_delay_factor
         )
+
         if connection_args:
             device_args.update(connection_args)
         device = ConnectHandler(**device_args)
