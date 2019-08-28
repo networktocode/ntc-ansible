@@ -296,10 +296,7 @@ def get_structured_data(rawoutput, module):
         cli_table.ParseCmd(rawoutput, attrs)
         structured_data = clitable_to_dict(cli_table)
     except CliTableError as e:
-        # Invalid or Missing template
-        # module.fail_json(msg='parsing error', error=str(e))
-        # rather than fail, fallback to return raw text
-        structured_data = [rawoutput]
+        module.fail_json(msg='parsing error', error=str(e))
 
     return structured_data
 
