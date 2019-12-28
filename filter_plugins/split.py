@@ -4,7 +4,7 @@ import re
 def split_string(string, separator=' '):
     try:
         return string.split(separator)
-    except Exception, e:
+    except Exception as e:
         raise errors.AnsibleFilterError('split plugin error: %s, string=%s' % str(e),str(string) )
 
 
