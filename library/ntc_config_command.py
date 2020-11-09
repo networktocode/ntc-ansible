@@ -142,7 +142,7 @@ except ImportError:
 
 
 from ansible import __version__ as ansible_version
-if float(ansible_version[:3]) < 2.4:
+if float(".".join(ansible_version.split(".", 2)[:2])) < 2.4:
     raise ImportError("Ansible versions < 2.4 are not supported")
 
 
