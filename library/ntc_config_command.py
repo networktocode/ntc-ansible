@@ -141,8 +141,10 @@ except ImportError:
     HAS_NETMIKO=False
 
 
+from packaging import version
 from ansible import __version__ as ansible_version
-if float(".".join(ansible_version.split(".", 2)[:2])) < 2.4:
+
+if version.parse(ansible_version) < version.parse("2.4"):
     raise ImportError("Ansible versions < 2.4 are not supported")
 
 
