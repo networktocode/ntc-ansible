@@ -232,10 +232,14 @@ vars:
 import os.path
 import socket
 
-from packaging import version
+try:
+    from packaging import version
+    HAS_PACKAGING = True
+except ImportError:
+    HAS_PACKAGING = False
 from ansible import __version__ as ansible_version
 
-if version.parse(ansible_version) < version.parse("2.4"):
+if (HAS_PACKAGING and version.parse(ansible_version) < version.parse("2.4")) or (not HAS_PACKAGING and float(ansible_version[:3])) < 2.4):
     raise ImportError("Ansible versions < 2.4 are not supported")
 
 HAS_NTC_TEMPLATES = True
