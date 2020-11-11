@@ -141,7 +141,11 @@ except ImportError:
     HAS_NETMIKO=False
 
 
-from packaging import version
+try:
+    from packaging import version
+    HAS_PACKAGING = True
+except ImportError:
+    HAS_PACKAGING = False
 from ansible import __version__ as ansible_version
 
 if version.parse(ansible_version) < version.parse("2.4"):
