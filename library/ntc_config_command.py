@@ -33,6 +33,11 @@ options:
         required: false
         default: ssh
         choices: ['ssh', 'telnet']
+    connection_args:
+        description:
+            - Transport parameters specific to netmiko, trigger, etc.
+        required: false
+        default: {}
     platform:
         description:
             - Platform FROM the index file
@@ -178,6 +183,7 @@ def main():
         secret=dict(required=False, type='str', no_log=True),
         use_keys=dict(required=False, default=False, type='bool'),
         key_file=dict(required=False, default=None),
+        connection_args=dict(required=False, type='dict', default={}),
     )
     base_argument_spec = dict(
         commands=dict(required=False, type='list'),
@@ -213,9 +219,9 @@ def main():
     secret = module.params['secret']
     use_keys = module.params['use_keys']
     key_file = module.params['key_file']
+    connection_args = module.params['connection_args']
 
-
-    argument_check = { 'host': host, 'username': username, 'platform': platform, 'password': password }
+    argument_check = {'host': host, 'username': username, 'platform': platform, 'password': password}
     for key, val in argument_check.items():
         if val is None:
             module.fail_json(msg=str(key) + " is required")
@@ -224,8 +230,7 @@ def main():
         host = socket.gethostbyname(module.params['host'])
 
     if connection == 'telnet' and platform != 'cisco_ios':
-        module.fail_json(msg='only cisco_ios supports '
-                             'telnet connection')
+        module.fail_json(msg='only cisco_ios supports telnet connection')
 
     if platform == 'cisco_ios' and connection == 'telnet':
         device_type = 'cisco_ios_telnet'
@@ -239,16 +244,20 @@ def main():
             port = 22
 
     if connection in ['ssh', 'telnet']:
-        device = ConnectHandler(device_type=device_type,
-                                ip=socket.gethostbyname(host),
-                                port=port,
-                                username=username,
-                                password=password,
-                                secret=secret,
-                                use_keys=use_keys,
-                                key_file=key_file
-                                )
+        device_args = dict(
+            device_type=device_type,
+            ip=socket.gethostbyname(host),
+            port=port,
+            username=username,
+            password=password,
+            secret=secret,
+            use_keys=use_keys,
+            key_file=key_file,
+        )
+        if connection_args:
+            device_args.update(connection_args)
 
+        device = ConnectHandler(**device_args)
         if secret:
             device.enable()
 
@@ -264,8 +273,7 @@ def main():
                 module.fail_json(msg="Unable to locate: {}".format(commands_file))
 
     if (error_params(platform, output)):
-        module.fail_json(msg="Error executing command:\
-                         {}".format(output))
+        module.fail_json(msg="Error executing command: {}".format(output))
 
     results = {}
     results['response'] = output
