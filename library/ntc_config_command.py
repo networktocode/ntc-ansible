@@ -142,7 +142,12 @@ except ImportError:
 
 
 from ansible import __version__ as ansible_version
-if float(ansible_version[:3]) < 2.4:
+try:
+    from packaging import version
+    HAS_PACKAGING=True
+except ImportError:
+    HAS_PACKAGING=False
+if (HAS_PACKAGING and version.parse(ansible_version) < version.parse("2.4")) or (not HAS_PACKAGING and float(ansible_version[:3]) < 2.4):
     raise ImportError("Ansible versions < 2.4 are not supported")
 
 
