@@ -106,7 +106,11 @@ pip install terminal
 
 ## Common Issues
 
-#### Gather Facts
+### Ansible 2.10
+
+In order to use this with Ansible 2.10 and greater, the `packaging` python library must be installed.
+
+### Gather Facts
 
 Starting in Ansible 2.1 there is a name space conflict when gathering facts. The below message will indicate the issues:
 
@@ -141,7 +145,7 @@ rm ./ntc-templates/setup.py
 ```
 See https://github.com/ansible/ansible/issues/20702 and https://github.com/ansible/ansible/pull/20717 for further details.
 
-#### This module requires TextFSM
+### This module requires TextFSM
 
 Most often seen in virtual enviroments as per ansible's interpretation of which python binary you are using is not as expected. You can tell that you have reached this issue if you correctly have textfsm installed, but receive the following warning:
 
