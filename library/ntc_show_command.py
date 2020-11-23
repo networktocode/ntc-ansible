@@ -46,7 +46,7 @@ options:
         choices: ['ssh', 'offline', 'netmiko_ssh', 'trigger_ssh', 'netmiko_telnet', 'telnet']
     connection_args:
         description:
-            - Transport parameters specific to netmiko, trigger, etc.
+            - Transport parameters specific to netmiko.
         required: false
         default: {}
     platform:
