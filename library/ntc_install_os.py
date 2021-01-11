@@ -221,15 +221,16 @@ def already_set(boot_options, system_image_file, kickstart_image_file, **kwargs)
 
 def main():
     connection_argument_spec = dict(
-        platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI,
-                               PLATFORM_F5, PLATFORM_ASA],
-                      required=False),
+        platform=dict(
+            choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_F5, PLATFORM_ASA],
+            required=False,
+        ),
         host=dict(required=False),
         port=dict(required=False),
-        username=dict(required=False, type='str'),
-        password=dict(required=False, type='str', no_log=True),
-        secret=dict(required=False, type='str', no_log=True),
-        transport=dict(required=False, choices=['http', 'https']),
+        username=dict(required=False, type="str"),
+        password=dict(required=False, type="str", no_log=True),
+        secret=dict(required=False, type="str", no_log=True),
+        transport=dict(required=False, choices=["http", "https"]),
         ntc_host=dict(required=False),
         ntc_conf_file=dict(required=False),
     )
@@ -238,6 +239,7 @@ def main():
         kickstart_image_file=dict(required=False),
         volume=dict(required=False, type="str"),
         reboot=dict(required=False, type="bool", default=False),
+        install_mode=dict(required=False, type="bool", default=None),
     )
     argument_spec = base_argument_spec
     argument_spec.update(connection_argument_spec)
@@ -245,17 +247,18 @@ def main():
 
     module = AnsibleModule(
         argument_spec=argument_spec,
-        mutually_exclusive=[['host', 'ntc_host'],
-                            ['ntc_host', 'secret'],
-                            ['ntc_host', 'transport'],
-                            ['ntc_host', 'port'],
-                            ['ntc_conf_file', 'secret'],
-                            ['ntc_conf_file', 'transport'],
-                            ['ntc_conf_file', 'port'],
-                            ],
-        required_one_of=[['host', 'ntc_host', 'provider']],
+        mutually_exclusive=[
+            ["host", "ntc_host"],
+            ["ntc_host", "secret"],
+            ["ntc_host", "transport"],
+            ["ntc_host", "port"],
+            ["ntc_conf_file", "secret"],
+            ["ntc_conf_file", "transport"],
+            ["ntc_conf_file", "port"],
+        ],
+        required_one_of=[["host", "ntc_host", "provider"]],
         required_if=[["platform", PLATFORM_F5, ["volume"]]],
-        supports_check_mode=True
+        supports_check_mode=True,
     )
 
     if not HAS_PYNTC:
@@ -324,6 +327,15 @@ def main():
     kickstart_image_file = module.params["kickstart_image_file"]
     volume = module.params["volume"]
 
+    # Get the NTC Version split
+    version_numbers = pyntc_version.split(".")
+    install_mode = module.params.get("install_mode")
+
+    if install_mode and not ((int(version_numbers[0]) > 0) or (int(version_numbers[1]) >= 16)):
+        module.fail_json(
+            msg="Current version of PyNTC does not support install_mode. Please update PyNTC >= 0.16.0"
+        )
+
     if kickstart_image_file == "null":
         kickstart_image_file = None
 
@@ -337,7 +349,10 @@ def main():
                 # TODO: Remove conditional if we require reboot for non-F5 devices
                 if reboot or device.device_type == "f5_tmos_icontrol":
                     changed = device.install_os(
-                        image_name=system_image_file, kickstart=kickstart_image_file, volume=volume
+                        image_name=system_image_file,
+                        kickstart=kickstart_image_file,
+                        volume=volume,
+                        install_mode=install_mode,
                     )
                 else:
                     # TODO: Remove support if we require reboot for non-F5 devices
