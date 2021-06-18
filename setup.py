@@ -7,9 +7,9 @@ with open(os.path.join(CWD, "README.md")) as readme:
     README = readme.read()
 
 setup(
-  name='ntc-ansible',
+  name='ntc-ansible-plugin',
   packages=find_packages(),
-  version='0.9.3',
+  version='0.9.4',
   description='Dependencies for NTC Ansible modules',
   long_description=README,
   long_description_content_type="text/markdown",
