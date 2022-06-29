@@ -1,0 +1,11 @@
+---
+
+platform: "cisco_ios"
+
+vlan_command: "show vlan"
+ip_route_command: "show ip route"
+ip_bgp_summary_command: "show ip bgp summary"
+interface_transceiver_command: "show interface transceiver"
+standby_brief_command: "show standby brief"
+vtp_status_command: "show vtp status"
+ip_ospf_neighbor_command: "show ip ospf neighbor"

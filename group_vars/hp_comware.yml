@@ -1,5 +1,0 @@
----
-
-platform: hp_comware
-
-vlan_command: display vlan brief
