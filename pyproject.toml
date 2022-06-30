@@ -14,6 +14,7 @@ ntc-templates = "^3.0.0"
 lxml = "^4.9.0"
 ansible-base = "^2.10.0"
 textfsm = "^1.1.2"
+packaging = "^21.3"
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"

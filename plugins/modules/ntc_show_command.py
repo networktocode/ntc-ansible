@@ -232,7 +232,6 @@ vars:
       connection_args:
         ssh_config_file: '/home/ntc/playbook/ssh_config'
 """
-
 import os.path
 
 from ansible.module_utils.ansible_release import __version__ as ansible_version
