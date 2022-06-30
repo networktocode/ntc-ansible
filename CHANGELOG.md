@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [0.9.5]
+## [1.0.0]
 - [#xx] Restructure to a Ansible Collection
 
 ## [0.9.4]

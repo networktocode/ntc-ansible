@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ntc-ansible"
-version = "0.9.5"
+version = "1.0.0"
 description = "Multi-vendor Ansible Collection for Network Automation"
 authors = ["Network to Code <opensource@networktocode.com>"]
 license = "Apache 2.0"
