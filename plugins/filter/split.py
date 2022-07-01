@@ -11,7 +11,7 @@ def split_string(string, separator=" "):
     try:
         return string.split(separator)
     except Exception as err:
-        raise AnsibleFilterError("split plugin error: %s, string=%s" % str(err), str(string))  # pylint: disable=W0707
+        raise AnsibleFilterError from err
 
 
 class FilterModule(object):  # pylint: disable=useless-object-inheritance

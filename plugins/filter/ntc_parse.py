@@ -6,18 +6,18 @@ __metaclass__ = type
 HAS_NTC_TEMPLATES = True
 try:
     from ntc_templates.parse import _get_template_dir as ntc_get_template_dir
-except:  # noqa
+except ModuleNotFoundError:
     HAS_NTC_TEMPLATES = False
 
 HAS_TEXTFSM = True
 try:
-    import clitable  # pylint: disable=import-error
-    from clitable import CliTableError  # pylint: disable=import-error
-except:  # noqa
+    import clitable
+    from clitable import CliTableError
+except ModuleNotFoundError:
     try:
-        import textfsm.clitable as clitable  # pylint: disable=consider-using-from-import
+        from textfsm import clitable
         from textfsm.clitable import CliTableError
-    except:  # noqa
+    except ModuleNotFoundError:
         HAS_TEXTFSM = False
 
 if HAS_NTC_TEMPLATES:

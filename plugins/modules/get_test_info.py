@@ -82,4 +82,5 @@ def main():
     module.exit_json(tests=tests)
 
 
-main()
+if __name__ == "__main__":
+    main()

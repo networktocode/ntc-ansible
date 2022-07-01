@@ -344,4 +344,5 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
     )
 
 
-main()
+if __name__ == "__main__":
+    main()

@@ -162,6 +162,7 @@ RETURN = r"""
 install_state:
     returned: always
     type: dictionary
+    description: Dictionary of details from install.
     sample: {
         "kick": "n5000-uk9-kickstart.7.2.1.N1.1.bin",
         "sys": "n5000-uk9.7.2.1.N1.1.bin",
@@ -457,4 +458,5 @@ def main():  # pylint: disable=too-many-statements,too-many-branches,too-many-lo
     module.exit_json(changed=changed, install_state=install_state)
 
 
-main()
+if __name__ == "__main__":
+    main()

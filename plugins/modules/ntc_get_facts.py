@@ -300,4 +300,5 @@ def main():  # pylint: disable=too-many-locals
     module.exit_json(ansible_facts=facts)
 
 
-main()
+if __name__ == "__main__":
+    main()

@@ -334,4 +334,5 @@ def main():  # pylint: disable=too-many-arguments,too-many-branches,too-many-sta
     module.exit_json(changed=changed, rebooted=rebooted, reachable=reachable, atomic=atomic)
 
 
-main()
+if __name__ == "__main__":
+    main()
