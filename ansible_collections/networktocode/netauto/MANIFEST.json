@@ -1,0 +1,32 @@
+{
+ "collection_info": {
+  "namespace": "networktocode",
+  "name": "netauto",
+  "version": "1.0.0",
+  "authors": [
+   "Network to Code <opensource@networktocode.com>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "networking",
+   "network_automation",
+   "multi_vendor"
+  ],
+  "description": "Multi-vendor Ansible Collection for Network Automation",
+  "license": [],
+  "license_file": "LICENSE",
+  "dependencies": {},
+  "repository": "https://github.com/networktocode/ntc-ansible",
+  "documentation": "https://github.com/networktocode/ntc-ansible",
+  "homepage": "https://github.com/networktocode/ntc-ansible",
+  "issues": "https://github.com/networktocode/ntc-ansible/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "41c0b5d1cf5859d77e85feffcffb312fb20df346144c6aa6e113bfb29b542c1b",
+  "format": 1
+ },
+ "format": 1
+}

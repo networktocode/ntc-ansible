@@ -14,7 +14,6 @@ ntc-templates = "^3.0.0"
 lxml = "^4.9.0"
 ansible-base = "^2.10.0"
 textfsm = "^1.1.2"
-packaging = "^21.3"
 jsonschema = "^4.6.1"
 
 [tool.poetry.dev-dependencies]
@@ -27,6 +26,7 @@ toml = "^0.10.2"
 pydocstyle = "^6.1.1"
 pylint = "^2.14.4"
 voluptuous = "^0.13.1"
+pytest = "^7.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,0 +1,10 @@
+{
+    "docs": "https://docs.ansible.com/ansible/2.10/dev_guide/testing/sanity/ignores.html", 
+    "results": [
+        {
+            "message": "The test `ansible-test sanity --test ignores` [[explain](https://docs.ansible.com/ansible/2.10/dev_guide/testing/sanity/ignores.html)] failed with 1 error:", 
+            "output": "tests/sanity/ignore-2.10.txt:14:1: File 'plugins/modules/get_test_info.py' does not exist"
+        }
+    ], 
+    "verified": false
+}
