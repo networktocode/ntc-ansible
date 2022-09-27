@@ -12,9 +12,9 @@ pyntc = "^0.20.1"
 netmiko = "^3.1"
 ntc-templates = "^3.0.0"
 lxml = "^4.9.0"
-ansible-base = "^2.10.0"
 textfsm = "^1.1.2"
 jsonschema = "^4.6.1"
+ansible = "^2.9"
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"

@@ -1,7 +1,7 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
-# Copyright 2015 Jason Edelman <jason@networktocode.com>
-# Network to Code, LLC
+#  Copyright 2022 Network to Code
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,45 +21,37 @@ __metaclass__ = type
 
 DOCUMENTATION = r"""
 ---
-module: ntc_rollback
-short_description: Set a checkpoint or rollback to a checkpoint
+module: ntc_config_command
+short_description: Writes config data to devices that don't have an API
 description:
-    - This module offers the ability to set a configuration checkpoint file or rollback
-      to a configuration checkpoint file on supported Cisco or Arista switches.
-    - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
-notes:
-    - This module is not idempotent.
-author: Jason Edelman (@jedelman8)
+    - This module write config data to devices that don't have an API.
+      The use case would be writing configuration based on output gleaned
+      from ntc_show_command output.
+author: "Jeff Kala"
 requirements:
     - pyntc
 options:
     platform:
         description:
-            - Vendor and platform identifier.
-        required: false
-        choices: ['cisco_nxos_nxapi', 'cisco_ios_ssh', 'arista_eos_eapi']
-    checkpoint_file:
-        description:
-            - Name of checkpoint file to create. Mutually exclusive with rollback_to.
+            - Switch platform
         required: false
         default: null
-    rollback_to:
-        description:
-            - Name of checkpoint file to rollback to. Mutually exclusive with checkpoint_file.
-        required: false
-        default: null
+        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'f5_tmos_icontrol']
     host:
         description:
             - Hostame or IP address of switch.
         required: false
+        default: null
     username:
         description:
-            - Username used to login to the target device.
+            - Username used to login to the target device
         required: false
+        default: null
     password:
         description:
-            - Password used to login to the target device.
+            - Password used to login to the target device
         required: false
+        default: null
     provider:
         description:
           - Dictionary which acts as a collection of arguments used to define the characteristics
@@ -72,10 +64,10 @@ options:
         description:
             - Enable secret for devices connecting over SSH.
         required: false
+        default: null
     transport:
         description:
-            - Transport protocol for API. Only needed for NX-API and eAPI.
-              If omitted, platform-specific default will be used.
+            - Transport protocol for API-based devices.
         required: false
         default: null
         choices: ['http', 'https']
@@ -100,6 +92,7 @@ options:
 """
 
 EXAMPLES = r"""
+
 - hosts: all
   vars:
     nxos_provider:
@@ -109,31 +102,50 @@ EXAMPLES = r"""
       platform: "cisco_nxos"
       connection: ssh
 
-- ntc_rollback:
+- name: Write vlan data
+  networktocode.netauto.ntc_config_command:
+    connection: ssh
+    platform: cisco_nxos
+    commands:
+      - vlan 10
+      - name vlan_10
+      - end
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    secret: "{{ secret }}"
+
+- name: Write config from file
+  networktocode.netauto.ntc_config_command:
+    connection: ssh
+    platform: cisco_nxos
+    commands_file: "dynamically_created_config.txt"
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    secret: "{{ secret }}"
+
+- name: Configure vlans
+  networktocode.netauto.ntc_config_command:
+    commands:
+      - vlan 10
+      - name vlan_10
+      - end
     provider: "{{ nxos_provider }}"
-    rollback_to: backup.cfg
 
-- ntc_rollback:
-    ntc_host: eos1
-    checkpoint_file: backup.cfg
-
-- ntc_rollback:
-    ntc_host: eos1
-    rollback_to: backup.cfg
 """
+# import os.path
+# import socket
 
-RETURN = r"""
-filename:
-    description: The filename of the checkpoint/rollback file.
-    returned: success
-    type: string
-    sample: 'backup.cfg'
-status:
-    description: Which operation took place and whether it was successful.
-    returned: success
-    type: string
-    sample: 'rollback executed'
-"""
+# from ansible.module_utils.basic import AnsibleModule
+
+# try:
+#     from netmiko import ConnectHandler
+
+#     HAS_NETMIKO = True
+# except ImportError:
+#     HAS_NETMIKO = False
+
 from ansible.module_utils.basic import AnsibleModule
 
 try:
@@ -146,12 +158,25 @@ PLATFORM_NXAPI = "cisco_nxos_nxapi"
 PLATFORM_IOS = "cisco_ios_ssh"
 PLATFORM_EAPI = "arista_eos_eapi"
 PLATFORM_JUNOS = "juniper_junos_netconf"
+PLATFORM_F5 = "f5_tmos_icontrol"
+
+
+def error_params(platform, command_output):
+    """Checks for typical cisco command error outputs."""
+    if "cisco_ios" in platform:
+        if "Invalid input detected at '^' marker" in command_output:
+            return True
+        if "Ambiguous command" in command_output:
+            return True
+    return False
 
 
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
     connection_argument_spec = dict(
-        platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS], required=False),
+        platform=dict(
+            choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS, PLATFORM_F5], required=False
+        ),
         host=dict(required=False),
         port=dict(required=False),
         username=dict(required=False, type="str"),
@@ -161,18 +186,14 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
         ntc_host=dict(required=False),
         ntc_conf_file=dict(required=False),
     )
-
-    base_argument_spec = dict(
-        checkpoint_file=dict(required=False),
-        rollback_to=dict(required=False),
-    )
-
+    base_argument_spec = {}
     argument_spec = base_argument_spec
     argument_spec.update(connection_argument_spec)
     argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
 
     module = AnsibleModule(
         argument_spec=argument_spec,
+        supports_check_mode=False,
         mutually_exclusive=[
             ["host", "ntc_host"],
             ["ntc_host", "secret"],
@@ -181,10 +202,8 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
             ["ntc_conf_file", "secret"],
             ["ntc_conf_file", "transport"],
             ["ntc_conf_file", "port"],
-            ["checkpoint_file", "rollback_to"],
         ],
         required_one_of=[["host", "ntc_host", "provider"]],
-        supports_check_mode=False,
     )
 
     if not HAS_PYNTC:
@@ -209,6 +228,11 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
     port = module.params["port"]
     secret = module.params["secret"]
 
+    argument_check = {"host": host, "username": username, "platform": platform, "password": password}
+    for key, val in argument_check.items():
+        if val is None:
+            module.fail_json(msg=str(key) + " is required")
+
     if ntc_host is not None:
         device = ntc_device_by_name(ntc_host, ntc_conf_file)
     else:
@@ -223,33 +247,9 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
         device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)
 
-    checkpoint_file = module.params["checkpoint_file"]
-    rollback_to = module.params["rollback_to"]
-
-    argument_check = {"host": host, "username": username, "platform": platform, "password": password}
-    for key, val in argument_check.items():
-        if val is None:
-            module.fail_json(msg=str(key) + " is required")
-
     device.open()
-
-    status = None
-    filename = None
-    changed = False
-    try:
-        if checkpoint_file:
-            device.checkpoint(checkpoint_file)
-            status = "checkpoint file created"
-        elif rollback_to:
-            device.rollback(rollback_to)
-            status = "rollback executed"
-        changed = True
-        filename = rollback_to or checkpoint_file
-    except Exception as e:  # pylint: disable=broad-except
-        module.fail_json(msg=str(e))
-
+    # device.config()
     device.close()
-    module.exit_json(changed=changed, status=status, filename=filename)
 
 
 if __name__ == "__main__":

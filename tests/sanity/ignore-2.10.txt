@@ -11,6 +11,7 @@ tasks.py future-import-boilerplate
 tasks.py metaclass-boilerplate
 tests/units/filter/test_version.py future-import-boilerplate
 tests/units/filter/test_version.py metaclass-boilerplate
+plugins/modules/get_test_info.py pylint:blacklisted-name
 plugins/modules/ntc_file_copy.py pylint:bare-except
 plugins/modules/ntc_install_os.py pylint:bare-except
 plugins/modules/ntc_reboot.py pylint:bare-except

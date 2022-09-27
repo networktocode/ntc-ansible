@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Copyright 2015 Jason Edelman <jason@networktocode.com>
+# Copyright 2022 Network to Code
 # Network to Code, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,16 +21,12 @@ __metaclass__ = type
 
 DOCUMENTATION = r"""
 ---
-module: ntc_get_facts
-short_description: Get facts about a remote network device.
+module: ntc_show_command
+short_description: Gets output from show commands using SSH and tries to return structured data
 description:
-    - Reboot a network device, optionally on a timer.
-    - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
-notes:
-    - Facts to be returned include - uptime (string), uptime (seconds), model, vendor, os_version, serial_number, hostname, fqdn, vlans, interfaces.
-    - Facts are automatically added to Ansible facts environment. No need to register them.
-author: Jason Edelman (@jedelman8)
-version_added: 1.9.2
+    - This module connects to network devices using SSH and tries to
+      return structured data (JSON).
+author: Jeff Kala
 requirements:
     - pyntc
 options:
@@ -93,7 +89,6 @@ options:
         required: false
         default: null
 """
-
 EXAMPLES = r"""
 - hosts: all
   vars:
@@ -104,109 +99,22 @@ EXAMPLES = r"""
       platform: "cisco_nxos"
       connection: ssh
 
-- name: get facts
-  networktocode.netauto.ntc_get_facts:
-    provider: "{{ nxos_provider }}"
-    ntc_host: n9k1
-    ntc_conf_file: .ntc.conf
-
-- name: get facts
-  networktocode.netauto.ntc_get_facts:
-    platform: cisco_nxos_nxapi
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-    transport: http
-
-- name: get facts
-  networktocode.netauto.ntc_get_facts:
-    ntc_host: n9k1
-    ntc_conf_file: .ntc.conf
-
-- name: get facts
-  networktocode.netauto.ntc_get_facts:
-    ntc_host: eos_leaf
-
-- name: get facts
-  networktocode.netauto.ntc_get_facts:
-    platform: arista_eos_eapi
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-
-- name: get facts
-  networktocode.netauto.ntc_get_facts:
-    platform: cisco_ios
+- name: Get Vlans
+  networktocode.netauto.ntc_show_command:
+    connection: ssh
+    platform: cisco_nxos
+    commands:
+      - show vlans
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
     secret: "{{ secret }}"
-"""
 
-RETURN = r"""
-uptime_string:
-    description: The device uptime represented as a string format DD:HH:MM:SS.
-    returned: success
-    type: string
-    sample: "00:00:21:53"
-uptime:
-    description: The device uptime represented as an integer number of strings.
-    returned: success
-    type: int
-    sample: 1313
-vlans:
-    description: List of VLAN IDs.
-    returned: success
-    type: List
-    sample: [
-            "1",
-            "2",
-            "3",
-            "4",
-        ]
-vendor:
-    description: Vendor of network device.
-    returned: success
-    type: string
-    sample: "cisco"
-os_version:
-    description: Operating System version on network device.
-    returned: success
-    type: string
-    sample: "7.0(3)I2(1)"
-serial_number:
-    description: Serial number on network device.
-    returned: success
-    type: string
-    sample: "SAL1819S6LU"
-model:
-    description: Hardware model of network device.
-    returned: success
-    type: string
-    sample: "Nexus9000 C9396PX Chassis"
-hostname:
-    description: Hostname of network device.
-    returned: success
-    type: string
-    sample: "N9K1"
-fqdn:
-    description: Fully-qualified domain name.
-    returned: success
-    type: string
-    sample: "N9K1.ntc.com"
-interfaces:
-    description: List of interfaces.
-    returned: success
-    type: list
-    sample: [
-            "mgmt0",
-            "Ethernet1/1",
-            "Ethernet1/2",
-            "Ethernet1/3",
-            "Ethernet1/4",
-            "Ethernet1/5",
-            "Ethernet1/6",
-    ]
+- name: Get Vlans
+  networktocode.netauto.ntc_show_command:
+    commands:
+      - show vlans
+    provider: "{{ nxos_provider }}"
 """
 
 from ansible.module_utils.basic import AnsibleModule
@@ -224,7 +132,7 @@ PLATFORM_JUNOS = "juniper_junos_netconf"
 PLATFORM_F5 = "f5_tmos_icontrol"
 
 
-def main():  # pylint: disable=too-many-locals
+def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
     connection_argument_spec = dict(
         platform=dict(
@@ -301,10 +209,12 @@ def main():  # pylint: disable=too-many-locals
         device = ntc_device(device_type, host, username, password, **kwargs)
 
     device.open()
-    facts = device.facts
+    # device.show()
     device.close()
 
-    module.exit_json(ansible_facts=facts)
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":

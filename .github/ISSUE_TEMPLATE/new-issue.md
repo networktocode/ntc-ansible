@@ -10,7 +10,6 @@ assignees: ''
 <!---
 - [ ] Verify first that your issue/request is not already reported on GitHub.
 - [ ] Also test if the latest release, and master branch are affected too.
-- [ ] Verify that the latest pynautobot has been installed
 -->
 
 ##### ISSUE TYPE
