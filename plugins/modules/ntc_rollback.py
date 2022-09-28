@@ -26,77 +26,26 @@ short_description: Set a checkpoint or rollback to a checkpoint
 description:
     - This module offers the ability to set a configuration checkpoint file or rollback
       to a configuration checkpoint file on supported Cisco or Arista switches.
-    - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
 notes:
     - This module is not idempotent.
 author: Jason Edelman (@jedelman8)
 requirements:
     - pyntc
+extends_documentation_fragment:
+  - networktocode.netauto.netauto
 options:
-    platform:
-        description:
-            - Vendor and platform identifier.
-        required: false
-        choices: ['cisco_nxos_nxapi', 'cisco_ios_ssh', 'arista_eos_eapi']
     checkpoint_file:
         description:
             - Name of checkpoint file to create. Mutually exclusive with rollback_to.
         required: false
         default: null
+        type: str
     rollback_to:
         description:
             - Name of checkpoint file to rollback to. Mutually exclusive with checkpoint_file.
         required: false
         default: null
-    host:
-        description:
-            - Hostame or IP address of switch.
-        required: false
-    username:
-        description:
-            - Username used to login to the target device.
-        required: false
-    password:
-        description:
-            - Password used to login to the target device.
-        required: false
-    provider:
-        description:
-          - Dictionary which acts as a collection of arguments used to define the characteristics
-            of how to connect to the device.
-            Note - host, username, password and platform must be defined in either provider
-            or local param
-            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
-        required: false
-    secret:
-        description:
-            - Enable secret for devices connecting over SSH.
-        required: false
-    transport:
-        description:
-            - Transport protocol for API. Only needed for NX-API and eAPI.
-              If omitted, platform-specific default will be used.
-        required: false
-        default: null
-        choices: ['http', 'https']
-    port:
-        description:
-            - TCP/UDP port to connect to target device. If omitted standard port numbers will be used.
-              80 for HTTP; 443 for HTTPS; 22 for SSH.
-        required: false
-        default: null
-    ntc_host:
-        description:
-            - The name of a host as specified in an NTC configuration file.
-        required: false
-        default: null
-    ntc_conf_file:
-        description:
-            - The path to a local NTC configuration file. If omitted, and ntc_host is specified,
-              the system will look for a file given by the path in the environment variable PYNTC_CONF,
-              and then in the users home directory for a file called .ntc.conf.
-        required: false
-        default: null
+        type: str
 """
 
 EXAMPLES = r"""
@@ -135,6 +84,11 @@ status:
     sample: 'rollback executed'
 """
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.networktocode.netauto.plugins.module_utils.args_common import (
+    CONNECTION_ARGUMENT_SPEC,
+    MUTUALLY_EXCLUSIVE,
+    REQUIRED_ONE_OF,
+)
 
 try:
     HAS_PYNTC = True
@@ -142,48 +96,27 @@ try:
 except ImportError:
     HAS_PYNTC = False
 
-PLATFORM_NXAPI = "cisco_nxos_nxapi"
-PLATFORM_IOS = "cisco_ios_ssh"
-PLATFORM_EAPI = "arista_eos_eapi"
-PLATFORM_JUNOS = "juniper_junos_netconf"
+# PLATFORM_NXAPI = "cisco_nxos_nxapi"
+# PLATFORM_IOS = "cisco_ios_ssh"
+# PLATFORM_EAPI = "arista_eos_eapi"
+# PLATFORM_JUNOS = "juniper_junos_netconf"
 
 
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
-    connection_argument_spec = dict(
-        platform=dict(choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS], required=False),
-        host=dict(required=False),
-        port=dict(required=False),
-        username=dict(required=False, type="str"),
-        password=dict(required=False, type="str", no_log=True),
-        secret=dict(required=False, type="str", no_log=True),
-        transport=dict(required=False, choices=["http", "https"]),
-        ntc_host=dict(required=False),
-        ntc_conf_file=dict(required=False),
-    )
-
     base_argument_spec = dict(
-        checkpoint_file=dict(required=False),
-        rollback_to=dict(required=False),
+        checkpoint_file=dict(required=False, type="str"),
+        rollback_to=dict(required=False, type="str"),
     )
 
     argument_spec = base_argument_spec
-    argument_spec.update(connection_argument_spec)
-    argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
+    argument_spec.update(CONNECTION_ARGUMENT_SPEC)
+    argument_spec["provider"] = dict(required=False, type="dict", options=CONNECTION_ARGUMENT_SPEC)
 
     module = AnsibleModule(
         argument_spec=argument_spec,
-        mutually_exclusive=[
-            ["host", "ntc_host"],
-            ["ntc_host", "secret"],
-            ["ntc_host", "transport"],
-            ["ntc_host", "port"],
-            ["ntc_conf_file", "secret"],
-            ["ntc_conf_file", "transport"],
-            ["ntc_conf_file", "port"],
-            ["checkpoint_file", "rollback_to"],
-        ],
-        required_one_of=[["host", "ntc_host", "provider"]],
+        mutually_exclusive=MUTUALLY_EXCLUSIVE,
+        required_one_of=[REQUIRED_ONE_OF],
         supports_check_mode=False,
     )
 

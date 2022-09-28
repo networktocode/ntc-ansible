@@ -22,7 +22,7 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: ntc_file_copy
-short_description: Copy a file to a remote network device over SCP.
+short_description: Copy a file to a remote network device over SCP
 description:
     - Copy a file to the flash (or bootflash) remote network device on supported platforms over SCP.
     - Supported platforms include Cisco Nexus switches with NX-API, Cisco IOS switches or routers, Arista switches with eAPI.
@@ -36,86 +36,40 @@ author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
 requirements:
     - pyntc
+extends_documentation_fragment:
+  - networktocode.netauto.netauto
 options:
-    platform:
-        description:
-            - Switch platform
-        required: false
-        choices: ['cisco_nxos_nxapi', 'arista_eos_eapi', 'cisco_ios_ssh', 'cisco_asa_ssh', 'f5_tmos_icontrol']
-    local_file:
-        description:
-            - Path to local file. Local directory must exist.
-        required: false
-    remote_file:
-        description:
-            - Remote file path of the copy. Remote directories must exist.
-              If omitted, the name of the local file will be used.
-        required: false
-        default: null
-    file_system:
-        description:
-            - The remote file system of the device. If omitted,
-              devices that support a file_system parameter will use their default values.
-        required: false
-        default: null
-    host:
-        description:
-            - Hostame or IP address of switch.
-        required: false
-    provider:
-        description:
-          - Dictionary which acts as a collection of arguments used to define the characteristics
-            of how to connect to the device.
-            Note - host, username, password, local_file, and platform must be defined in either
-            provider or local param
-            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
-        required: false
-    username:
-        description:
-            - Username used to login to the target device
-        required: false
-    password:
-        description:
-            - Password used to login to the target device
-        required: false
-    secret:
-        description:
-            - Enable secret for devices connecting over SSH.
-        required: false
-    transport:
-        description:
-            - Transport protocol for API-based devices. Not used for actual file transfer.
-        required: false
-        default: null
-        choices: ['http', 'https']
-    port:
-        description:
-            - TCP/UDP port to connect to target device. If omitted standard port numbers will be used.
-              80 for HTTP; 443 for HTTPS; 22 for SSH.
-        required: false
-        default: null
-    global_delay_factor:
-        description:
-            - Sets delay between operations.
-        required: false
-        default: 1
-    delay_factor:
-        description:
-            - Multiplication factor for timing delays
-        required: false
-        default: 1
-    ntc_host:
-        description:
-            - The name of a host as specified in an NTC configuration file.
-        required: false
-        default: null
-    ntc_conf_file:
-        description:
-            - The path to a local NTC configuration file. If omitted, and ntc_host is specified,
-              the system will look for a file given by the path in the environment variable PYNTC_CONF,
-              and then in the users home directory for a file called .ntc.conf.
-        required: false
-        default: null
+  local_file:
+      description:
+          - Path to local file. Local directory must exist.
+      required: false
+      type: str
+  remote_file:
+      description:
+          - Remote file path of the copy. Remote directories must exist.
+            If omitted, the name of the local file will be used.
+      required: false
+      default: null
+      type: str
+  file_system:
+      description:
+          - The remote file system of the device. If omitted,
+            devices that support a file_system parameter will use their default values.
+      required: false
+      default: null
+      type: str
+  global_delay_factor:
+      description:
+          - Sets delay between operations.
+      required: false
+      default: 1
+      type: int
+  delay_factor:
+      description:
+          - Multiplication factor for timing delays
+      required: false
+      default: 1
+      type: int
 """
 
 EXAMPLES = r"""
@@ -187,6 +141,11 @@ atomic:
 import os
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.networktocode.netauto.plugins.module_utils.args_common import (
+    CONNECTION_ARGUMENT_SPEC,
+    MUTUALLY_EXCLUSIVE,
+    REQUIRED_ONE_OF,
+)
 
 try:
     HAS_PYNTC = True
@@ -194,55 +153,26 @@ try:
 except ImportError:
     HAS_PYNTC = False
 
-PLATFORM_NXAPI = "cisco_nxos_nxapi"
-PLATFORM_IOS = "cisco_ios_ssh"
-PLATFORM_EAPI = "arista_eos_eapi"
-PLATFORM_JUNOS = "juniper_junos_netconf"
-PLATFORM_F5 = "f5_tmos_icontrol"
-PLATFORM_ASA = "cisco_asa_ssh"
-
 
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
-    connection_argument_spec = dict(
-        platform=dict(
-            choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_JUNOS, PLATFORM_F5, PLATFORM_ASA],
-            required=False,
-        ),
-        host=dict(required=False),
-        port=dict(required=False),
-        username=dict(required=False, type="str"),
-        password=dict(required=False, type="str", no_log=True),
-        secret=dict(required=False, type="str", no_log=True),
+    base_argument_spec = dict(
         use_keys=dict(required=False, default=False, type="bool"),
         key_file=dict(required=False, default=None),
         global_delay_factor=dict(default=1, required=False, type="int"),
         delay_factor=dict(default=1, required=False, type="int"),
-        transport=dict(required=False, choices=["http", "https"]),
-        ntc_host=dict(required=False),
-        ntc_conf_file=dict(required=False),
-    )
-    base_argument_spec = dict(
         local_file=dict(required=False),
         remote_file=dict(required=False),
         file_system=dict(required=False),
     )
     argument_spec = base_argument_spec
-    argument_spec.update(connection_argument_spec)
-    argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
+    argument_spec.update(CONNECTION_ARGUMENT_SPEC)
+    argument_spec["provider"] = dict(required=False, type="dict", options=CONNECTION_ARGUMENT_SPEC)
 
     module = AnsibleModule(
         argument_spec=argument_spec,
-        mutually_exclusive=[
-            ["host", "ntc_host"],
-            ["ntc_host", "secret"],
-            ["ntc_host", "transport"],
-            ["ntc_host", "port"],
-            ["ntc_conf_file", "secret"],
-            ["ntc_conf_file", "transport"],
-            ["ntc_conf_file", "port"],
-        ],
-        required_one_of=[["host", "ntc_host", "provider"]],
+        mutually_exclusive=MUTUALLY_EXCLUSIVE,
+        required_one_of=[REQUIRED_ONE_OF],
         supports_check_mode=True,
     )
 

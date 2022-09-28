@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 James Williams <james.williams@packetgeek.net>
+#  Copyright 2022 Network to Code
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,83 +22,17 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: ntc_config_command
-short_description: Writes config data to devices that don't have an API
+short_description: Writes config data to devices
 description:
-    - This module write config data to devices that don't have an API.
-      The use case would be writing configuration based on output gleaned
-      from ntc_show_command output.
-author: James Williams (@packetgeeknet)
+  - This module write config data to devices.
+    The use case would be writing configuration based on output gleaned from ntc_show_command output.
+author: "Jeff Kala (@jeffkala)"
 requirements:
-    - netmiko
-options:
-    connection:
-        description:
-            - connect to device using netmiko or read from offline file
-              for testing
-        required: false
-        default: ssh
-        type: str
-        choices: ['ssh', 'telnet']
-    connection_args:
-        description:
-            - Transport parameters specific to netmiko, trigger, etc.
-        required: false
-        default: {}
-    platform:
-        description:
-            - Platform FROM the index file
-        required: false
-    commands:
-        description:
-            - Command to execute on target device
-        required: false
-        default: null
-    commands_file:
-        description:
-            - Command to execute on target device
-        required: false
-    host:
-        description:
-            - IP Address or hostname (resolvable by Ansible control host)
-        required: false
-    provider:
-        description:
-          - Dictionary which acts as a collection of arguments used to define the characteristics
-            of how to connect to the device.
-            Note - host, username, password and platform must be defined in either provider
-            or local param
-            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
-        required: false
-    port:
-        description:
-            - SSH port to use to connect to the target device
-        required: false
-        default: 22 for SSH. 23 for Telnet
-    username:
-        description:
-            - Username used to login to the target device
-        required: false
-        default: null
-    password:
-        description:
-            - Password used to login to the target device
-        required: false
-        default: null
-    secret:
-        description:
-            - Password used to enter a privileged mode on the target device
-        required: false
-        default: null
-    use_keys:
-        description:
-            - Boolean true/false if ssh key login should be attempted
-        required: false
-        default: false
-    key_file:
-        description:
-            - Path to private ssh key used for login
-        required: false
-        default: null
+  - pyntc
+
+extends_documentation_fragment:
+  - networktocode.netauto.netauto
+  - networktocode.netauto.netauto.command_option
 """
 
 EXAMPLES = r"""
@@ -144,17 +78,19 @@ EXAMPLES = r"""
     provider: "{{ nxos_provider }}"
 
 """
-import os.path
-import socket
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.networktocode.netauto.plugins.module_utils.args_common import (
+    CONNECTION_ARGUMENT_SPEC,
+    MUTUALLY_EXCLUSIVE,
+    REQUIRED_ONE_OF,
+)
 
 try:
-    from netmiko import ConnectHandler
-
-    HAS_NETMIKO = True
+    HAS_PYNTC = True
+    from pyntc import ntc_device, ntc_device_by_name
 except ImportError:
-    HAS_NETMIKO = False
+    HAS_PYNTC = False
 
 
 def error_params(platform, command_output):
@@ -169,31 +105,23 @@ def error_params(platform, command_output):
 
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
-    connection_argument_spec = dict(
-        connection=dict(
-            type="str",
-            choices=["ssh", "telnet"],
-            default="ssh",
-        ),
-        platform=dict(required=False, default="cisco_ios"),
-        host=dict(required=False),
-        port=dict(required=False),
-        username=dict(required=False, type="str"),
-        password=dict(required=False, type="str", no_log=True),
-        secret=dict(required=False, type="str", no_log=True),
-        use_keys=dict(required=False, default=False, type="bool"),
-        key_file=dict(required=False, default=None),
-        connection_args=dict(required=False, type="dict", default={}),
-    )
     base_argument_spec = dict(
-        commands=dict(required=False, type="list"),
-        commands_file=dict(required=False),
+        commands=dict(required=True, type="list"),
+        commands_file=dict(required=False, default=None, type="str"),
     )
     argument_spec = base_argument_spec
-    argument_spec.update(connection_argument_spec)
-    argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
+    argument_spec.update(CONNECTION_ARGUMENT_SPEC)
+    argument_spec["provider"] = dict(required=False, type="dict", options=CONNECTION_ARGUMENT_SPEC)
 
-    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=False)
+    module = AnsibleModule(
+        argument_spec=argument_spec,
+        supports_check_mode=False,
+        mutually_exclusive=MUTUALLY_EXCLUSIVE,
+        required_one_of=[REQUIRED_ONE_OF],
+    )
+
+    if not HAS_PYNTC:
+        module.fail_json(msg="pyntc Python library not found.")
 
     provider = module.params["provider"] or {}
 
@@ -202,80 +130,40 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
         if module.params.get(param) is not False:
             module.params[param] = module.params.get(param) or pvalue
 
-    if not HAS_NETMIKO:
-        module.fail_json(msg="This module requires netmiko")
-
-    host = module.params["host"]
-    connection = module.params["connection"]
     platform = module.params["platform"]
-    device_type = platform.split("-")[0]
-    commands = module.params["commands"]
-    commands_file = module.params["commands_file"]
+    host = module.params["host"]
     username = module.params["username"]
     password = module.params["password"]
+
+    ntc_host = module.params["ntc_host"]
+    ntc_conf_file = module.params["ntc_conf_file"]
+
+    transport = module.params["transport"]
+    port = module.params["port"]
     secret = module.params["secret"]
-    use_keys = module.params["use_keys"]
-    key_file = module.params["key_file"]
-    connection_args = module.params["connection_args"]
 
     argument_check = {"host": host, "username": username, "platform": platform, "password": password}
     for key, val in argument_check.items():
         if val is None:
             module.fail_json(msg=str(key) + " is required")
 
-    if module.params["host"]:
-        host = socket.gethostbyname(module.params["host"])
-
-    if connection == "telnet" and platform != "cisco_ios":
-        module.fail_json(msg="only cisco_ios supports telnet connection")
-
-    if platform == "cisco_ios" and connection == "telnet":
-        device_type = "cisco_ios_telnet"
-
-    if module.params["port"]:
-        port = int(module.params["port"])
+    if ntc_host is not None:
+        device = ntc_device_by_name(ntc_host, ntc_conf_file)
     else:
-        if connection == "telnet":
-            port = 23
-        else:
-            port = 22
+        kwargs = {}
+        if transport is not None:
+            kwargs["transport"] = transport
+        if port is not None:
+            kwargs["port"] = port
+        if secret is not None:
+            kwargs["secret"] = secret
 
-    if connection in ["ssh", "telnet"]:
-        device_args = dict(
-            device_type=device_type,
-            ip=socket.gethostbyname(host),
-            port=port,
-            username=username,
-            password=password,
-            secret=secret,
-            use_keys=use_keys,
-            key_file=key_file,
-        )
-        if connection_args:
-            device_args.update(connection_args)
+        device_type = platform
+        device = ntc_device(device_type, host, username, password, **kwargs)
 
-        device = ConnectHandler(**device_args)
-        if secret:
-            device.enable()
-
-        if commands:
-            output = device.send_config_set(commands)
-        else:
-            try:
-                if commands_file:
-                    if os.path.isfile(commands_file):
-                        with open(commands_file, "r", encoding="utf-8") as f:
-                            output = device.send_config_set(f.readlines())
-            except IOError:
-                module.fail_json(msg="Unable to locate: {0}".format(commands_file))
-
-    if error_params(platform, output):
-        module.fail_json(msg="Error executing command: {0}".format(output))
-
-    results = {}
-    results["response"] = output
-
-    module.exit_json(changed=True, **results)
+    device.open()
+    # device.config()
+    device.close()
 
 
 if __name__ == "__main__":

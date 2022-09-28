@@ -23,7 +23,7 @@ DOCUMENTATION = r"""
 ---
 module: ntc_install_os
 short_description: Install an operating system by setting the boot options
-                   like boot image and kickstart image.
+                   like boot image and kickstart image
 description:
     - Set boot options like boot image and kickstart image.
     - Reboot option for device to perform install.
@@ -48,80 +48,31 @@ author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
 requirements:
     - pyntc
+extends_documentation_fragment:
+  - networktocode.netauto.netauto
 options:
-    platform:
-        description:
-            - Switch platform
-        required: false
-        choices: ["cisco_nxos_nxapi", "arista_eos_eapi", "cisco_ios_ssh",
-                  "cisco_asa_ssh", "f5_tmos_icontrol"]
     system_image_file:
         description:
             - Name of the system (or combined) image file on flash.
         required: true
+        type: str
     kickstart_image_file:
         description:
             - Name of the kickstart image file on flash.
         required: false
         default: null
+        type: str
     volume:
         description:
             - Volume name - required argument for F5 platform.
         required: false
-    host:
-        description:
-            - Hostname or IP address of switch.
-        required: false
-    username:
-        description:
-            - Username used to login to the target device
-        required: false
-    password:
-        description:
-            - Password used to login to the target device
-        required: false
-    provider:
-        description:
-          - Dictionary which acts as a collection of arguments used to define the characteristics
-            of how to connect to the device.
-            Note - host, username, password and platform must be defined in either provider
-            or local param
-            Note - local param takes precedence, e.g. hostname is preferred to provider['host']
-        required: false
-    secret:
-        description:
-            - Enable secret for devices connecting over SSH.
-        required: false
-    transport:
-        description:
-            - Transport protocol for API-based devices.
-        required: false
-        default: null
-        choices: ["http", "https"]
-    port:
-        description:
-            - TCP/UDP port to connect to target device.
-            - If omitted standard port numbers will be used. 80 for HTTP; 443 for HTTPS; 22 for SSH.
-        required: false
-        default: null
-    ntc_host:
-        description:
-            - The name of a host as specified in an NTC configuration file.
-        required: false
-        default: null
-    ntc_conf_file:
-        description:
-            - The path to a local NTC configuration file.
-            - If omitted, and ntc_host is specified, the system will look for a file given
-              by the path in the environment variable PYNTC_CONF, and then in the users
-              home directory for a file called .ntc.conf.
-        required: false
-        default: null
+        type: str
     reboot:
         description:
             - Determines whether or not the device should be rebooted to complete OS installation.
         required: false
         default: false
+        type: bool
 """
 
 EXAMPLES = r"""
@@ -180,6 +131,11 @@ install_state:
 import time  # noqa E402
 
 from ansible.module_utils.basic import AnsibleModule  # noqa E402
+from ansible_collections.networktocode.netauto.plugins.module_utils.args_common import (
+    CONNECTION_ARGUMENT_SPEC,
+    MUTUALLY_EXCLUSIVE,
+    REQUIRED_ONE_OF,
+)
 
 try:
     from pyntc import ntc_device, ntc_device_by_name  # noqa E402
@@ -206,11 +162,11 @@ except ImportError:
     HAS_PYNTC_VERSION = False
 # fmt: on
 
-PLATFORM_NXAPI = "cisco_nxos_nxapi"
-PLATFORM_IOS = "cisco_ios_ssh"
-PLATFORM_EAPI = "arista_eos_eapi"
+# PLATFORM_NXAPI = "cisco_nxos_nxapi"
+# PLATFORM_IOS = "cisco_ios_ssh"
+# PLATFORM_EAPI = "arista_eos_eapi"
 PLATFORM_F5 = "f5_tmos_icontrol"
-PLATFORM_ASA = "cisco_asa_ssh"
+# PLATFORM_ASA = "cisco_asa_ssh"
 
 
 # TODO: Remove when deprecating older pyntc
@@ -226,43 +182,21 @@ def already_set(boot_options, system_image_file, kickstart_image_file, **kwargs)
 
 def main():  # pylint: disable=too-many-statements,too-many-branches,too-many-locals
     """Main execution."""
-    connection_argument_spec = dict(
-        platform=dict(
-            choices=[PLATFORM_NXAPI, PLATFORM_IOS, PLATFORM_EAPI, PLATFORM_F5, PLATFORM_ASA],
-            required=False,
-        ),
-        host=dict(required=False),
-        port=dict(required=False),
-        username=dict(required=False, type="str"),
-        password=dict(required=False, type="str", no_log=True),
-        secret=dict(required=False, type="str", no_log=True),
-        transport=dict(required=False, choices=["http", "https"]),
-        ntc_host=dict(required=False),
-        ntc_conf_file=dict(required=False),
-    )
     base_argument_spec = dict(
-        system_image_file=dict(required=True),
-        kickstart_image_file=dict(required=False),
+        system_image_file=dict(required=True, type="str"),
+        kickstart_image_file=dict(required=False, type="str"),
         volume=dict(required=False, type="str"),
         reboot=dict(required=False, type="bool", default=False),
         install_mode=dict(required=False, type="bool", default=None),
     )
     argument_spec = base_argument_spec
-    argument_spec.update(connection_argument_spec)
-    argument_spec["provider"] = dict(required=False, type="dict", options=connection_argument_spec)
+    argument_spec.update(CONNECTION_ARGUMENT_SPEC)
+    argument_spec["provider"] = dict(required=False, type="dict", options=CONNECTION_ARGUMENT_SPEC)
 
     module = AnsibleModule(
         argument_spec=argument_spec,
-        mutually_exclusive=[
-            ["host", "ntc_host"],
-            ["ntc_host", "secret"],
-            ["ntc_host", "transport"],
-            ["ntc_host", "port"],
-            ["ntc_conf_file", "secret"],
-            ["ntc_conf_file", "transport"],
-            ["ntc_conf_file", "port"],
-        ],
-        required_one_of=[["host", "ntc_host", "provider"]],
+        mutually_exclusive=MUTUALLY_EXCLUSIVE,
+        required_one_of=[REQUIRED_ONE_OF],
         required_if=[["platform", PLATFORM_F5, ["volume"]]],
         supports_check_mode=True,
     )
