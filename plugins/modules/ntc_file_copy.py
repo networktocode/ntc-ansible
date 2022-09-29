@@ -118,23 +118,23 @@ RETURN = r"""
 transfer_status:
     description: Whether a file was transfered. "No Transfer" or "Sent".
     returned: success
-    type: string
+    type: str
     sample: 'Sent'
 local_file:
     description: The path of the local file.
     returned: success
-    type: string
+    type: str
     sample: '/path/to/local/file'
 remote_file:
     description: The path of the remote file.
     returned: success
-    type: string
+    type: str
     sample: '/path/to/remote/file'
 atomic:
     description: Whether the module has atomically completed all steps,
                  including closing connection after file delivering.
     returned: always
-    type: boolean
+    type: bool
     sample: true
 """
 
@@ -157,8 +157,6 @@ except ImportError:
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
     base_argument_spec = dict(
-        use_keys=dict(required=False, default=False, type="bool"),
-        key_file=dict(required=False, default=None),
         global_delay_factor=dict(default=1, required=False, type="int"),
         delay_factor=dict(default=1, required=False, type="int"),
         local_file=dict(required=False),

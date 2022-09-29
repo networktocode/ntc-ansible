@@ -73,6 +73,12 @@ options:
         required: false
         default: false
         type: bool
+    install_mode:
+        description:
+            - Determines whether OS support install mode.
+        required: false
+        default: false
+        type: bool
 """
 
 EXAMPLES = r"""
@@ -113,7 +119,7 @@ EXAMPLES = r"""
 RETURN = r"""
 install_state:
     returned: always
-    type: dictionary
+    type: dict
     description: Dictionary of details from install.
     sample: {
         "kick": "n5000-uk9-kickstart.7.2.1.N1.1.bin",

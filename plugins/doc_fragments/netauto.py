@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 #  Copyright 2022 Network to Code
@@ -178,7 +177,7 @@ options:
           - Command to execute on target device
       required: false
       default: null
-      type: str
+      type: list
   commands_file:
       description:
           - Command to execute on target device

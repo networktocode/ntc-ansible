@@ -54,7 +54,7 @@ options:
       - The "name" key should have a value that is a dictionary key in both C(data) and C(schema).
       - The "required" key is used to validate whether the C(data) must be present.
     required: true
-    type: dict
+    type: list
 """
 
 EXAMPLES = r"""
@@ -89,7 +89,7 @@ RETURN = r"""
 from ansible.module_utils.basic import AnsibleModule
 
 try:
-    from jsonschema import FormatChecker, SchemaError, ValidationError, validate
+    from jsonschema import FormatChecker, SchemaError, validate, ValidationError
 
     HAS_LIB = True
 except ImportError:

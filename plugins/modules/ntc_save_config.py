@@ -101,12 +101,12 @@ RETURN = r"""
 local_file:
     description: The local file path of the saved running config.
     returned: success
-    type: string
+    type: str
     sample: '/path/to/config.cfg'
 remote_file:
     description: The remote file name of the saved running config.
     returned: success
-    type: string
+    type: str
     sample: 'config_backup.cfg'
 remote_save_successful:
     description: Whether the remote save was successful.

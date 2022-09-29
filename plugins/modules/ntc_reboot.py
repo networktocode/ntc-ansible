@@ -25,7 +25,7 @@ module: ntc_reboot
 short_description: Reboot a network device
 description:
     - Reboot a network device, optionally on a timer.
-Notes:
+notes:
     - The timer is only supported for IOS devices.
 author: Jason Edelman (@jedelman8)
 version_added: 1.9.2
@@ -51,7 +51,7 @@ options:
         description:
             - Safeguard boolean. Set to true if you're sure you want to reboot.
         required: false
-        default: false
+        default: true
         type: bool
     volume:
         description:
@@ -108,20 +108,20 @@ RETURN = r"""
 rebooted:
     description: Whether the device was instructed to reboot.
     returned: success
-    type: boolean
+    type: bool
     sample: true
 reachable:
     description: Whether the device is reachable on specified port
                  after rebooting.
     returned: always
-    type: boolean
+    type: bool
     sample: true
 atomic:
     description: Whether the module has atomically completed all steps,
                  including testing port and closing connection after
                  rebooting.
     returned: always
-    type: boolean
+    type: bool
     sample: true
 """
 import time

@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 # Copyright 2022
 # Network to Code, LLC
 #

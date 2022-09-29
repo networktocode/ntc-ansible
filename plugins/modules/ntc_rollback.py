@@ -75,12 +75,12 @@ RETURN = r"""
 filename:
     description: The filename of the checkpoint/rollback file.
     returned: success
-    type: string
+    type: str
     sample: 'backup.cfg'
 status:
     description: Which operation took place and whether it was successful.
     returned: success
-    type: string
+    type: str
     sample: 'rollback executed'
 """
 from ansible.module_utils.basic import AnsibleModule
