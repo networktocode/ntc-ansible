@@ -1,0 +1,158 @@
+---
+- name: "Ansible Integration Tests"
+  connection: "local"
+  gather_facts: false
+  hosts: "localhost"
+
+  tasks:
+    - name: "10000 - EXACT_MATCH"
+      jdiff:
+        check_type: "exact_match"
+        evaluate_args:
+          reference_data: "{{ ref_data }}"
+          value_to_compare: "{{ data_to_compare }}"
+        exclude:
+          - "interfaceStatistics"
+      register: "result"
+      vars:
+        ref_data: |
+          {
+              "Ethernet1": {
+                  "status": "up",
+                  "interfaceStatistics": {
+                      "inBitsRate": 3403.4362520883615,
+                      "inPktsRate": 3.7424095978179257,
+                      "outBitsRate": 16249.69114419833,
+                      "updateInterval": 300,
+                      "outPktsRate": 2.1111866059750692
+                  }
+              }
+          }
+        data_to_compare: |
+          {
+              "Ethernet1": {
+                  "status": "down",
+                  "interfaceStatistics": {
+                      "inBitsRate": 3413.4362520883615,
+                      "inPktsRate": 3.7624095978179257,
+                      "outBitsRate": 16259.69114419833,
+                      "updateInterval": 300,
+                      "outPktsRate": 2.1211866059750692
+                  }
+              }
+          }
+    - assert: {that: "not result.success"}
+
+    - name: "10010 - TOLERANCE"
+      jdiff:
+        check_type: "tolerance"
+        evaluate_args:
+          reference_data: "{{ ref_data }}"
+          value_to_compare: "{{ data_to_compare }}"
+          tolerance: 5
+        jmespath: "*.*.ipv4.[accepted_prefixes]"
+      register: "result"
+      vars:
+        ref_data: |
+          {
+              "10.1.0.0": {
+                  "address_family": {
+                      "ipv4": {
+                          "accepted_prefixes": 100,
+                          "sent_prefixes": 1
+                      }
+                  }
+              }
+          }
+        data_to_compare: |
+          {
+              "10.1.0.0": {
+                  "address_family": {
+                      "ipv4": {
+                          "accepted_prefixes": 90,
+                          "sent_prefixes": 0
+                      }
+                  }
+              }
+          }
+    - assert: {that: "not result.success"}
+
+    - name: "10015 - PARAMETER"
+      jdiff:
+        check_type: "parameter_match"
+        evaluate_args:
+          value_to_compare: "{{ data_to_compare }}"
+          mode: "match"
+          params:
+            linkType: "external"
+        jmespath: "peers[*].[$ip$,linkType]"
+      register: "result"
+      vars:
+        data_to_compare: |
+          {
+              "peers": [
+                  {
+                      "ip": "10.1.0.0",
+                      "linkType": "external"
+                  },
+                  {
+                      "ip": "10.2.0.0",
+                      "linkType": "external"
+                  }
+              ]
+          }
+    - assert: {that: "result.success"}
+
+    - name: "10020 - REGEX"
+      jdiff:
+        check_type: "regex"
+        evaluate_args:
+          value_to_compare: "{{ data_to_compare }}"
+          regex: "^([0-9a-fA-F]{2}(:|-)){5}([0-9a-fA-F]{2})$"
+          mode: "match"
+        jmespath: "interfaces.*.[$name$,burnedInAddress]"
+      register: "result"
+      vars:
+        data_to_compare: |
+          {
+              "interfaces": {
+                  "Management1": {
+                      "burnedInAddress": "08:00:27:e6:b2:f8",
+                      "name": "Management1"
+                  },
+                  "Management2": {
+                      "burnedInAddress": "08-00-27-e6-b2-f9",
+                      "name": "Management2"
+                  }
+              }
+          }
+    - assert: {that: "result.success"}
+
+    - name: "10025 - OPERATOR"
+      jdiff:
+        check_type: "operator"
+        evaluate_args:
+          value_to_compare: "{{ data_to_compare }}"
+          params:
+            params:
+              mode: "in-range"
+              operator_data: [-8, -2]
+        jmespath: "ports[*].[$name$,RxPower]"
+      register: "result"
+      vars:
+        data_to_compare: |
+          {
+              "ports": [
+                  {
+                      "name": "1/1",
+                      "RxPower": -3.83,
+                      "state": "Connected"
+                  },
+                  {
+                      "name": "1/2",
+                      "RxPower": -3.21,
+                      "state": "Connected"
+                  }
+              ]
+          }
+    - assert: {that: "result.success"}
