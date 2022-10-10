@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright: (c) 2020, Network to Code (@networktocode) <info@networktocode.com>
+# Copyright: (c) 2022, Network to Code (@networktocode) <info@networktocode.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """Nautobot Action Plugin for jdiff."""
 
@@ -66,7 +66,7 @@ class ActionModule(ActionBase):
         """
         if JDIFF_IMPORT_ERROR:
             raise_from(
-                AnsibleError("jdiff must be installed to use this plugin"),
+                AnsibleError("jdiff library must be installed to use this plugin"),
                 JDIFF_IMPORT_ERROR,
             )
 

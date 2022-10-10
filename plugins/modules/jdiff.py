@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright: (c) 2020, Network to Code (@networktocode) <info@networktocode.com>
+# Copyright: (c) 2022, Network to Code (@networktocode) <info@networktocode.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """Ansible plugin definition for jdiff action plugin."""
 from __future__ import (absolute_import, division, print_function)
@@ -196,7 +196,7 @@ changed:
     returned: success
     type: bool
 fail_details:
-    description: deepdiff output indicating where the check failed
+    description: output indicating where the check failed
     returned: success
     type: dict
 success:
