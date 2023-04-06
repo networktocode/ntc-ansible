@@ -53,3 +53,9 @@ MUTUALLY_EXCLUSIVE = [
 ]
 
 REQUIRED_ONE_OF = ["host", "ntc_host", "provider"]
+
+NETMIKO_BACKEND = [
+    "cisco_aireos_ssh",
+    "cisco_asa_ssh",
+    "cisco_ios_ssh",
+]

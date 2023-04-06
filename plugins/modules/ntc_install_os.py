@@ -88,29 +88,29 @@ EXAMPLES = r"""
       host: "{{ inventory_hostname }}"
       username: "ntc-ansible"
       password: "ntc-ansible"
-      platform: "cisco_nxos"
-      connection: ssh
+      platform: "cisco_nxos_nxapi"
+      connection: local
 
 - name: "INSTALL OS ON NEXUS 9K"
-  ntc_install_os:
+  networktocode.netauto.ntc_install_os:
     ntc_host: n9k1
     system_image_file: n9000-dk9.6.1.2.I3.1.bin
     reboot: yes
 
 - name: "INSTALL OS ON NEXUS 3K WITH KICKSTART"
-  ntc_install_os:
+  networktocode.netauto.ntc_install_os:
     ntc_host: n3k1
     system_image_file: n3000-uk9.6.0.2.U6.5.bin
     kickstart_image_file: n3000-uk9-kickstart.6.0.2.U6.5.bin
     reboot: yes
 
 - name: "CONFIGURE BOOT OPTIONS ON CISCO 2800"
-  ntc_install_os:
+  networktocode.netauto.ntc_install_os:
     ntc_host: c2801
     system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
 
 - name: "INSTALL OS ON CISCO 2800"
-  ntc_install_os:
+  networktocode.netauto.ntc_install_os:
     provider: "{{ ios_provider }}"
     system_image_file: c2800nm-adventerprisek9_ivs_li-mz.151-3.T4.bin
     reboot: yes
@@ -208,7 +208,7 @@ def main():  # pylint: disable=too-many-statements,too-many-branches,too-many-lo
     )
 
     if not HAS_PYNTC:
-        module.fail_json(msg="pyntc Python library not found.")
+        module.fail_json(msg="pyntc is required for this module.")
     # TODO: Change to fail_json when deprecating older pyntc
     if not HAS_PYNTC_VERSION:
         module.warn("Support for pyntc version < 0.0.9 is being deprecated; please upgrade pyntc")

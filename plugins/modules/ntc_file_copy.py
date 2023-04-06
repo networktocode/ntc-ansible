@@ -79,8 +79,7 @@ EXAMPLES = r"""
       host: "{{ inventory_hostname }}"
       username: "ntc-ansible"
       password: "ntc-ansible"
-      platform: "cisco_nxos"
-      connection: ssh
+      platform: "cisco_nxos_nxapi"
 
 - name: copy file to network device
   networktocode.netauto.ntc_file_copy:
@@ -182,7 +181,7 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
             module.params[param] = module.params.get(param) or pvalue
 
     if not HAS_PYNTC:
-        module.fail_json(msg="pyntc Python library not found.")
+        module.fail_json(msg="pyntc is required for this module.")
 
     platform = module.params["platform"]
     host = module.params["host"]

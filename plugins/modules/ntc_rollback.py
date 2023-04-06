@@ -55,18 +55,18 @@ EXAMPLES = r"""
       host: "{{ inventory_hostname }}"
       username: "ntc-ansible"
       password: "ntc-ansible"
-      platform: "cisco_nxos"
-      connection: ssh
+      platform: "cisco_nxos_nxapi"
+      connection: local
 
-- ntc_rollback:
+- networktocode.netoauto.ntc_rollback:
     provider: "{{ nxos_provider }}"
     rollback_to: backup.cfg
 
-- ntc_rollback:
+- networktocode.netoauto.ntc_rollback:
     ntc_host: eos1
     checkpoint_file: backup.cfg
 
-- ntc_rollback:
+- networktocode.netoauto.ntc_rollback:
     ntc_host: eos1
     rollback_to: backup.cfg
 """
@@ -96,11 +96,11 @@ try:
 except ImportError:
     HAS_PYNTC = False
 
-# PLATFORM_NXAPI = "cisco_nxos_nxapi"
-# PLATFORM_IOS = "cisco_ios_ssh"
-# PLATFORM_EAPI = "arista_eos_eapi"
-# PLATFORM_JUNOS = "juniper_junos_netconf"
+UNSUPPORTED_PLATFORMS = [
+    "cisco_aireos_ssh",
+    "f5_tmos_icontrol"
 
+]
 
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
@@ -121,7 +121,7 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
     )
 
     if not HAS_PYNTC:
-        module.fail_json(msg="pyntc Python library not found.")
+        module.fail_json(msg="pyntc is required for this module.")
 
     provider = module.params["provider"] or {}
 
@@ -141,6 +141,9 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
     transport = module.params["transport"]
     port = module.params["port"]
     secret = module.params["secret"]
+
+    if platform in UNSUPPORTED_PLATFORMS:
+        module.fail_json(msg=f"ntc_rollback is not implemented for this platform type {platform}.")
 
     if ntc_host is not None:
         device = ntc_device_by_name(ntc_host, ntc_conf_file)

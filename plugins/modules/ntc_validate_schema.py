@@ -59,13 +59,13 @@ options:
 
 EXAMPLES = r"""
 - name: "VALIDATE THE SCHEMA"
-  ntc_validate_schema:
+  networktocode.netauto.ntc_validate_schema:
     schema: "{{ my_schema }}"
     data: "{{ hostvars[inventory_hostname] }}"
     scope: "{{ scope }}"
 
 - name: "VALIDATE THE SCHEMA EXPLICIT"
-  ntc_validate_schema:
+  networktocode.netauto.ntc_validate_schema:
     schema:
       vlans:
         type: "array"

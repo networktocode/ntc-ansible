@@ -67,14 +67,14 @@ EXAMPLES = r"""
       host: "{{ inventory_hostname }}"
       username: "ntc-ansible"
       password: "ntc-ansible"
-      platform: "cisco_nxos"
-      connection: ssh
+      platform: "cisco_nxos_nxapi"
+      connection: local
 
-- ntc_reboot:
+- networktocode.netauto.ntc_reboot:
     provider: "{{ nxos_provider }}"
     confirm: true
 
-- ntc_reboot:
+- networktocode.netauto.ntc_reboot:
     platform: cisco_nxos_nxapi
     confirm: true
     host: "{{ inventory_hostname }}"
@@ -82,19 +82,19 @@ EXAMPLES = r"""
     password: "{{ password }}"
     transport: http
 
-- ntc_reboot:
+- networktocode.netauto.ntc_reboot:
     ntc_host: n9k1
     ntc_conf_file: .ntc.conf
     confirm: true
 
-- ntc_reboot:
+- networktocode.netauto.ntc_reboot:
     platform: arista_eos_eapi
     confirm: true
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
 
-- ntc_reboot:
+- networktocode.netauto.ntc_reboot:
     platform: cisco_ios
     confirm: true
     timer: 5
@@ -193,7 +193,7 @@ def main():  # pylint: disable=too-many-arguments,too-many-branches,too-many-sta
     )
 
     if not HAS_PYNTC:
-        module.fail_json(msg="pyntc Python library not found.")
+        module.fail_json(msg="pyntc is required for this module.")
 
     provider = module.params["provider"] or {}
 
@@ -244,7 +244,7 @@ def main():  # pylint: disable=too-many-arguments,too-many-branches,too-many-sta
     supported_timer_platforms = [PLATFORM_IOS, PLATFORM_JUNOS]
 
     if timer is not None and device.device_type not in supported_timer_platforms:
-        module.fail_json(msg="Timer parameter not supported on platform %s." % platform)
+        module.fail_json(msg=f"Timer parameter not supported on platform {platform}.")
 
     argument_check = {"host": host, "username": username, "platform": platform, "password": password}
 

@@ -70,19 +70,19 @@ EXAMPLES = r"""
       host: "{{ inventory_hostname }}"
       username: "ntc-ansible"
       password: "ntc-ansible"
-      platform: "cisco_nxos"
-      connection: ssh
+      platform: "cisco_nxos_nxapi"
+      connection: local
 
-- ntc_save_config:
+- networktocode.netauto.ntc_save_config:
     platform: cisco_nxos_nxapi
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
 
-- ntc_save_config:
+- networktocode.netauto.ntc_save_config:
     ntc_host: n9k1
 
-- ntc_save_config:
+- networktocode.netauto.ntc_save_config:
     platform: arista_eos_eapi
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
@@ -92,7 +92,7 @@ EXAMPLES = r"""
 
 # You can get the timestamp by setting get_facts to True, then you can append it to your filename.
 
-- ntc_save_config:
+- networktocode.netauto.ntc_save_config:
     provider: "{{ nxos_provider }}"
     local_file: config_{{ inventory_hostname }}_{{ ansible_date_time.date | replace('-','_') }}.cfg
 """
@@ -119,6 +119,7 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.networktocode.netauto.plugins.module_utils.args_common import (
     CONNECTION_ARGUMENT_SPEC,
     MUTUALLY_EXCLUSIVE,
+    NETMIKO_BACKEND,
     REQUIRED_ONE_OF,
 )
 
@@ -127,12 +128,6 @@ try:
     from pyntc import ntc_device, ntc_device_by_name
 except ImportError:
     HAS_PYNTC = False
-
-# PLATFORM_NXAPI = "cisco_nxos_nxapi"
-# PLATFORM_IOS = "cisco_ios_ssh"
-# PLATFORM_EAPI = "arista_eos_eapi"
-# PLATFORM_JUNOS = "juniper_junos_netconf"
-
 
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
@@ -154,7 +149,7 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
     )
 
     if not HAS_PYNTC:
-        module.fail_json(msg="pyntc Python library not found.")
+        module.fail_json(msg="pyntc is required for this module.")
 
     provider = module.params["provider"] or {}
 
@@ -187,10 +182,11 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
             kwargs["port"] = port
         if secret is not None:
             kwargs["secret"] = secret
-        if global_delay_factor is not None:
-            kwargs["global_delay_factor"] = global_delay_factor
-        if delay_factor is not None:
-            kwargs["delay_factor"] = delay_factor
+        if platform in NETMIKO_BACKEND:
+            if global_delay_factor is not None:
+                kwargs["global_delay_factor"] = global_delay_factor
+            if delay_factor is not None:
+                kwargs["delay_factor"] = delay_factor
 
         device_type = platform
         device = ntc_device(device_type, host, username, password, **kwargs)

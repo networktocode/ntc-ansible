@@ -7,18 +7,18 @@ license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = "^3.7.2"
-pynxos = "^0.0.5"
-pyntc = "^0.20.1"
-netmiko = "^3.1"
-ntc-templates = "^3.0.0"
+# pynxos = "^0.0.5"
+pyntc = { git = "https://github.com/networktocode/pyntc.git", branch="develop"}
+# netmiko = "^3.1"
+# ntc-templates = "^3.0.0"
 lxml = "^4.9.0"
-textfsm = "^1.1.2"
-jsonschema = "^4.6.1"
+# textfsm = "^1.1.2"
+jsonschema = "^4.17.3"
 ansible = "^2.9"
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"
-flake8 = "^4.0.1"
+flake8 = "*"
 bandit = "^1.7.4"
 yamllint = "^1.26.3"
 invoke = "^1.7.1"

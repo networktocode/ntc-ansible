@@ -44,12 +44,12 @@ EXAMPLES = r"""
       host: "{{ inventory_hostname }}"
       username: "ntc-ansible"
       password: "ntc-ansible"
-      platform: "cisco_nxos"
-      connection: ssh
+      platform: "cisco_nxos_nxapi"
+      connection: local
 
 - name: Write vlan data
   networktocode.netauto.ntc_config_command:
-    connection: ssh
+    connection: local
     platform: cisco_nxos
     commands:
       - vlan 10
@@ -62,7 +62,7 @@ EXAMPLES = r"""
 
 - name: Write config from file
   networktocode.netauto.ntc_config_command:
-    connection: ssh
+    connection: local
     platform: cisco_nxos
     commands_file: "dynamically_created_config.txt"
     host: "{{ inventory_hostname }}"
@@ -90,6 +90,7 @@ from ansible_collections.networktocode.netauto.plugins.module_utils.args_common 
 try:
     HAS_PYNTC = True
     from pyntc import ntc_device, ntc_device_by_name
+    from pyntc.errors import CommandListError
 except ImportError:
     HAS_PYNTC = False
 
@@ -107,7 +108,7 @@ def error_params(platform, command_output):
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
     base_argument_spec = dict(
-        commands=dict(required=True, type="list"),
+        commands=dict(required=False, type="list"),
         commands_file=dict(required=False, default=None, type="str"),
     )
     argument_spec = base_argument_spec
@@ -122,7 +123,20 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
     )
 
     if not HAS_PYNTC:
-        module.fail_json(msg="pyntc Python library not found.")
+        module.fail_json(msg="pyntc is required for this module.")
+
+    if not any([module.params["commands"], module.params["commands_file"]]):
+        module.fail_json(msg="One of `commands` or `commands_file` argument is required.")
+
+    if module.params["commands"] and module.params["commands_file"]:
+        module.fail_json(msg="The use of both `commands` and `commands_file` in the same task is not currently supported.")
+    elif module.params["commands_file"]:
+        with open(module.params["commands_file"], "r") as cmds:
+            commands = [cmd.rstrip() for cmd in cmds]
+    elif module.params["commands"] :
+        commands = list(module.params["commands"])
+    else:
+        module.fail_json(msg="The combination of params used is not supported.")
 
     provider = module.params["provider"] or {}
 
@@ -163,8 +177,23 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
         device = ntc_device(device_type, host, username, password, **kwargs)
 
     device.open()
-    # device.config()
-    device.close()
+    changed = False
+    failed = False
+    # Currently module is NOT idompotent.
+    try:
+        result = device.config(commands)
+        changed = True
+    except CommandListError as err:
+        changed = False
+        module.fail_json(msg=err)
+    finally:
+        device.close()
+
+    module.exit_json(
+        changed=changed,
+        failed=failed,
+        results=result,
+    )
 
 
 if __name__ == "__main__":

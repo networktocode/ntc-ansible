@@ -41,12 +41,12 @@ EXAMPLES = r"""
       host: "{{ inventory_hostname }}"
       username: "ntc-ansible"
       password: "ntc-ansible"
-      platform: "cisco_nxos"
-      connection: ssh
+      platform: "cisco_nxos_nxapi"
+      connection: local
 
 - name: Get Vlans
   networktocode.netauto.ntc_show_command:
-    connection: ssh
+    connection: local
     platform: cisco_nxos
     commands:
       - show vlans
@@ -59,6 +59,11 @@ EXAMPLES = r"""
   networktocode.netauto.ntc_show_command:
     commands:
       - show vlans
+    provider: "{{ nxos_provider }}"
+
+- name: Get From a File
+  networktocode.netauto.ntc_show_command:
+    commands_file: "list_of_cmds.txt"
     provider: "{{ nxos_provider }}"
 """
 
@@ -79,7 +84,7 @@ except ImportError:
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
     base_argument_spec = dict(
-        commands=dict(required=True, type="list"),
+        commands=dict(required=False, type="list"),
         commands_file=dict(required=False, default=None, type="str"),
     )
     argument_spec = base_argument_spec
@@ -94,7 +99,20 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
     )
 
     if not HAS_PYNTC:
-        module.fail_json(msg="pyntc Python library not found.")
+        module.fail_json(msg="pyntc is required for this module.")
+
+    if not any([module.params["commands"], module.params["commands_file"]]):
+        module.fail_json(msg="One of `commands` or `commands_file` argument is required.")
+
+    if module.params["commands"] and module.params["commands_file"]:
+        module.fail_json(msg="The use of both `commands` and `commands_file` in the same task is not currently supported.")
+    elif module.params["commands_file"]:
+        with open(module.params["commands_file"], "r") as cmds:
+            commands = [cmd.rstrip() for cmd in cmds]
+    elif module.params["commands"] :
+        commands = module.params["commands"]
+    else:
+        module.fail_json(msg="The combination of params used is not supported.")
 
     provider = module.params["provider"] or {}
 
@@ -135,9 +153,7 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
         device = ntc_device(device_type, host, username, password, **kwargs)
 
     device.open()
-    result = device.show_list(["show version"])
-
-    # device.show()
+    result = device.show(commands)
     device.close()
 
     module.exit_json(
