@@ -129,6 +129,7 @@ try:
 except ImportError:
     HAS_PYNTC = False
 
+
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""
     base_argument_spec = dict(

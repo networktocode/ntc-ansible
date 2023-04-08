@@ -96,11 +96,8 @@ try:
 except ImportError:
     HAS_PYNTC = False
 
-UNSUPPORTED_PLATFORMS = [
-    "cisco_aireos_ssh",
-    "f5_tmos_icontrol"
+UNSUPPORTED_PLATFORMS = ["cisco_aireos_ssh", "f5_tmos_icontrol"]
 
-]
 
 def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Main execution."""

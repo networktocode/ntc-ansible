@@ -1,0 +1,7 @@
+ancestor: null
+releases:
+  1.0.0:
+    changes:
+      release_summary: This is the first official release of an Ansible Collection
+        for what was previously just a repo of ansible things called ntc-ansible.
+    release_date: '2023-04-07'

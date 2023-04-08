@@ -8,10 +8,10 @@ license = "Apache 2.0"
 [tool.poetry.dependencies]
 python = "^3.7.2"
 # pynxos = "^0.0.5"
-pyntc = { git = "https://github.com/networktocode/pyntc.git", branch="develop"}
+pyntc = "^1.0.0"
 # netmiko = "^3.1"
 # ntc-templates = "^3.0.0"
-lxml = "^4.9.0"
+# lxml = "^4.9.0"
 # textfsm = "^1.1.2"
 jsonschema = "^4.17.3"
 ansible = "^2.9"

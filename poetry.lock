@@ -493,7 +493,7 @@ python-versions = "*"
 
 [[package]]
 name = "netmiko"
-version = "4.1.1"
+version = "4.1.2"
 description = "Multi-vendor library to simplify legacy CLI connections to network devices"
 category = "main"
 optional = false
@@ -507,7 +507,7 @@ pyyaml = ">=5.3"
 scp = ">=0.13.3"
 setuptools = ">=38.4.0"
 tenacity = "*"
-textfsm = ">=1.1.2"
+textfsm = "1.1.2"
 
 [[package]]
 name = "ntc-templates"
@@ -708,28 +708,21 @@ tests = ["hypothesis (>=3.27.0)", "pytest (>=3.2.1,!=3.3.0)"]
 
 [[package]]
 name = "pyntc"
-version = "1.0.0a0"
+version = "1.0.0"
 description = "SDK to simplify common workflows for Network Devices."
 category = "main"
 optional = false
-python-versions = "^3.7"
-develop = false
+python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
-f5-sdk = "^3.0.21"
+f5-sdk = ">=3.0.21,<4.0.0"
 importlib-metadata = "4.13.0"
-junos-eznc = "^2.6"
-netmiko = "^4.0"
-pyeapi = "^0.8.4"
-pynxos = "^0.0.5"
-requests = "^2.28"
-scp = "^0.14"
-
-[package.source]
-type = "git"
-url = "https://github.com/networktocode/pyntc.git"
-reference = "develop"
-resolved_reference = "5ca390678dc9119af3ceca9db9290b8507d322d3"
+junos-eznc = ">=2.6,<3.0"
+netmiko = ">=4.0,<5.0"
+pyeapi = ">=0.8.4,<0.9.0"
+pynxos = ">=0.0.5,<0.0.6"
+requests = ">=2.28,<3.0"
+scp = ">=0.14,<0.15"
 
 [[package]]
 name = "pynxos"
@@ -910,7 +903,7 @@ doc = ["reno", "sphinx", "tornado (>=4.5)"]
 
 [[package]]
 name = "textfsm"
-version = "1.1.3"
+version = "1.1.2"
 description = "Python module for parsing semi-structured text into python tables."
 category = "main"
 optional = false
@@ -1043,7 +1036,7 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.2"
-content-hash = "220017b491cf3f3191140a903112ec3e4b41f2d075e3bd730570964e68522eb6"
+content-hash = "689b2c39c5313aaceb09a249c450639d14cb22803cbd56376a6761ea64c9a7f0"
 
 [metadata.files]
 ansible = [
@@ -1535,8 +1528,8 @@ netaddr = [
     {file = "netaddr-0.8.0.tar.gz", hash = "sha256:d6cc57c7a07b1d9d2e917aa8b36ae8ce61c35ba3fcd1b83ca31c5a0ee2b5a243"},
 ]
 netmiko = [
-    {file = "netmiko-4.1.1-py3-none-any.whl", hash = "sha256:a01e65fbed9cefc460e336ea9bc28da68e1f4c215d9288a94080e200133e5a41"},
-    {file = "netmiko-4.1.1.tar.gz", hash = "sha256:6529b11da166d3009aac1133a7eedb2fbaf6110c519bbb4b4f48f865d8daac9a"},
+    {file = "netmiko-4.1.2-py3-none-any.whl", hash = "sha256:ee1e88ecbd07f619b0bc1e90648f82a64a0adee5968c3068621bbdadbfec5c03"},
+    {file = "netmiko-4.1.2.tar.gz", hash = "sha256:f5ede2a28670d3dfd3470061468665f80f9b4906ed20e6b0fb4d9e1c9be67afc"},
 ]
 ntc-templates = [
     {file = "ntc_templates-3.3.0-py3-none-any.whl", hash = "sha256:b0941824212ae50668cf9b882e848512d09487128a491909eab9afc30f808a85"},
@@ -1609,7 +1602,10 @@ pynacl = [
     {file = "PyNaCl-1.5.0-cp36-abi3-win_amd64.whl", hash = "sha256:20f42270d27e1b6a29f54032090b972d97f0a1b0948cc52392041ef7831fee93"},
     {file = "PyNaCl-1.5.0.tar.gz", hash = "sha256:8ac7448f09ab85811607bdd21ec2464495ac8b7c66d146bf545b0f08fb9220ba"},
 ]
-pyntc = []
+pyntc = [
+    {file = "pyntc-1.0.0-py3-none-any.whl", hash = "sha256:88d586093284855bc6843f76758a156965c43f81314d6c8ecc83305b41804b1a"},
+    {file = "pyntc-1.0.0.tar.gz", hash = "sha256:36b7dfb4c9aab780c015aef6f75e63b8bf98e796335655781b0b2d3c7638ca69"},
+]
 pynxos = [
     {file = "pynxos-0.0.5.tar.gz", hash = "sha256:ad148aec468b715b4a4c86802997cbf2b54e67e3709b043cf79f65b420143168"},
 ]
@@ -1733,8 +1729,8 @@ tenacity = [
     {file = "tenacity-8.2.2.tar.gz", hash = "sha256:43af037822bd0029025877f3b2d97cc4d7bb0c2991000a3d59d71517c5c969e0"},
 ]
 textfsm = [
-    {file = "textfsm-1.1.3-py2.py3-none-any.whl", hash = "sha256:dcbeebc6a6137bed561c71a56344d752e6dbc04ae5ea309252cb70fb97ccc9cd"},
-    {file = "textfsm-1.1.3.tar.gz", hash = "sha256:577ef278a9237f5341ae9b682947cefa4a2c1b24dbe486f94f2c95addc6504b5"},
+    {file = "textfsm-1.1.2-py2.py3-none-any.whl", hash = "sha256:f3d4e9bd4344935a08e6844e53d6220e2e4fb7e465bee51fa909152ed6bab406"},
+    {file = "textfsm-1.1.2.tar.gz", hash = "sha256:85a450b441aff04b1cac726bdb36f35534a5b196cca08c8bc14fddd879c4255c"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},

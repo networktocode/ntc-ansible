@@ -129,11 +129,13 @@ def main():  # pylint: disable=too-many-locals,too-many-branches,too-many-statem
         module.fail_json(msg="One of `commands` or `commands_file` argument is required.")
 
     if module.params["commands"] and module.params["commands_file"]:
-        module.fail_json(msg="The use of both `commands` and `commands_file` in the same task is not currently supported.")
+        module.fail_json(
+            msg="The use of both `commands` and `commands_file` in the same task is not currently supported."
+        )
     elif module.params["commands_file"]:
         with open(module.params["commands_file"], "r") as cmds:
             commands = [cmd.rstrip() for cmd in cmds]
-    elif module.params["commands"] :
+    elif module.params["commands"]:
         commands = list(module.params["commands"])
     else:
         module.fail_json(msg="The combination of params used is not supported.")

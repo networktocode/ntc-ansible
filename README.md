@@ -1,7 +1,7 @@
 
 # Multi-vendor Ansible Collection for Network Automation
 
-Multi-vendor collection of Ansible Modules to automate repeateable tasks and data gathering.
+Multi-vendor collection of Ansible Modules to automate repeateable tasks and data gathering. As of release 1.0.0 this collection is used pyntc v1.0.0 for the backend logic.
 
 ## Modules
 
@@ -10,13 +10,9 @@ Multi-vendor collection of Ansible Modules to automate repeateable tasks and dat
   * **ntc_save_config** - saves the running config and optionally copies it to the Ansible control host for an offline backup.  Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
   * **ntc_file_copy** - copies a file from the Ansible control host to a network device. Uses SSH for IOS, NX-API for Nexus, and eAPI for Arista.
   * **ntc_reboot** - reboots a network device. Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
-  * **ntc_get_facts** - gathers facts from a network device.  Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
   * **ntc_rollback** - performs two major functions.  (1) Creates a checkpoint file or backup running config on box. (2) Rolls back to the previously created checkpoint/backup config.  Use case is to create the checkpoint/backup as the first task in a playbook and then rollback to it _if_ needed using block/rescue, i.e. try/except in Ansible. Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista.
   * **ntc_install_os** - installs a new operating system or just sets boot options.  Depends on platform.  Does not issue a "reload" command, but the device may perform an automatic reboot.  Common workflow is to use ntc_file_copy, ntc_install_os, and then ntc_reboot (if needed) for upgrades.  Uses SSH/netmiko for IOS, NX-API for Nexus, and eAPI for Arista. For Cisco stack switches pyntc leverages `install_mode` flag to install with the install command. This has an optional parameter of `install_mode` available on install_os.
 
-## Examples
-
-See [Examples](./docs/examples/examples.md/examples.md)
 
 ## Background
 
