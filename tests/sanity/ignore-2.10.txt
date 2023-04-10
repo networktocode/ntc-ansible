@@ -1,0 +1,33 @@
+tests/unit/filter/test_version.py compile-2.6!skip # Python 2.6 is not supported on the controller
+tasks.py compile-2.6!skip # Python 2.6 is not supported on the controller
+tests/unit/filter/test_version.py compile-2.7!skip # Python 2.7 is not supported on the controller
+tasks.py compile-2.7!skip # Python 2.7 is not supported on the controller
+tests/unit/filter/test_version.py compile-3.5!skip # Python 3.5 is not supported on the controller
+tasks.py compile-3.5!skip # Python 3.5 is not supported on the controller
+tasks.py future-import-boilerplate
+tasks.py metaclass-boilerplate
+tests/unit/filter/test_version.py future-import-boilerplate
+tests/unit/filter/test_version.py metaclass-boilerplate
+plugins/modules/ntc_file_copy.py pylint:bare-except
+plugins/modules/ntc_install_os.py pylint:bare-except
+plugins/modules/ntc_reboot.py pylint:bare-except
+plugins/modules/ntc_config_command.py validate-modules:missing-gplv3-license
+plugins/modules/ntc_file_copy.py validate-modules:missing-gplv3-license
+plugins/modules/ntc_install_os.py validate-modules:missing-gplv3-license
+plugins/modules/ntc_rollback.py validate-modules:missing-gplv3-license
+plugins/modules/ntc_reboot.py validate-modules:missing-gplv3-license
+plugins/modules/ntc_save_config.py validate-modules:missing-gplv3-license
+plugins/modules/ntc_show_command.py validate-modules:missing-gplv3-license
+plugins/modules/ntc_validate_schema.py validate-modules:missing-gplv3-license
+.dockerignore shebang!skip
+Dockerfile shebang!skip
+CODE_OF_CONDUCT shebang!skip
+plugins/doc_fragments/netauto.py shebang!skip
+plugins/module_utils/args_common.py shebang!skip
+plugins/modules/ntc_config_command.py shebang!skip
+plugins/modules/ntc_show_command.py shebang!skip
+release.md shebang!skip
+tests/sanity/ignore-2.9.txt shebang!skip
+tests/sanity/ignore-2.10.txt shebang!skip
+tests/sanity/ignore-2.11.txt shebang!skip
+tests/sanity/ignore-2.12.txt shebang!skip

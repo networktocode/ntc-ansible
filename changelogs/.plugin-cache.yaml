@@ -1,0 +1,57 @@
+objects: {}
+plugins:
+  become: {}
+  cache: {}
+  callback: {}
+  cliconf: {}
+  connection: {}
+  httpapi: {}
+  inventory: {}
+  lookup: {}
+  module:
+    ntc_config_command:
+      description: Writes config data to devices
+      name: ntc_config_command
+      namespace: ''
+      version_added: null
+    ntc_file_copy:
+      description: Copy a file to a remote network device over SCP
+      name: ntc_file_copy
+      namespace: ''
+      version_added: 1.9.2
+    ntc_install_os:
+      description: Install an operating system by setting the boot options like boot
+        image and kickstart image
+      name: ntc_install_os
+      namespace: ''
+      version_added: 1.9.2
+    ntc_reboot:
+      description: Reboot a network device
+      name: ntc_reboot
+      namespace: ''
+      version_added: 1.9.2
+    ntc_rollback:
+      description: Set a checkpoint or rollback to a checkpoint
+      name: ntc_rollback
+      namespace: ''
+      version_added: null
+    ntc_save_config:
+      description: Save the running config locally and/or remotely
+      name: ntc_save_config
+      namespace: ''
+      version_added: 1.9.2
+    ntc_show_command:
+      description: Gets output from show commands and tries to return structured data
+      name: ntc_show_command
+      namespace: ''
+      version_added: null
+    ntc_validate_schema:
+      description: Validate schema with json schema
+      name: ntc_validate_schema
+      namespace: ''
+      version_added: '2.6'
+  netconf: {}
+  shell: {}
+  strategy: {}
+  vars: {}
+version: 1.0.0

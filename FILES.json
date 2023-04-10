@@ -1,0 +1,397 @@
+{
+ "files": [
+  {
+   "name": ".",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": ".github",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": ".github/ISSUE_TEMPLATE",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": ".github/ISSUE_TEMPLATE/new-issue.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "026de3b974ff83bff8867c8977df252a25e37da47ed5bce029794a70c936c0fe",
+   "format": 1
+  },
+  {
+   "name": ".github/CODEOWNERS",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d734f38e2296eb7427284a82c4ea0035e58a5e45dd0f76d2fb7790268dd8c750",
+   "format": 1
+  },
+  {
+   "name": "tasks.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c2b45164fcf20492240eec4082872d7b3e4e99a4d919153eed35355ababb682b",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3e6fdeccad25e529a3d60b5ac63a797335c3cc5cfbe2e701f5d8a9e72331fa05",
+   "format": 1
+  },
+  {
+   "name": ".bandit.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9c0a5fa84cd1c93caa92476cb27b2f7c68de65b54f65288cb00292981f3c51d7",
+   "format": 1
+  },
+  {
+   "name": "CHANGELOG.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "264d6cf2e39fb4206079d0e96d76419c49a8443bf16f05b3d7e6d413b3e4280a",
+   "format": 1
+  },
+  {
+   "name": ".flake8",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e28f5c1f1168cf91ee6918deaee876334efbab269b2b90ec41621fcfeeba0032",
+   "format": 1
+  },
+  {
+   "name": "hacking",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "hacking/local-test.sh",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9423aaf45433f492de722eb940015b5f82de92c78a6e90a3f34fc10b1ca8f13e",
+   "format": 1
+  },
+  {
+   "name": "hacking/build.sh",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d8501e71451e403f90fd43e7cbfe774a7491c0a804a029caf4095d5bf78c44a4",
+   "format": 1
+  },
+  {
+   "name": "hacking/black.sh",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "31b38a6d54cf7fd233d647760c6f9b695bde61762b09b0aba5899ea746d14248",
+   "format": 1
+  },
+  {
+   "name": "hacking/packages",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": ".gitignore",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f8c1d996df562d9723b7a9414016b206bfc02b60c93364bf6e6725a675ffe5f1",
+   "format": 1
+  },
+  {
+   "name": "Dockerfile",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "2d9d11c2af69d6236332e8eea36bc770a82335d2f26268410e1a0b4381c71d89",
+   "format": 1
+  },
+  {
+   "name": "requirements.txt",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7c17516ecc58609e63971c57fc431de3418f3129cfd05e5bd8351b73e2c21427",
+   "format": 1
+  },
+  {
+   "name": "plugins",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/filter",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/filter/split.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "1d4a22a5f87355bb60efe4d92d72328e15548382bc8f608143ccadd4a5f34dce",
+   "format": 1
+  },
+  {
+   "name": "plugins/filter/ntc_parse.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "98ea58f3ac14d54df57257469a8de149408a00fccf011b5fbcd592c7bd2d027e",
+   "format": 1
+  },
+  {
+   "name": "plugins/README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "23e9939164cad964c2338b8059e4d3def72eef9523e32594503efd50960fcae4",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/ntc_save_config.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "53ee933f3db755c356b1e86b6498894817e471f0c3a2071d9cf5c376f8050c94",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/ntc_config_command.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "2eb9c575ae228fc7ac9e82ef939ddc5982da68c76211a6156c2ccac745192140",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/ntc_validate_schema.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3b2ad068a0796e7128980b5784a805e8dd9ba7557349a8496f8a2fabd0ca369c",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/ntc_reboot.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "fa5613dacc4e4c2a91a639636f4ff903449994f0391717170275ed953aec7e57",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/ntc_file_copy.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5a7bd5222399aeba09c539cd1aa16397db8d12deb38bcefa96317d2de1ac65b0",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/ntc_get_facts.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "8ef471a8e0f2683bbec7ed634c0d8015d7c6a36df12374eeee64a33d4928494e",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/ntc_show_command.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "9e3454c14168dfc29331149a31dfb83a544138f00a25e655e1ae5efc95c05899",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/ntc_rollback.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "c4eee1708b4535452cb1a98b3ecb035d9c7be50aef752d015e3b389f96cbe321",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/ntc_install_os.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "23dce2b8061cbbb19a5086088b2c1d43f32eb88a71bae3d5cb3350d939834c96",
+   "format": 1
+  },
+  {
+   "name": "meta",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "meta/runtime.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "b5d9b146aa07048432c93824a93c4dba79f95dcb91effa4b205bdaa8fdb8e2fb",
+   "format": 1
+  },
+  {
+   "name": "docs",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "docs/examples",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "docs/examples/group_vars",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "docs/examples/group_vars/cisco_ios.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "64f63692e8db9ffd24be1bbe6d69667164b2f20f40c68299c241e971867327ba",
+   "format": 1
+  },
+  {
+   "name": "docs/examples/group_vars/all.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "6fc7f0a032b641aec40e819d4a1ec315a5f609546f13288d8291ed7e8eb57dd5",
+   "format": 1
+  },
+  {
+   "name": "docs/examples/group_vars/hp_comware.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "96a46402030ccd909c5919c1269c05d8011cbf68f21b4469cd59e566b6fad24b",
+   "format": 1
+  },
+  {
+   "name": "docs/examples/group_vars/cisco_nxos.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "19fea60865fe9ab0daee08f0f70e971db50766a759c72f2ce09356657bc79cf9",
+   "format": 1
+  },
+  {
+   "name": "docs/examples/site.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "3bf810d587d6e77a63d884ea76d5ff7b3b7988080f84694d5e8e040c19cbee1e",
+   "format": 1
+  },
+  {
+   "name": "docs/examples/test_ntc_parse.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bbc750dd7b58adcac8d8aebc70dd6d484ed79f145ddd2e56069d0e9894df7a68",
+   "format": 1
+  },
+  {
+   "name": "docs/examples/examples.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "2567af6f00d72ab453e23eed43a7819173e8d6cbbfd1d604dadae601addd5c3d",
+   "format": 1
+  },
+  {
+   "name": "docs/examples/test-write.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "bbc4eab8ce346e8ee13f794fe563b391b14161a68f259e2b7d03f7fc926c1185",
+   "format": 1
+  },
+  {
+   "name": "tests",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/units",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/units/filter",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/units/filter/test_version.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "f47d7e0bd94728f79d1f001b6d2720f7f103043909ed5e7874025771d1731442",
+   "format": 1
+  },
+  {
+   "name": "tests/units/modules",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/units/modules/.gitkeep",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "format": 1
+  },
+  {
+   "name": "tests/sanity",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "tests/sanity/ignore-2.10.txt",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "d3202613db8f29d46ac16863838580fbc47cf4a40296eae1b13f4956ed44b20f",
+   "format": 1
+  },
+  {
+   "name": ".yamllint.yml",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "195225311b5c26153d7da2ddfe69b96df18a2f1e25532f2c977c217b4a628de3",
+   "format": 1
+  },
+  {
+   "name": "LICENSE",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "5247d627c7cebca8061461fbc00104e27f1fbbd356cfec260147a6dac88a7dd4",
+   "format": 1
+  }
+ ],
+ "format": 1
+}

@@ -1,19 +1,96 @@
+[tool.poetry]
+name = "ntc-ansible"
+version = "1.0.0"
+description = "Multi-vendor Ansible Collection for Network Automation"
+authors = ["Network to Code <opensource@networktocode.com>"]
+license = "Apache 2.0"
+
+[tool.poetry.dependencies]
+python = "^3.7.2"
+pyntc = "^1.0.0"
+jsonschema = "^4.17.3"
+ansible = "^2.9"
+
+[tool.poetry.dev-dependencies]
+black = "^22.6.0"
+flake8 = "*"
+bandit = "^1.7.4"
+yamllint = "^1.26.3"
+invoke = "^1.7.1"
+toml = "^0.10.2"
+pydocstyle = "^6.1.1"
+pylint = "^2.14.4"
+voluptuous = "^0.13.1"
+pytest = "^7.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
-line-length = 100
-py36 = true
+line-length = 120
+target-version = ['py37']
 include = '\.pyi?$'
 exclude = '''
-/(
-  \.git
-| \.mypy_cache
-| \.tox
-| \.venv
-| _build
-| buck-out
-| build
-| dist
-# The following are specific to Black, you probably don't want those.
-| blib2to3
-| tests/data
-)/
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | settings.py     # This is where you define files that should not be stylized by black
+                     # the root of the project
+)
 '''
+[tool.pylint.basic]
+# No docstrings required for private methods (Pylint default), or for test_ functions, or for inner Meta classes.
+no-docstring-rgx="^(_|test_|Meta$)"
+good-names="i,ip,j,k,ex,Run,_"
+
+[tool.pylint.messages_control]
+# Line length is enforced by Black, so pylint doesn't need to check it.
+# Pylint and Black disagree about how to format multi-line arrays; Black wins.
+disable = """,
+    line-too-long,
+    consider-iterating-dictionary,
+    too-few-public-methods,
+    invalid-name,
+    consider-using-f-string,
+    bare-except,
+    duplicate-code,
+    missing-module-docstring,
+    no-value-for-parameter,
+    wrong-import-position,
+    import-error
+    """
+
+[tool.pylint.miscellaneous]
+# Don't flag TODO as a failure, let us commit with things that still need to be done in the code
+notes = """,
+    FIXME,
+    XXX,
+    """
+
+[tool.pytest.ini_options]
+python_paths = "./"
+testpaths = "tests/"
+addopts = "-vv --doctest-modules -p no:warnings --ignore-glob='*mock*'"
+
+[tool.pydocstyle]
+convention = "google"
+inherit = false
+match = "(?!__init__).*\\.py"
+match-dir = "(?!tests|migrations|development)[^\\.].*"
+# D212 is enabled by default in google convention, and complains if we have a docstring like:
+# """
+# My docstring is on the line after the opening quotes instead of on the same line as them.
+# """
+# We've discussed and concluded that we consider this to be a valid style choice.
+add_ignore = "D212,D100"
