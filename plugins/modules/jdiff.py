@@ -43,7 +43,7 @@ options:
 
 EXAMPLES = """
 - name: "EXACT_MATCH - VALIDATE INTERFACE STATUS"
-  jdiff:
+  networktocode.netauto.jdiff:
     check_type: "exact_match"
     evaluate_args:
       reference_data: "{{ ref_data }}"
@@ -80,7 +80,7 @@ EXAMPLES = """
       }
 
 - name: "TOLERANCE - VALIDATE PREFIXES ARE WITH 10% TOLERANCE"
-  jdiff:
+  networktocode.netauto.jdiff:
     check_type: "tolerance"
     evaluate_args:
       reference_data: "{{ ref_data }}"
@@ -113,7 +113,7 @@ EXAMPLES = """
       }
 
 - name: "PARAMETER - VALIDATE PEER TYPE"
-  jdiff:
+  networktocode.netauto.jdiff:
     check_type: "parameter_match"
     evaluate_args:
       value_to_compare: "{{ data_to_compare }}"
@@ -138,7 +138,7 @@ EXAMPLES = """
       }
 
 - name: "REGEX - VALIDATE MAC FORMAT"
-  jdiff:
+  networktocode.netauto.jdiff:
     check_type: "regex"
     evaluate_args:
       value_to_compare: "{{ data_to_compare }}"
@@ -162,7 +162,7 @@ EXAMPLES = """
       }
 
 - name: "OPERATOR - VALIDATE RX LEVEL WITHIN RANGE"
-  jdiff:
+  networktocode.netauto.jdiff:
     check_type: "operator"
     evaluate_args:
       value_to_compare: "{{ data_to_compare }}"
