@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 # Copyright: (c) 2020, Network to Code (@networktocode) <info@networktocode.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-"""Ansible plugin definition for jdiff action plugin."""
+"""Ansible plugin definition for netcompare action plugin."""
 from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
-
+# TODO update `version_added` when ready for release.
 DOCUMENTATION = """
 ---
 module: netcompare
