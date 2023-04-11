@@ -12,7 +12,7 @@ DOCUMENTATION = """
 ---
 module: jdiff
 short_description: Ansible module for jdiff.
-version_added: '2.0.0'
+version_added: '1.1.0'
 description:
     - Ansible module wrapper on jdiff python library.
 requirements:
