@@ -1,0 +1,135 @@
+---
+name: "CI"
+on: # yamllint disable
+  push:
+    branches:
+      - "develop"
+      - "main"
+  pull_request:
+  release:
+    types: [published]
+  schedule:
+    - cron: "20 3 * * 1"
+
+jobs:
+  lint:
+    runs-on: "ubuntu-20.04"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v2"
+      - name: "Install invoke"
+        run: "pip install -U pip && pip install invoke"
+      - name: "Linting"
+        run: "invoke lint"
+  test:
+    runs-on: "ubuntu-20.04"
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.7", "3.8", "3.9"]
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v2"
+      - name: "Install invoke"
+        run: "pip install -U pip && pip install invoke"
+      - name: "Tests"
+        run: "invoke unit"
+    needs:
+      - "lint"
+  integration:
+    runs-on: "ubuntu-20.04"
+    strategy:
+      fail-fast: false
+      matrix:
+        # Need to check what is needed for the integration step
+        # python-version: ["3.7", "3.8", "3.9"]
+        # ansible-release: ["base", "core"]
+        include:
+          - python-version: "3.8"
+            ansible-release: "base"  # Ansible 2.10
+          - python-version: "3.8"
+            ansible-release: "2.11"
+          - python-version: "3.8"
+            ansible-release: "core"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v2"
+      - name: "Install invoke"
+        run: "pip install -U pip && pip install invoke"
+      - name: "Install poetry"
+        if: "${{ matrix.ansible-release == '2.11' }}"
+        run: "pip install poetry==1.4.2"
+      - name: "Remove ansible-base"
+        if: "${{ matrix.ansible-release == '2.11' }}"
+        run: "poetry remove ansible-base"
+      - name: "Add ansible-core"
+        if: "${{ matrix.ansible-release == '2.11' }}"
+        run: "poetry add ansible-core@~2.11"
+      - name: "Install poetry"
+        if: "${{ matrix.ansible-release == '2.9' }}"
+        run: "pip install poetry==1.4.2"
+      - name: "Remove ansible-base"
+        if: "${{ matrix.ansible-release == '2.9' }}"
+        run: "poetry remove ansible-base"
+      - name: "Add Ansible 2.9"
+        if: "${{ matrix.ansible-release == '2.9' }}"
+        run: "poetry add ansible@~2.9"
+      - name: "Install poetry"
+        if: "${{ matrix.ansible-release == '2.12' }}"
+        run: "pip install poetry==1.4.2"
+      - name: "Remove ansible-base"
+        if: "${{ matrix.ansible-release == '2.12' }}"
+        run: "poetry remove ansible-base"
+      - name: "Add Ansible 2.12"
+        if: "${{ matrix.ansible-release == '2.12' }}"
+        run: "poetry add ansible-core@~2.12 --python ^${{ matrix.python-version }}"
+      - name: "Start containers"
+        run: "invoke start"
+      - name: "Tests"
+        run: "invoke integration"
+    needs:
+      - "test"
+  publish_github:
+    name: "Publish to GitHub"
+    runs-on: "ubuntu-20.04"
+    if: "startsWith(github.ref, 'refs/tags/v')"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v2"
+      - name: "Set up Python"
+        uses: "actions/setup-python@v2"
+        with:
+          python-version: "3.9"
+      - name: "Install Python Packages"
+        run: "pip install ansible-core"
+      - name: "Build the collection"
+        run: "ansible-galaxy collection build --output-path build"
+      - name: "Upload binaries to release"
+        uses: "svenstaro/upload-release-action@v2"
+        with:
+          repo_token: "${{ secrets.NTC_GITHUB_TOKEN }}"
+          file: "build/*"
+          tag: "${{ github.ref }}"
+          overwrite: true
+          file_glob: true
+    needs:
+      - "integration"
+  publish_galaxy:
+    name: "Publish to Ansible Galaxy"
+    runs-on: "ubuntu-20.04"
+    if: "startsWith(github.ref, 'refs/tags/v')"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v2"
+      - name: "Set up Python"
+        uses: "actions/setup-python@v2"
+        with:
+          python-version: "3.9"
+      - name: "Install Python Packages"
+        run: "pip install ansible-core"
+      - name: "Build the collection"
+        run: "ansible-galaxy collection build --output-path build"
+      - name: "Publish the collection"
+        run: "ansible-galaxy collection publish build/* --api-key=${{ secrets.GALAXY_API_TOKEN }}"
+    needs:
+      - "integration"
