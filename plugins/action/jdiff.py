@@ -3,11 +3,11 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """Jdiff Action Plugin for jdiff library."""
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
-from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleError
 from ansible.module_utils.six import raise_from
+from ansible.plugins.action import ActionBase
 
 try:
     from jdiff import CheckType, extract_data_from_json
@@ -54,12 +54,14 @@ def main(args):
 
 class ActionModule(ActionBase):
     """Ansible Action Module to interact with jdiff.
+
     Args:
         ActionBase (ActionBase): Ansible Action Plugin
     """
 
     def run(self, tmp=None, task_vars=None):
         """Run of action plugin for interacting with jdiff.
+
         Args:
             tmp ([type], optional): [description]. Defaults to None.
             task_vars ([type], optional): [description]. Defaults to None.
