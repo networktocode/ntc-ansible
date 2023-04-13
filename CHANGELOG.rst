@@ -16,13 +16,7 @@ This release adds functionality to support jdiff, via a module and a action plug
 New Modules
 -----------
 
-Networktocode
-~~~~~~~~~~~~~
-
-netauto
-^^^^^^^
-
-- networktocode.netauto.networktocode.netauto.jdiff - Ansible module wrapper on jdiff python library.
+- networktocode.netauto.jdiff - Ansible module wrapper on jdiff python library.
 
 v1.0.0
 ======

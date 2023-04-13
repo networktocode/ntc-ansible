@@ -12,5 +12,5 @@ releases:
     modules:
     - description: Ansible module wrapper on jdiff python library.
       name: jdiff
-      namespace: networktocode.netauto
+      namespace: ''
     release_date: '2023-04-13'
