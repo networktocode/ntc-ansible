@@ -4,4 +4,13 @@ releases:
     changes:
       release_summary: This is the first official release of an Ansible Collection
         for what was previously just a repo of ansible things called ntc-ansible.
-    release_date: '2023-04-07'
+    release_date: '2023-04-13'
+  1.1.0:
+    changes:
+      release_summary: This release adds functionality to support jdiff, via a module
+        and a action plugin.
+    modules:
+    - description: Ansible module wrapper on jdiff python library.
+      name: jdiff
+      namespace: networktocode.netauto
+    release_date: '2023-04-13'

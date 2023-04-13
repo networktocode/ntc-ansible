@@ -9,6 +9,11 @@ plugins:
   inventory: {}
   lookup: {}
   module:
+    jdiff:
+      description: Ansible module for jdiff.
+      name: jdiff
+      namespace: ''
+      version_added: 1.1.0
     ntc_config_command:
       description: Writes config data to devices
       name: ntc_config_command
@@ -54,4 +59,4 @@ plugins:
   shell: {}
   strategy: {}
   vars: {}
-version: 1.0.0
+version: 1.1.0
