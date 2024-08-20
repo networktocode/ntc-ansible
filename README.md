@@ -17,6 +17,6 @@ Multi-vendor collection of Ansible Modules to automate repeatable tasks and data
 
 ## Background
 
-These modules have a long history of using multiple different python libraries, as of 1.0.0 release of pyntc, all functionality in these modules have been moved to pyntc for easier supportability.
+These modules have a long history of using multiple different python libraries, as of 1.0.0 release of pyntc, all functionality in these modules have been moved to pyntc for easier support.
 
 As more functionality and enhancements are made to pyntc, those will map over into these modules to extend them.
