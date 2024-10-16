@@ -1,7 +1,7 @@
 
 # Multi-vendor Ansible Collection for Network Automation
 
-Multi-vendor collection of Ansible Modules to automate repeateable tasks and data gathering. As of release 1.0.0 this collection is used pyntc v1.0.0 for the backend logic.
+Multi-vendor collection of Ansible Modules to automate repeatable tasks and data gathering. As of release 1.0.0 this collection is used pyntc v1.0.0 for the backend logic.
 
 ## Modules
 
@@ -17,6 +17,6 @@ Multi-vendor collection of Ansible Modules to automate repeateable tasks and dat
 
 ## Background
 
-These modules have a long history of using multiple different python libraries, as of 1.0.0 release of pyntc, all functionality in these modules have been moved to pyntc for easier supportability.
+These modules have a long history of using multiple different python libraries, as of 1.0.0 release of pyntc, all functionality in these modules have been moved to pyntc for easier support.
 
 As more functionality and enhancements are made to pyntc, those will map over into these modules to extend them.
